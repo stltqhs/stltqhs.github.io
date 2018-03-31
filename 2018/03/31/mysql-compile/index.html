@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>mysql编译 | 海东青</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Windows系统下的编译过程1.获取源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql编译">
+<meta property="og:url" content="http://yoursite.com/2018/03/31/mysql-compile/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="Windows系统下的编译过程1.获取源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-03-31T07:53:46.781Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql编译">
+<meta name="twitter:description" content="Windows系统下的编译过程1.获取源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快">
+  
+    <link rel="alternate" href="/atom.xml" title="海东青" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">海东青</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-mysql-compile" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/31/mysql-compile/" class="article-date">
+  <time datetime="2018-03-31T07:48:24.000Z" itemprop="datePublished">2018-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      mysql编译
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Windows系统下的编译过程"><a href="#Windows系统下的编译过程" class="headerlink" title="Windows系统下的编译过程"></a>Windows系统下的编译过程</h1><h3 id="1-获取源码"><a href="#1-获取源码" class="headerlink" title="1.获取源码"></a>1.获取源码</h3><p><code>mysql-server</code>的源码放在github中，代码仓库路径是：<code>https://github.com/mysql/mysql-server.git</code>，使用下面的命令将代码复制到本地计算机中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mysql/mysql-server.git</span><br></pre></td></tr></table></figure></p>
+<p>这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从github中下载。</p>
+<h3 id="2-生成visual-studio项目配置文件"><a href="#2-生成visual-studio项目配置文件" class="headerlink" title="2.生成visual studio项目配置文件"></a>2.生成<code>visual studio</code>项目配置文件</h3><p>需要使用<code>cmake</code>命令和<code>bison</code>的支持，需要将这2项下载好，添加到PATH环境变量中。<br>执行下面的命令生成VS2013的项目配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G &quot;Visual Studio 12 2013&quot;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-VS编译"><a href="#3-VS编译" class="headerlink" title="3.VS编译"></a>3.VS编译</h3><p>（1）编译时可能出现<code>sql_locale.cc</code>编译失败，出现错误的字符等等。可以将该文件转换为<code>Unicode(UTF8 BOM)</code>型文件；<br>（2）SIGABRT问题需要将<code>sql/mysqld.cc</code>中的 <code>DBUG_ASSERT(0)</code> 注释掉；<br>（3）因为权限问题无法操作注册表，可以以管理员身份运行<code>VS</code>。<br>设置<code>mysqld</code>为默认启动项，然后编译，由于<code>mysqld</code>启动时需要加载<code>data</code>目录（使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录），因此可以设置启动参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>&lt;my.ini&gt;</code>为<code>mysql</code>的配置文件，此时就可以调试。<br>需要配置<code>lc_messages_dir=&lt;mysql-server-source-dir&gt;/sql/share</code></p>
+<p>总结：<br>1.初始数据文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</span><br></pre></td></tr></table></figure></p>
+<p>2.设置启动参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
+<p>3.将日志调试时不要隐藏窗口<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--console</span><br></pre></td></tr></table></figure></p>
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>1.mysql5.6在windows下的编译与调试：<a href="http://www.voidcn.com/blog/fei33423/article/p-4830278.html" target="_blank" rel="noopener">http://www.voidcn.com/blog/fei33423/article/p-4830278.html</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjff2ywup0001xoxylp5g9fkw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/03/31/openjdk-compile/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">openjdk编译</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/31/mysql-compile/">mysql编译</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/31/openjdk-compile/">openjdk编译</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/31/hello-world/">数据库性能分析</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

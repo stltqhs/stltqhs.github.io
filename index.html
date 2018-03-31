@@ -62,6 +62,51 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mysql-compile" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/31/mysql-compile/" class="article-date">
+  <time datetime="2018-03-31T07:48:24.000Z" itemprop="datePublished">2018-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/31/mysql-compile/">mysql编译</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Windows系统下的编译过程"><a href="#Windows系统下的编译过程" class="headerlink" title="Windows系统下的编译过程"></a>Windows系统下的编译过程</h1><h3 id="1-获取源码"><a href="#1-获取源码" class="headerlink" title="1.获取源码"></a>1.获取源码</h3><p><code>mysql-server</code>的源码放在github中，代码仓库路径是：<code>https://github.com/mysql/mysql-server.git</code>，使用下面的命令将代码复制到本地计算机中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mysql/mysql-server.git</span><br></pre></td></tr></table></figure></p>
+<p>这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从github中下载。</p>
+<h3 id="2-生成visual-studio项目配置文件"><a href="#2-生成visual-studio项目配置文件" class="headerlink" title="2.生成visual studio项目配置文件"></a>2.生成<code>visual studio</code>项目配置文件</h3><p>需要使用<code>cmake</code>命令和<code>bison</code>的支持，需要将这2项下载好，添加到PATH环境变量中。<br>执行下面的命令生成VS2013的项目配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G &quot;Visual Studio 12 2013&quot;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-VS编译"><a href="#3-VS编译" class="headerlink" title="3.VS编译"></a>3.VS编译</h3><p>（1）编译时可能出现<code>sql_locale.cc</code>编译失败，出现错误的字符等等。可以将该文件转换为<code>Unicode(UTF8 BOM)</code>型文件；<br>（2）SIGABRT问题需要将<code>sql/mysqld.cc</code>中的 <code>DBUG_ASSERT(0)</code> 注释掉；<br>（3）因为权限问题无法操作注册表，可以以管理员身份运行<code>VS</code>。<br>设置<code>mysqld</code>为默认启动项，然后编译，由于<code>mysqld</code>启动时需要加载<code>data</code>目录（使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录），因此可以设置启动参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>&lt;my.ini&gt;</code>为<code>mysql</code>的配置文件，此时就可以调试。<br>需要配置<code>lc_messages_dir=&lt;mysql-server-source-dir&gt;/sql/share</code></p>
+<p>总结：<br>1.初始数据文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</span><br></pre></td></tr></table></figure></p>
+<p>2.设置启动参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
+<p>3.将日志调试时不要隐藏窗口<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--console</span><br></pre></td></tr></table></figure></p>
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>1.mysql5.6在windows下的编译与调试：<a href="http://www.voidcn.com/blog/fei33423/article/p-4830278.html" target="_blank" rel="noopener">http://www.voidcn.com/blog/fei33423/article/p-4830278.html</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjff2ywup0001xoxylp5g9fkw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-openjdk-compile" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/03/31/openjdk-compile/" class="article-date">
@@ -124,7 +169,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjff2m6zu0000wnxyvfbmenp7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjff2ywui0000xoxyc3oorzji" class="article-share-link">Share</a>
       
       
     </footer>
@@ -168,7 +213,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjff2m70f0001wnxy8eno9clf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjff2ywuu0002xoxytf1xi9qa" class="article-share-link">Share</a>
       
       
     </footer>
@@ -207,6 +252,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2018/03/31/mysql-compile/">mysql编译</a>
+          </li>
         
           <li>
             <a href="/2018/03/31/openjdk-compile/">openjdk编译</a>
