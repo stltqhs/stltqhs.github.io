@@ -315,6 +315,7 @@ sed -i 's/$(IMAGES_OUTPUTDIR)/e:\/Project\/openjdk\/build\/windows-x86_64-normal
  !endif
 ```
 这个文件也可能需要改（出错就改这）hotspot/make/windows/makefiles/compile.make
+```
 @@ -112,6 +112,7 @@ CXX_FLAGS=$(CXX_FLAGS) /D TARGET_COMPILER_visCPP
  #      1500 is for VS2008
  #      1600 is for VS2010
