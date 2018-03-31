@@ -65,7 +65,7 @@
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/03/31/hello-world/" class="article-date">
-  <time datetime="2018-03-31T07:00:13.046Z" itemprop="datePublished">2018-03-31</time>
+  <time datetime="2018-03-31T07:30:42.408Z" itemprop="datePublished">2018-03-31</time>
 </a>
     
   </div>
@@ -76,7 +76,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/31/hello-world/">Hello World</a>
+      <a class="article-title" href="/2018/03/31/hello-world/">数据库性能分析</a>
     </h1>
   
 
@@ -84,20 +84,19 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h1 id="1-查询锁等待的sql"><a href="#1-查询锁等待的sql" class="headerlink" title="1.查询锁等待的sql"></a>1.查询锁等待的sql</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select requesting_trx_id,requested_lock_id,t1.trx_query as request_trx_query,blocking_trx_id,blocking_lock_id,t2.trx_query as blocking_trx_query from innodb_lock_waits left join innodb_trx t1 on requesting_trx_id=t1.trx_id left join innodb_trx t2 on blocking_trx_id = t2.trx_id\G</span><br></pre></td></tr></table></figure>
+<h1 id="2-profile"><a href="#2-profile" class="headerlink" title="2.profile"></a>2.profile</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">show profiles;</span><br><span class="line">set profiling=1;// 默认关闭</span><br><span class="line">show profile [source] for query 2;</span><br><span class="line">show profile block io,cpu for query 2;</span><br></pre></td></tr></table></figure>
+<p>还可以查询PROFILING视图</p>
+<h1 id="3-查看临时表"><a href="#3-查看临时表" class="headerlink" title="3.查看临时表"></a>3.查看临时表</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; show global status like &apos;%tmp%&apos;;</span><br><span class="line">+-------------------------+---------+</span><br><span class="line">| Variable_name           | Value   |</span><br><span class="line">+-------------------------+---------+</span><br><span class="line">| Created_tmp_disk_tables | 5155228 |</span><br><span class="line">| Created_tmp_files       | 8261    |</span><br><span class="line">| Created_tmp_tables      | 7046409 |</span><br><span class="line">+-------------------------+---------+</span><br><span class="line">Created_tmp_disk_tables / Created_tmp_tables * 100% &lt;= 25%（该值不清楚）</span><br></pre></td></tr></table></figure>
+<h1 id="4-查看innodb状态"><a href="#4-查看innodb状态" class="headerlink" title="4.查看innodb状态"></a>4.查看innodb状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show engine innodb status\G</span><br></pre></td></tr></table></figure>
+<p>可以看到IO情况，事务加锁的情况等。</p>
+<h1 id="5-查看表状态"><a href="#5-查看表状态" class="headerlink" title="5.查看表状态"></a>5.查看表状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">show table status like &apos;t_charging&apos;\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">           Name: t_charging</span><br><span class="line">         Engine: InnoDB</span><br><span class="line">        Version: 10</span><br><span class="line">     Row_format: Compact</span><br><span class="line">           Rows: 5926799</span><br><span class="line"> Avg_row_length: 323</span><br><span class="line">    Data_length: 1917845504</span><br><span class="line">Max_data_length: 0</span><br><span class="line">   Index_length: 1267597312</span><br><span class="line">      Data_free: 0</span><br><span class="line"> Auto_increment: NULL</span><br><span class="line">    Create_time: 2017-09-07 10:49:00</span><br><span class="line">    Update_time: NULL</span><br><span class="line">     Check_time: NULL</span><br><span class="line">      Collation: utf8_general_ci</span><br><span class="line">       Checksum: NULL</span><br><span class="line"> Create_options:</span><br><span class="line">        Comment: 充电记录</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="6-开启optimizer-trace"><a href="#6-开启optimizer-trace" class="headerlink" title="6.开启optimizer_trace"></a>6.开启optimizer_trace</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">set optimizer_trace=&quot;enabled=on&quot;;</span><br><span class="line">select sum(length(val)) from t where j = 2 and i between 100 and 200;</span><br><span class="line">select * from information_schema.optimizer_trace;</span><br></pre></td></tr></table></figure>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjff1jfri0000t1xy7y01suom" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjff258no0000vhxy75izq1yw" class="article-share-link">Share</a>
       
       
     </footer>
@@ -138,7 +137,7 @@
       <ul>
         
           <li>
-            <a href="/2018/03/31/hello-world/">Hello World</a>
+            <a href="/2018/03/31/hello-world/">数据库性能分析</a>
           </li>
         
       </ul>
