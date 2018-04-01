@@ -1,7 +1,7 @@
 ---
 title: mysql编译
 date: 2018-03-31 15:48:24
-tags:
+tags: mysql
 ---
 
 # Windows系统下的编译过程

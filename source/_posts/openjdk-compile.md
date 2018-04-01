@@ -1,7 +1,7 @@
 ---
 title: openjdk编译
 date: 2018-03-31 15:34:38
-tags:
+tags: java
 ---
 
 # 一、`windows`下`openjdk`编译与`hotspot`调试过程
