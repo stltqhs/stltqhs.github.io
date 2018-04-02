@@ -62,6 +62,189 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mysql-scalability" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/01/mysql-scalability/" class="article-date">
+  <time datetime="2018-04-01T03:31:54.000Z" itemprop="datePublished">2018-04-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/01/mysql-scalability/">Mysql扩展</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>正在编写</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjfg92ujg0008qxxycciotp86" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-mysql-optimization-index" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/01/mysql-optimization-index/" class="article-date">
+  <time datetime="2018-04-01T03:23:49.000Z" itemprop="datePublished">2018-04-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/01/mysql-optimization-index/">Mysql优化 - 索引</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>正在编写</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjfg92ujc0004qxxyb9s2kknz" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-mysql-optimization-sql" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/01/mysql-optimization-sql/" class="article-date">
+  <time datetime="2018-04-01T03:22:27.000Z" itemprop="datePublished">2018-04-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/01/mysql-optimization-sql/">Mysql优化 - 查询优化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="where子句优化"><a href="#where子句优化" class="headerlink" title="where子句优化"></a>where子句优化</h3><p><code>mysql</code>为<code>where</code>子句优化做了：</p>
+<ul>
+<li>去掉没用的条件</li>
+<li>常量替换和移除</li>
+<li>索引使用的常量只会计算一次</li>
+<li><code>count(*)</code>的优化</li>
+<li>联表时优先读取常量表</li>
+</ul>
+<p>联表查询时，当<code>order by</code>和<code>group by</code>的字段都来自同一个表，那么该表将会先查询，如果它们的字段来自不同表，<code>mysql</code>将会建立<strong>临时表</strong>。</p>
+<h3 id="范围优化"><a href="#范围优化" class="headerlink" title="范围优化"></a>范围优化</h3><p><code>范围条件</code>的定义：</p>
+<ul>
+<li>对于BTREE和HASH索引，常量比较使用<strong>=,&lt;=&gt;,IN(),IS NULL,IS NOT NULL</strong></li>
+<li>对于BTREE索引，常量比较使用<strong>&gt;,&lt;,&gt;=,&lt;=,BTWEEN,!=,&lt;&gt;,LIKE(不是以通配符开头的字符常量)</strong></li>
+<li>使用<code>OR</code>或者<code>AND</code>结合多个<code>范围条件</code></li>
+</ul>
+<p>范围查找的示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1</span><br><span class="line">  <span class="keyword">WHERE</span> key_col &gt; <span class="number">1</span></span><br><span class="line">  <span class="keyword">AND</span> key_col &lt; <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1</span><br><span class="line">  <span class="keyword">WHERE</span> key_col = <span class="number">1</span></span><br><span class="line">  <span class="keyword">OR</span> key_col <span class="keyword">IN</span> (<span class="number">15</span>,<span class="number">18</span>,<span class="number">20</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1</span><br><span class="line">  <span class="keyword">WHERE</span> key_col <span class="keyword">LIKE</span> <span class="string">'ab%'</span></span><br><span class="line">  <span class="keyword">OR</span> key_col <span class="keyword">BETWEEN</span> <span class="string">'bar'</span> <span class="keyword">AND</span> <span class="string">'foo'</span>;</span><br></pre></td></tr></table></figure>
+<p>mysql执行范围优化的过程是先去掉<code>WHERE</code>子句非<code>范围条件</code>和非索引字段的过滤条件，然后合并范围条件得到最后的查询条件，查询条件的字段需要命中索引，直接从索引中过滤数据，由于这个查询条件没有<code>WHERE</code>子句的条件严格，可能会获得更多数据，此时需要使用<code>WHERE</code>子句来过滤查询到的数据，最后得到满足整个<code>WHERE</code>子句条件的数据（<code>using where</code>）。</p>
+<h3 id="索引合并优化"><a href="#索引合并优化" class="headerlink" title="索引合并优化"></a>索引合并优化</h3><p>单表查询中合并范围查找的数据，合并时会产生<code>unions</code>,<code>intersections</code>,<code>unions-of-intersections</code>，即交集、并集。</p>
+<p>使用了索引合并的优化示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> tbl_name <span class="keyword">WHERE</span> key1 = <span class="number">10</span> <span class="keyword">OR</span> key2 = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> tbl_name</span><br><span class="line">  <span class="keyword">WHERE</span> (key1 = <span class="number">10</span> <span class="keyword">OR</span> key2 = <span class="number">20</span>) <span class="keyword">AND</span> non_key = <span class="number">30</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1, t2</span><br><span class="line">  <span class="keyword">WHERE</span> (t1.key1 <span class="keyword">IN</span> (<span class="number">1</span>,<span class="number">2</span>) <span class="keyword">OR</span> t1.key2 <span class="keyword">LIKE</span> <span class="string">'value%'</span>)</span><br><span class="line">  <span class="keyword">AND</span> t2.key1 = t1.some_col;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1, t2</span><br><span class="line">  <span class="keyword">WHERE</span> t1.key1 = <span class="number">1</span></span><br><span class="line">  <span class="keyword">AND</span> (t2.key1 = t1.some_col <span class="keyword">OR</span> t2.key2 = t1.some_col2);</span><br></pre></td></tr></table></figure>
+<h3 id="Pushdown优化"><a href="#Pushdown优化" class="headerlink" title="Pushdown优化"></a>Pushdown优化</h3><p>mysql分为服务层和存储引擎层，对于查询来说，mysql首先将部分sql交给存储引擎，存储引擎将查询到的数据交给mysql服务层再次过滤数据。常见的Pushdown优化有Index Pushdown和Engine Pushdown。</p>
+<p>Index Pushdown示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 假设创建的索引是INDEX (zipcode, lastname, firstname)</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> people</span><br><span class="line">  <span class="keyword">WHERE</span> zipcode=<span class="string">'95054'</span></span><br><span class="line">  <span class="keyword">AND</span> lastname <span class="keyword">LIKE</span> <span class="string">'%etrunia%'</span></span><br><span class="line">  <span class="keyword">AND</span> address <span class="keyword">LIKE</span> <span class="string">'%Main Street%'</span>;</span><br><span class="line"><span class="comment">-- 由于lastname是以通配符开头的查询，当没有Index Pushdown时，存储引擎将先查询出所有的zipcode，然后将数据交给mysql服务层过滤，当存在Index Pushdown时，存储引擎自己就可以在索引中来过滤数据。</span></span><br></pre></td></tr></table></figure>
+<p>Engine Pushdown目前只能适用于NDB存储引擎。</p>
+<h3 id="联表优化"><a href="#联表优化" class="headerlink" title="联表优化"></a>联表优化</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>带join buffer时：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    store used columns from t1, t2 in join buffer</span><br><span class="line">    <span class="keyword">if</span> buffer is full &#123;</span><br><span class="line">      <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">        <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">          <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      empty join buffer</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> buffer is <span class="keyword">not</span> empty &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">    <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjfg92ujd0005qxxy9cr1etnb" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-mysql-optimization-data-type" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/01/mysql-optimization-data-type/" class="article-date">
+  <time datetime="2018-04-01T03:22:22.000Z" itemprop="datePublished">2018-04-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/01/mysql-optimization-data-type/">Mysql优化 - 数据结构优化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>正在编写</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjfg92ujb0003qxxyyqgvt3im" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-mysql-compile" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/03/31/mysql-compile/" class="article-date">
@@ -97,9 +280,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjffb54qs0002dxxy0fl2jade" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjfg92uj80001qxxyo7q3f3ee" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
     </footer>
   </div>
   
@@ -159,9 +344,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjffb54qf0000dxxylt0wlib8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjfg92ujh000aqxxy0i0147gx" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
+
     </footer>
   </div>
   
@@ -172,7 +359,7 @@
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/03/31/hello-world/" class="article-date">
-  <time datetime="2018-03-31T07:30:42.408Z" itemprop="datePublished">2018-03-31</time>
+  <time datetime="2018-03-31T03:23:49.000Z" itemprop="datePublished">2018-03-31</time>
 </a>
     
   </div>
@@ -203,9 +390,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjffb54qk0001dxxyvsqbltp5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjfg92uj40000qxxycynipy63" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
     </footer>
   </div>
   
@@ -223,15 +412,29 @@
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+    </div>
+  </div>
+
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
     </div>
   </div>
 
@@ -244,15 +447,23 @@
       <ul>
         
           <li>
+            <a href="/2018/04/01/mysql-scalability/">Mysql扩展</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/01/mysql-optimization-index/">Mysql优化 - 索引</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/01/mysql-optimization-sql/">Mysql优化 - 查询优化</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/01/mysql-optimization-data-type/">Mysql优化 - 数据结构优化</a>
+          </li>
+        
+          <li>
             <a href="/2018/03/31/mysql-compile/">mysql编译</a>
-          </li>
-        
-          <li>
-            <a href="/2018/03/31/openjdk-compile/">openjdk编译</a>
-          </li>
-        
-          <li>
-            <a href="/2018/03/31/hello-world/">数据库性能分析</a>
           </li>
         
       </ul>
@@ -267,7 +478,7 @@
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2018 John Doe<br>
+      &copy; 2018 Gyrfalcon<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
