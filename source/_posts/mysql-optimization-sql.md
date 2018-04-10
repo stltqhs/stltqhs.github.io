@@ -119,5 +119,9 @@ if buffer is not empty {
 }
 ```
 
+### MRR优化
 
+该优化本质是减少随机读，通过将存储引擎层的查询到的索引数据按照主键排序，回表查询时就可以表现出顺序读。可以参考[这里](http://mysql.taobao.org/monthly/2016/01/04/)。
+
+### Order by优化
 
