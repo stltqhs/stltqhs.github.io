@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Cloud Native Java阅读笔记 | 海东青</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="《Cloud Native Java》主要介绍使用Spring Cloud开发微服务应用，包括业务逻辑层，缓存，分布式事务及数据持久化。 第1章-第2章这两章主要介绍Spring Boot的使用，不过叙述太过简单，关于Spring Boot的使用可以阅读《Spring Boot In Action》。Spring Boot比较重要的就是条件配置。 第3章本章主要介绍集中化配置。从Spring的属性">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cloud Native Java阅读笔记">
+<meta property="og:url" content="http://yoursite.com/2018/04/10/cloud-native-java/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="《Cloud Native Java》主要介绍使用Spring Cloud开发微服务应用，包括业务逻辑层，缓存，分布式事务及数据持久化。 第1章-第2章这两章主要介绍Spring Boot的使用，不过叙述太过简单，关于Spring Boot的使用可以阅读《Spring Boot In Action》。Spring Boot比较重要的就是条件配置。 第3章本章主要介绍集中化配置。从Spring的属性">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-04-13T06:05:32.233Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cloud Native Java阅读笔记">
+<meta name="twitter:description" content="《Cloud Native Java》主要介绍使用Spring Cloud开发微服务应用，包括业务逻辑层，缓存，分布式事务及数据持久化。 第1章-第2章这两章主要介绍Spring Boot的使用，不过叙述太过简单，关于Spring Boot的使用可以阅读《Spring Boot In Action》。Spring Boot比较重要的就是条件配置。 第3章本章主要介绍集中化配置。从Spring的属性">
+  
+    <link rel="alternate" href="/atom.xml" title="海东青" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">海东青</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-cloud-native-java" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/10/cloud-native-java/" class="article-date">
+  <time datetime="2018-04-10T14:10:31.000Z" itemprop="datePublished">2018-04-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Cloud Native Java阅读笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>《Cloud Native Java》主要介绍使用Spring Cloud开发微服务应用，包括业务逻辑层，缓存，分布式事务及数据持久化。</p>
+<h3 id="第1章-第2章"><a href="#第1章-第2章" class="headerlink" title="第1章-第2章"></a>第1章-第2章</h3><p>这两章主要介绍Spring Boot的使用，不过叙述太过简单，关于Spring Boot的使用可以阅读《<a href="https://www.manning.com/books/spring-boot-in-action?" target="_blank" rel="noopener">Spring Boot In Action</a>》。Spring Boot比较重要的就是条件配置。</p>
+<h3 id="第3章"><a href="#第3章" class="headerlink" title="第3章"></a>第3章</h3><p>本章主要介绍集中化配置。从Spring的属性配置<code>PropertyPlaceHolderConfigurer</code>到<code>Environment</code>到Spring Boot的<code>Profile</code>，这些都是基于硬编码或者命令行级别的配置方式。Spring Cloud支持的配置中心化是<code>Spring Cloud Config Server</code>，且使用<code>@RefreshScope</code>注解可以刷新应用的配置而不需要重启应用。</p>
+<p>使用<code>@EnableConfigServer</code>来创建配置服务，在客户端使用<code>bootstrap.yml</code>配置文件指定配置服务来从配置服务中获取配置信息。</p>
+<h3 id="第4章"><a href="#第4章" class="headerlink" title="第4章"></a>第4章</h3><p>本章主要介绍测试相关的内容。</p>
+<h3 id="第5章"><a href="#第5章" class="headerlink" title="第5章"></a>第5章</h3><p>本章主要介绍如何使用Spring Cloud将应用迁移到云平台中（如Cloud Foundry）。本章还介绍了使用<code>X/Open XA</code>协议和<code>JTA</code>来实现分布式事务。</p>
+<h3 id="第6章"><a href="#第6章" class="headerlink" title="第6章"></a>第6章</h3><p>本章介绍Restful API开发方式，使用<a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html" target="_blank" rel="noopener">RestTemplate</a>来对接Restful接口。使用<code>@ControllerAdvice</code>和<code>@ExceptionHandler</code>处理请求数据和异常数据。使用<code>HAL</code>和<code>HATEOAS</code>来描述资源，使用<code>Spring RESTDocs</code>来生成Restful API接口文档，不过已习惯使用<code>swagger</code>。</p>
+<h3 id="第7章"><a href="#第7章" class="headerlink" title="第7章"></a>第7章</h3><p>本章介绍分布式系统服务的寻址路由，包括服务注册、发现、负载均衡。使用<code>@EnableEurekaServer</code>启动注册中心，而且还提供了管控台。使用<code>@EnableDiscoveryClient</code>启动<code>服务提供者</code>，<code>服务消费者</code>（或者客户端）同样适用<code>@EnableDiscoveryClient</code>来使用eureka注册中心，可以注入<code>DiscoveryClient</code>实例来获取已经注册的服务的信息，由于服务会存在多个，可以使用客户端级别的负载均衡组件<code>Netflix Ribbon</code>来选取需要使用的服务，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> DiscoveryClient discoveryClient;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">String serviceId = <span class="string">"greetings-service"</span>;</span><br><span class="line">List&lt;Server&gt; servers = discoveryClient.getInstances(serviceId)</span><br><span class="line">    .stream()</span><br><span class="line">    .map(si -&gt; <span class="keyword">new</span> Server(si.getHost(), si.getPort()))</span><br><span class="line">    .collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">IRule roundRobinRule = <span class="keyword">new</span> RoundRobinRule();</span><br><span class="line"></span><br><span class="line">BaseLoadBalancer loadBalancer = LoadBalancerBuilder.newBuilder()</span><br><span class="line">    .withRule(roundRobinRule)</span><br><span class="line">    .buildFixedServerListLoadBalancer(servers);</span><br><span class="line"></span><br><span class="line">Server server = loadBalancer.chooseServer();</span><br><span class="line"></span><br><span class="line">ResponseEntity&lt;JsonNode&gt; response = <span class="keyword">this</span>.restTemplate.getForEntity(<span class="string">"http://"</span> + server.getHost() + <span class="string">":"</span> + server.getPort() + <span class="string">"/hi/&#123;name&#125;"</span>, JsonNode.class, variables);</span><br></pre></td></tr></table></figure>
+<p>或者直接注入<code>LoadBalancerClient</code>，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> LoadBalancerClient loadBalancerClient;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">String serviceId = <span class="string">"greetings-service"</span>;</span><br><span class="line"></span><br><span class="line">ServiceInstance server = loadBalancerClient.choose(serviceId);</span><br><span class="line"></span><br><span class="line">ResponseEntity&lt;JsonNode&gt; response = <span class="keyword">this</span>.restTemplate.getForEntity(<span class="string">"http://"</span> + server.getHost() + <span class="string">":"</span> + server.getPort() + <span class="string">"/hi/&#123;name&#125;"</span>, JsonNode.class, variables);</span><br></pre></td></tr></table></figure>
+<p>也可以使用<code>@LoadBalance</code>来注入<code>RestTemplate</code>实例，使用<code>RestTemplate</code>调用服务接口时Spring Cloud内部会帮我们做负载均衡，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@LoadBalance</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">ResponseEntity&lt;JsonNode&gt; response = <span class="keyword">this</span>.restTemplate.getForEntity(<span class="string">"http://greetings-service/hi/&#123;name&#125;"</span>, JsonNode.class, variables);</span><br></pre></td></tr></table></figure>
+<p>其中<code>greetings-service</code>是服务id，Spring Cloud的拦截器会拦截请求的url，获取服务id，根据它来选取某一个服务提供者。</p>
+<h3 id="第8章"><a href="#第8章" class="headerlink" title="第8章"></a>第8章</h3><p>本章介绍<code>服务消费者</code>调用<code>服务提供者</code>的方式，有3种，如下：</p>
+<h5 id="1-带负载均衡的RestTemplate"><a href="#1-带负载均衡的RestTemplate" class="headerlink" title="1.带负载均衡的RestTemplate"></a>1.带负载均衡的RestTemplate</h5><p>第7章已经介绍，这种方式编码比较多，是一种原始的方法。</p>
+<h5 id="2-Netflix-Feign"><a href="#2-Netflix-Feign" class="headerlink" title="2.Netflix Feign"></a>2.Netflix Feign</h5><p>该方法可以将显示的RestTemplate调用过程抽象化成一个接口，由Spring Cloud内部处理具体的调用过程，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FeignClient</span>(serviceId = <span class="string">"greetings-service"</span>)</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GreetingsClient</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span>(method = RequestMethod.GET, value = <span class="string">"/greet/&#123;name&#125;"</span>)</span><br><span class="line">    <span class="function">Map&lt;String, String&gt; <span class="title">greet</span><span class="params">(@PathVariable(<span class="string">"name"</span>)</span> String name)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">GreetingsClient greetingsClient;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">greetingsClient.greet(name);</span><br></pre></td></tr></table></figure>
+<h5 id="3-Netflix-Zuul"><a href="#3-Netflix-Zuul" class="headerlink" title="3.Netflix Zuul"></a>3.Netflix Zuul</h5><p>Zuul的核心是代理或者过滤器。使用<code>@EnableZuulProxy</code>和<code>Zulu.routes.*</code>来配置zuul代理，使<code>边界服务</code>（<code>Edge Service</code>）直连<code>服务提供者</code>，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZuulConfiguration.java</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableZuulProxy</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ZuulConfiguration</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">CommandLineRunner <span class="title">commandLineRunner</span><span class="params">(RouteLocator routeLocator)</span> </span>&#123;</span><br><span class="line">        Log log = LogFactory.getLog(getClass());</span><br><span class="line">        <span class="keyword">return</span> args -&gt; routeLocator.getRoutes().forEach(</span><br><span class="line">        	r -&gt; log.info(String.format(<span class="string">"%s (%s) %s"</span>, r.getId(), r.getLocation(), r.getFullPath()));</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># application.properties</span><br><span class="line">zuul.routes.hi.path = /lets/**</span><br><span class="line">zuul.routes.hi.serviceId = greetings-service</span><br></pre></td></tr></table></figure>
+<p>从浏览器到Zuul代理的边界服务到服务提供者的流程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">     +---------+               +-------------------+            +-------------------+</span><br><span class="line">     | Browser | ---access--&gt;  | Zuul Edge Service |  --access-&gt;| greetings-service |</span><br><span class="line">     +---------+               +-------------------+            +-------------------+</span><br><span class="line">http://edge-service/lets/greet/&#123;name&#125; --zuulproxy--&gt; http://greetings-service/greet/&#123;name&#125;</span><br><span class="line">                    +----------------+       +-------------+</span><br><span class="line">                    | Servlet Filter |  ---&gt; | Zuul Filter |</span><br><span class="line">                    +----------------+       +-------------+</span><br></pre></td></tr></table></figure>
+<p>自定义Zuul过滤器的方式是继承<code>ZuulFilter</code>，Zuul过滤器有4种类型：<code>pre</code>，<code>routing</code>，<code>post</code>，<code>error</code>。比如实现一个限流的Zuul过滤器<a href="https://github.com/cloud-native-java/edge/blob/master/edge-service/src/main/java/greetings/ThrottlingZuulFilter.java" target="_blank" rel="noopener">ThrottlingZuulFilter.java</a>。</p>
+<p>维护可用服务列表的方式是监听<code>HeartbeatEvent</code>事件，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EventListener</span>(HeartbeatEvent.class)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onHeartbeantEvent</span><span class="params">(HeartbeatEvent e)</span> </span>&#123;</span><br><span class="line">    discoveryClient.getServices().forEach(</span><br><span class="line">    	svc -&gt; map.put(svc, discoveryClient.getInstances(svc))</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>详细代码可以参考<a href="https://github.com/cloud-native-java/edge/blob/master/edge-service/src/main/java/greetings/RoutesListener.java" target="_blank" rel="noopener">RoutesListener</a>。</p>
+<p>本章还介绍了使用<code>Spring Security</code>给服务提供者添加权限相关的特性。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjfxjttq200008fxyodvbeqq0" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/13/openjdk-introduction/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Openjdk简介
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/01/mysql-scalability/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Mysql扩展</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/openjdk-introduction/">Openjdk简介</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/10/cloud-native-java/">Cloud Native Java阅读笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/01/mysql-scalability/">Mysql扩展</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/01/mysql-optimization-index/">Mysql优化 - 索引</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/01/mysql-optimization-sql/">Mysql优化 - 查询优化</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Gyrfalcon<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
