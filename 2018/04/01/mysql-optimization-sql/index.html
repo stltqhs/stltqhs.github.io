@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="海东青">
 <meta property="og:description" content="where子句优化mysql为where子句优化做了：  去掉没用的条件 常量替换和移除 索引使用的常量只会计算一次 count(*)的优化 联表时优先读取常量表  联表查询时，当order by和group by的字段都来自同一个表，那么该表将会先查询，如果它们的字段来自不同表，mysql将会建立临时表。 范围优化范围条件的定义：  对于BTREE和HASH索引，常量比较使用=,&amp;lt;=&amp;gt">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-04-02T10:26:58.534Z">
+<meta property="og:updated_time" content="2018-04-02T10:52:23.498Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mysql优化 - 查询优化">
 <meta name="twitter:description" content="where子句优化mysql为where子句优化做了：  去掉没用的条件 常量替换和移除 索引使用的常量只会计算一次 count(*)的优化 联表时优先读取常量表  联表查询时，当order by和group by的字段都来自同一个表，那么该表将会先查询，如果它们的字段来自不同表，mysql将会建立临时表。 范围优化范围条件的定义：  对于BTREE和HASH索引，常量比较使用=,&amp;lt;=&amp;gt">
@@ -115,11 +115,12 @@
 <h3 id="联表优化"><a href="#联表优化" class="headerlink" title="联表优化"></a>联表优化</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 <p>带join buffer时：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    store used columns from t1, t2 in join buffer</span><br><span class="line">    <span class="keyword">if</span> buffer is full &#123;</span><br><span class="line">      <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">        <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">          <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      empty join buffer</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> buffer is <span class="keyword">not</span> empty &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">    <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h3 id="MRR优化"><a href="#MRR优化" class="headerlink" title="MRR优化"></a>MRR优化</h3><p>该优化本质是减少随机读，通过将存储引擎层的查询到的索引数据按照主键排序，回表查询时就可以表现出顺序读。可以参考<a href="http://mysql.taobao.org/monthly/2016/01/04/" target="_blank" rel="noopener">这里</a>。</p>
+<h3 id="Order-by优化"><a href="#Order-by优化" class="headerlink" title="Order by优化"></a>Order by优化</h3>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjfg92ujd0005qxxy9cr1etnb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjfxjguk800085exyxax3nyff" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -193,6 +194,10 @@
       <ul>
         
           <li>
+            <a href="/2018/04/13/openjdk-introduction/">Openjdk简介</a>
+          </li>
+        
+          <li>
             <a href="/2018/04/01/mysql-scalability/">Mysql扩展</a>
           </li>
         
@@ -206,10 +211,6 @@
         
           <li>
             <a href="/2018/04/01/mysql-optimization-data-type/">Mysql优化 - 数据结构优化</a>
-          </li>
-        
-          <li>
-            <a href="/2018/03/31/mysql-compile/">mysql编译</a>
           </li>
         
       </ul>

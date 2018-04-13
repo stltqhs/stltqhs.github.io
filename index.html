@@ -62,6 +62,44 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-openjdk-introduction" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/openjdk-introduction/" class="article-date">
+  <time datetime="2018-04-13T05:51:00.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/13/openjdk-introduction/">Openjdk简介</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>参考文献</p>
+<p>1.<a href="https://www.infoq.com/articles/Introduction-to-HotSpot" target="_blank" rel="noopener">Getting Started with Hotspot and Openjdk</a>.2013.Ben Evans.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjfxjgukb000d5exyswrgto95" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-mysql-scalability" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/04/01/mysql-scalability/" class="article-date">
@@ -89,7 +127,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjfg92ujg0008qxxycciotp86" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjfxjguk600055exyu5i4kzix" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -123,12 +161,11 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>正在编写</p>
-
+        <h3 id="索引结构"><a href="#索引结构" class="headerlink" title="索引结构"></a>索引结构</h3><h3 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h3>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjfg92ujc0004qxxyb9s2kknz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjfxjguk500045exysyrzne4g" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -190,11 +227,12 @@
 <h3 id="联表优化"><a href="#联表优化" class="headerlink" title="联表优化"></a>联表优化</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 <p>带join buffer时：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    store used columns from t1, t2 in join buffer</span><br><span class="line">    <span class="keyword">if</span> buffer is full &#123;</span><br><span class="line">      <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">        <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">          <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      empty join buffer</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> buffer is <span class="keyword">not</span> empty &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">    <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h3 id="MRR优化"><a href="#MRR优化" class="headerlink" title="MRR优化"></a>MRR优化</h3><p>该优化本质是减少随机读，通过将存储引擎层的查询到的索引数据按照主键排序，回表查询时就可以表现出顺序读。可以参考<a href="http://mysql.taobao.org/monthly/2016/01/04/" target="_blank" rel="noopener">这里</a>。</p>
+<h3 id="Order-by优化"><a href="#Order-by优化" class="headerlink" title="Order by优化"></a>Order by优化</h3>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjfg92ujd0005qxxy9cr1etnb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjfxjguk800085exyxax3nyff" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -233,7 +271,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjfg92ujb0003qxxyyqgvt3im" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjfxjguk300035exyxxduja40" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -280,7 +318,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjfg92uj80001qxxyo7q3f3ee" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjfxjguk000015exysntjzke0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -344,7 +382,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjfg92ujh000aqxxy0i0147gx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjfxjguka000a5exykg4qo8qw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -390,7 +428,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjfg92uj40000qxxycynipy63" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjfxjgujw00005exy30l8a3e7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -447,6 +485,10 @@
       <ul>
         
           <li>
+            <a href="/2018/04/13/openjdk-introduction/">Openjdk简介</a>
+          </li>
+        
+          <li>
             <a href="/2018/04/01/mysql-scalability/">Mysql扩展</a>
           </li>
         
@@ -460,10 +502,6 @@
         
           <li>
             <a href="/2018/04/01/mysql-optimization-data-type/">Mysql优化 - 数据结构优化</a>
-          </li>
-        
-          <li>
-            <a href="/2018/03/31/mysql-compile/">mysql编译</a>
           </li>
         
       </ul>
