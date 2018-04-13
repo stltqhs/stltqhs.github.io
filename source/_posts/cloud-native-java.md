@@ -1,7 +1,7 @@
 ---
 title: Cloud Native Java阅读笔记
 date: 2018-04-10 22:10:31
-tags:java
+tags: java
 ---
 
 《Cloud Native Java》主要介绍使用Spring Cloud开发微服务应用，包括业务逻辑层，缓存，分布式事务及数据持久化。
