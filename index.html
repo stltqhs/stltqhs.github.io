@@ -90,7 +90,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg0o815k000cs2xyc299rgq4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg0qakf0000j3txyyf1b85b9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -165,8 +165,8 @@
 <li>Availability：可用性，每次请求都能获得非错的响应，但不能保证获取的数据为最新数据；</li>
 <li>Partition：分区容错性，以实际效果而演言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。</li>
 </ul>
-<p><img src="https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png" alt="alt text" title="CAP理论"></p>
-<p><img src="http://book.mixu.net/distsys/images/CAP.png" alt="alt text" title="CAP理论"></p>
+<p><img src="https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png" alt="CAP理论" title="CAP理论"></p>
+<p><img src="http://book.mixu.net/distsys/images/CAP.png" alt="CAP之协议" title="CAP理论"></p>
 <p>该理论规定分布式系统只能满足三项中的两项，不可能全部满足。该理论的<a href="http://www.cs.berkeley.edu/~brewer/cs262b-2004/PODC-keynote.pdf" target="_blank" rel="noopener">猜想</a>于2000年提出，在2002年得到<a href="http://lpd.epfl.ch/sgilbert/pubs/BrewesConjecture-SigAct.pdf" target="_blank" rel="noopener">证明</a>。</p>
 <p>2.BASE</p>
 <p><a href="https://en.wikipedia.org/wiki/Eventual_consistency" target="_blank" rel="noopener">Basically Availability,Soft State,Eventual Consistency</a>是CAP的延伸，表示即使无法做到强一致性，但可以保证最终一致性，与传统的<a href="https://en.wikipedia.org/wiki/ACID" target="_blank" rel="noopener">ACID</a>形成对比，是两种不同的设计理念，其中：</p>
@@ -195,16 +195,58 @@
 <p>(1)：用户访问一个一个接口，可能是Rest API，使Service 1更新了某条数据；</p>
 <p>(2)：Service 1更新某条数据后，向Command总线发送了一个Command；</p>
 <p>(3)：Command处理器处理来自Command总线的新Command，验证有效性后发送一个或者多个事件；</p>
-<p>(4)：事件处理器处理Command处理器发来的事件，它可能会产生更多的事件并发送给Service 2；</p>
+<p>(4)：事件处理器处理Command处理器发来的事件，它可能会产生更多的事件并发送给Service 2，event-sourcing类型的事件支持重放功能；</p>
 <p>(5)：Service 2消耗事件，对系统做出响应的修改。</p>
-<p>CQRS的实现方式可用直接使用<code>Spring Cloud Stream</code>和<code>Spring Data</code>，本章介绍使用<a href="https://docs.axonframework.org/" target="_blank" rel="noopener">Axon</a>框架实现。</p>
+<p>CQRS的实现方式可用直接使用<code>Spring Cloud Stream</code>和<code>Spring Data</code>，本章介绍使用<a href="https://docs.axonframework.org/" target="_blank" rel="noopener">Axon</a>框架实现，示例代码参考<a href="https://github.com/cloud-native-java/data-integration" target="_blank" rel="noopener">这里</a>，比较重要的类有CommandGateway，@TargetAggregateHandler，@CommandHandler，@EventSourcingHandler，@EventListener，@EventHandler。</p>
 <p>7.SEDA</p>
-<p>SEDA(Staged event-driven architectures)</p>
+<p>SEDA(Staged event-driven architectures)指将基于事件驱动的应用程序拆分为基于消息队列的场景集合(a set of stages connected by queues)，是云端服务需要足够健壮的平衡负载和扩容的理想设计模式。本章介绍使用<code>Spring Cloud Data Flow</code>来实现这种设计模式或者架构。</p>
+<p>本章还介绍了<a href="https://github.com/Netflix/Hystrix/wiki" target="_blank" rel="noopener">Hystrix</a>，它是一种分布式容错系统。</p>
+<h3 id="第13章"><a href="#第13章" class="headerlink" title="第13章"></a>第13章</h3><p>本章介绍服务监控，使用<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html" target="_blank" rel="noopener">Spring Boot Actuator</a>捕获系统当前状态。<code>Actuator</code>的接口见下表（部分）：</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/info</td>
+<td>Exposes information about current service.</td>
+</tr>
+<tr>
+<td>/metrics</td>
+<td>Exposes quantifiable values about service.</td>
+</tr>
+<tr>
+<td>/beans</td>
+<td>Exposes a graph of all the objects that Spring Boot has created for you.</td>
+</tr>
+<tr>
+<td>/health</td>
+<td>A description of the state of components in the system: UP,DOWN,etc.Also returns HTTP status codes.</td>
+</tr>
+<tr>
+<td>/mappings</td>
+<td>Exposes all the HTTP endpoints that Spring Boot is aware of in this application as well as any other metadata(such as specified content-types or HTTP verbs in the Spring MVC mapping).</td>
+</tr>
+<tr>
+<td>/env</td>
+<td>returns all of the known environment properties, such as those in the operating system’s environment variables or the results of System.getProperties().</td>
+</tr>
+</tbody>
+</table>
+<p>使用CounterService来增加自己的指标数据，使用GaugeService获取相关数据，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> CounterService counterService;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> GaugeService gaugeService;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">counterService.increment(<span class="string">"customers.read.not-found"</span><span class="comment">/*metric name*/</span>);</span><br></pre></td></tr></table></figure>
+<p>使用<a href="http://cloud.spring.io/spring-cloud-sleuth/1.3.x/" target="_blank" rel="noopener">Spring Cloud Sleuth</a>建立分布式跟踪服务，帮助我们建立系统context，编译监测系统真实状态。Trace id是第一次请求时系统自动生成，贯穿整个请求流程（跨多个组件或者服务），当请求进入到新的组件或者服务时一个新的span id会生成。<code>Spring Cloud Sleuth</code>可用在日志中记录trace id和span id，不管请求时来自于消息中间件、Spring MVC、Netflix Zuul、RestTemplate、Netflix Feign Rest客户端，日志格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2016-02-11 17:12:45.404 INFO [my-service-id,73b62c0f90d11e06,73b6etydf90d11e06,false] 85184 --- [nio-8080-exec-1] com.example.MysimpleComponentMakingARequest : ...</span><br></pre></td></tr></table></figure>
+<p>my-service-id是spring.application.name指定的服务id，73b62c0f90d11e06是trace id，73b6etydf90d11e06是span id。</p>
+<p>本章介绍了<a href="https://github.com/openzipkin/zipkin" target="_blank" rel="noopener">OpenZipkin</a>，它是一种分布式日志跟踪系统，提供用户界面查看系统各个服务的运行状态。Spring Boot Admin和Ordina提供了其他方式来查看服务状态。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0o81560000s2xy9zgtgguu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0qake900003txy8jar25rs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -243,7 +285,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg0o815e0004s2xytkj86wja" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg0qakey000f3txy1zm9qxtk" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -281,7 +323,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg0o815h0009s2xynvr0wjo2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg0qakev000c3txybsalppny" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -348,7 +390,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg0o815l000es2xy3beizxnk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg0qakew000d3txy5ypfmavd" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -387,7 +429,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg0o815f0005s2xya8gemsi6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg0qakeh00043txyzl88r6f5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -434,7 +476,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg0o81590001s2xyp350egcr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg0qakeg00033txyea2psgvd" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -498,7 +540,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg0o815g0008s2xycyxlccpv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg0qakez000h3txyc7pzf8v1" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -544,7 +586,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg0o815d0003s2xyo2t0jtg4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg0qaked00013txyw4cfpdej" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
