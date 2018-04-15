@@ -90,7 +90,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg0xo7jp000fetxyqmjz6re6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg0xsvnx000cg3xy5xdkgqxy" class="article-share-link">Share</a>
       
       
     </footer>
@@ -140,7 +140,7 @@
 <h5 id="1-带负载均衡的RestTemplate"><a href="#1-带负载均衡的RestTemplate" class="headerlink" title="1.带负载均衡的RestTemplate"></a>1.带负载均衡的RestTemplate</h5><p>第7章已经介绍，这种方式编码比较多，是一种原始的方法。</p>
 <h5 id="2-Netflix-Feign"><a href="#2-Netflix-Feign" class="headerlink" title="2.Netflix Feign"></a>2.Netflix Feign</h5><p>该方法可以将显示的RestTemplate调用过程抽象化成一个接口，由Spring Cloud内部处理具体的调用过程，例如：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FeignClient</span>(serviceId = <span class="string">"greetings-service"</span>)</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GreetingsClient</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span>(method = RequestMethod.GET, value = <span class="string">"/greet/&#123;name&#125;"</span>)</span><br><span class="line">    <span class="function">Map&lt;String, String&gt; <span class="title">greet</span><span class="params">(@PathVariable(<span class="string">"name"</span>)</span> String name)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">GreetingsClient greetingsClient;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">greetingsClient.greet(name);</span><br></pre></td></tr></table></figure>
-<h5 id="3-Netflix-Zuul"><a href="#3-Netflix-Zuul" class="headerlink" title="3.Netflix Zuul"></a>3.Netflix Zuul</h5><p>Zuul的核心是代理或者过滤器。使用<code>@EnableZuulProxy</code>和<code>Zulu.routes.*</code>来配置zuul代理，使<code>边界服务</code>（<code>Edge Service</code>）直连<code>服务提供者</code>，例如：</p>
+<h5 id="3-Netflix-Zuul"><a href="#3-Netflix-Zuul" class="headerlink" title="3.Netflix Zuul"></a>3.Netflix Zuul</h5><p>Zuul的核心是代理或者过滤器。使用<code>@EnableZuulProxy</code>和<code>Zuul.routes.*</code>来配置zuul代理，使<code>边界服务</code>（<code>Edge Service</code>）直连<code>服务提供者</code>，例如：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZuulConfiguration.java</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableZuulProxy</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ZuulConfiguration</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">CommandLineRunner <span class="title">commandLineRunner</span><span class="params">(RouteLocator routeLocator)</span> </span>&#123;</span><br><span class="line">        Log log = LogFactory.getLog(getClass());</span><br><span class="line">        <span class="keyword">return</span> args -&gt; routeLocator.getRoutes().forEach(</span><br><span class="line">        	r -&gt; log.info(String.format(<span class="string">"%s (%s) %s"</span>, r.getId(), r.getLocation(), r.getFullPath()));</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># application.properties</span><br><span class="line">zuul.routes.hi.path = /lets/**</span><br><span class="line">zuul.routes.hi.serviceId = greetings-service</span><br></pre></td></tr></table></figure>
 <p>从浏览器到Zuul代理的边界服务到服务提供者的流程如下：</p>
@@ -248,7 +248,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0xo7jc0001etxyir3063wl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0xsvnk0000g3xyhqq6iiwg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -287,7 +287,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg0xo7jl000aetxycnk8m4v6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg0xsvnv0009g3xy5k2pu1ka" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -325,7 +325,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg0xo7ji0005etxyajrei5eu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg0xsvns0004g3xykwqyqsf2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -392,7 +392,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg0xo7jk0008etxyap1cd8tu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg0xsvnu0008g3xyixz1kndi" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -431,7 +431,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg0xo7jh0004etxyp71oheaw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg0xsvnt0005g3xyblxn8j68" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -478,7 +478,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg0xo7jg0003etxyl3hat4mj" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg0xsvnr0003g3xyukuqr7nm" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -542,7 +542,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg0xo7jo000detxyran5yfrl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg0xsvny000eg3xylj3m2pq4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -588,7 +588,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg0xo7j90000etxy8xb7kls6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg0xsvno0001g3xylgdm7nza" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
