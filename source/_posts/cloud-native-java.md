@@ -300,7 +300,7 @@ private GaugeService gaugeService;
 counterService.increment("customers.read.not-found"/*metric name*/);
 ```
 
-使用[Spring Cloud Sleuth](http://cloud.spring.io/spring-cloud-sleuth/1.3.x/)建立分布式跟踪服务，帮助我们建立系统context，编译监测系统真实状态。Trace id是第一次请求时系统自动生成，贯穿整个请求流程（跨多个组件或者服务），当请求进入到新的组件或者服务时一个新的span id会生成。`Spring Cloud Sleuth`可用在日志中记录trace id和span id，不管请求时来自于消息中间件、Spring MVC、Netflix Zuul、RestTemplate、Netflix Feign Rest客户端，日志格式如下：
+使用[Spring Cloud Sleuth](http://cloud.spring.io/spring-cloud-sleuth/1.3.x/)建立分布式跟踪服务，帮助我们建立系统context，编译监测系统真实状态。Trace id是第一次请求时系统自动生成，贯穿整个请求流程（跨多个组件或者服务），当请求进入到新的组件或者服务时一个新的span id会生成。`Spring Cloud Sleuth`可用在日志中记录trace id和span id，不管请求是来自于消息中间件、Spring MVC、Netflix Zuul、RestTemplate、Netflix Feign Rest客户端，日志格式如下：
 
 ```text
 2016-02-11 17:12:45.404 INFO [my-service-id,73b62c0f90d11e06,73b6etydf90d11e06,false] 85184 --- [nio-8080-exec-1] com.example.MysimpleComponentMakingARequest : ...
