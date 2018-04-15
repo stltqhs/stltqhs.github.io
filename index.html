@@ -90,7 +90,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjfxjttqj000e8fxy8dt5r9y2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg0o815k000cs2xyc299rgq4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -128,7 +128,7 @@
 <p>使用<code>@EnableConfigServer</code>来创建配置服务，在客户端使用<code>bootstrap.yml</code>配置文件指定配置服务来从配置服务中获取配置信息。</p>
 <h3 id="第4章"><a href="#第4章" class="headerlink" title="第4章"></a>第4章</h3><p>本章主要介绍测试相关的内容。</p>
 <h3 id="第5章"><a href="#第5章" class="headerlink" title="第5章"></a>第5章</h3><p>本章主要介绍如何使用Spring Cloud将应用迁移到云平台中（如Cloud Foundry）。本章还介绍了使用<code>X/Open XA</code>协议和<code>JTA</code>来实现分布式事务。</p>
-<h3 id="第6章"><a href="#第6章" class="headerlink" title="第6章"></a>第6章</h3><p>本章介绍Restful API开发方式，使用<a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html" target="_blank" rel="noopener">RestTemplate</a>来对接Restful接口。使用<code>@ControllerAdvice</code>和<code>@ExceptionHandler</code>处理请求数据和异常数据。使用<code>HAL</code>和<code>HATEOAS</code>来描述资源，使用<code>Spring RESTDocs</code>来生成Restful API接口文档，不过已习惯使用<code>swagger</code>。</p>
+<h3 id="第6章"><a href="#第6章" class="headerlink" title="第6章"></a>第6章</h3><p>本章介绍Restful API开发方式，使用<a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html" target="_blank" rel="noopener">RestTemplate</a>来对接Restful接口。使用<code>@ControllerAdvice</code>和<code>@ExceptionHandler</code>处理请求数据和异常数据。使用<code>HAL</code>和<code>HATEOAS</code>来描述资源，使用<code>Spring RESTDocs</code>来生成Restful API接口文档。</p>
 <h3 id="第7章"><a href="#第7章" class="headerlink" title="第7章"></a>第7章</h3><p>本章介绍分布式系统服务的寻址路由，包括服务注册、发现、负载均衡。使用<code>@EnableEurekaServer</code>启动注册中心，而且还提供了管控台。使用<code>@EnableDiscoveryClient</code>启动<code>服务提供者</code>，<code>服务消费者</code>（或者客户端）同样适用<code>@EnableDiscoveryClient</code>来使用eureka注册中心，可以注入<code>DiscoveryClient</code>实例来获取已经注册的服务的信息，由于服务会存在多个，可以使用客户端级别的负载均衡组件<code>Netflix Ribbon</code>来选取需要使用的服务，例如：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> DiscoveryClient discoveryClient;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">String serviceId = <span class="string">"greetings-service"</span>;</span><br><span class="line">List&lt;Server&gt; servers = discoveryClient.getInstances(serviceId)</span><br><span class="line">    .stream()</span><br><span class="line">    .map(si -&gt; <span class="keyword">new</span> Server(si.getHost(), si.getPort()))</span><br><span class="line">    .collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">IRule roundRobinRule = <span class="keyword">new</span> RoundRobinRule();</span><br><span class="line"></span><br><span class="line">BaseLoadBalancer loadBalancer = LoadBalancerBuilder.newBuilder()</span><br><span class="line">    .withRule(roundRobinRule)</span><br><span class="line">    .buildFixedServerListLoadBalancer(servers);</span><br><span class="line"></span><br><span class="line">Server server = loadBalancer.chooseServer();</span><br><span class="line"></span><br><span class="line">ResponseEntity&lt;JsonNode&gt; response = <span class="keyword">this</span>.restTemplate.getForEntity(<span class="string">"http://"</span> + server.getHost() + <span class="string">":"</span> + server.getPort() + <span class="string">"/hi/&#123;name&#125;"</span>, JsonNode.class, variables);</span><br></pre></td></tr></table></figure>
 <p>或者直接注入<code>LoadBalancerClient</code>，例如：</p>
@@ -150,11 +150,61 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EventListener</span>(HeartbeatEvent.class)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onHeartbeantEvent</span><span class="params">(HeartbeatEvent e)</span> </span>&#123;</span><br><span class="line">    discoveryClient.getServices().forEach(</span><br><span class="line">    	svc -&gt; map.put(svc, discoveryClient.getInstances(svc))</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>详细代码可以参考<a href="https://github.com/cloud-native-java/edge/blob/master/edge-service/src/main/java/greetings/RoutesListener.java" target="_blank" rel="noopener">RoutesListener</a>。</p>
 <p>本章还介绍了使用<code>Spring Security</code>给服务提供者添加权限相关的特性。</p>
+<h3 id="第9章"><a href="#第9章" class="headerlink" title="第9章"></a>第9章</h3><p>本章主要介绍数据存储的API使用，包括Spring JPA相关内容（如：<a href="https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/CrudRepository.html" target="_blank" rel="noopener">CrudRepository</a> ，使用<code>@Document</code>标记的实体可以使Spring访问<code>MongoDB</code>），数据库存取API（<a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/JdbcTemplate.html" target="_blank" rel="noopener">JdbcTemplate</a>），Redis存取API（<a href="https://docs.spring.io/spring-data/redis/docs/current/api/org/springframework/data/redis/core/RedisTemplate.html" target="_blank" rel="noopener">RedisTemplate</a>），以及缓存控制（<a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/cache/annotation/CacheEvict.html" target="_blank" rel="noopener">@CacheEvict</a>，<a href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/cache/annotation/Cacheable.html" target="_blank" rel="noopener">@Cacheable</a>，<a href="https://docs.spring.io/spring-framework/docs/4.0.x/javadoc-api/org/springframework/cache/annotation/CachePut.html" target="_blank" rel="noopener">@CachePut</a>）。</p>
+<p>另外，本章还介绍了基于图结构的<code>Nosql</code>数据存取工具——<a href="https://neo4j.com/docs/developer-manual/current/" target="_blank" rel="noopener">Neo4j</a>，该数据结构可以用在推荐系统中。</p>
+<h3 id="第10章"><a href="#第10章" class="headerlink" title="第10章"></a>第10章</h3><p>本章介绍消息中间件和<a href="https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/" target="_blank" rel="noopener">Spring Cloud Stream</a>。使用<code>Spring Cloud Stream</code>可以简化消息中间件的使用，如生产者（基于<a href="https://github.com/cloud-native-java/messaging/blob/master/stream/stream-producer/src/main/java/stream/producer/channels/StreamProducer.java" target="_blank" rel="noopener">Channel</a>或者基于<a href="https://github.com/cloud-native-java/messaging/blob/master/stream/stream-producer/src/main/java/stream/producer/ProducerChannels.java" target="_blank" rel="noopener">Gateway</a>），<a href="https://github.com/cloud-native-java/messaging/blob/master/stream/stream-consumer/src/main/java/stream/consumer/integration/StreamConsumer.java" target="_blank" rel="noopener">消费者</a>。</p>
+<p>本章还介绍了Spring Data Flow，比如实现如下命令的功能：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat input.txt | grep ERROR | wc -l &gt; output.txt</span><br></pre></td></tr></table></figure>
+<p>Java代码的实现参考<a href="https://github.com/cloud-native-java/messaging/blob/master/batch-and-integration/src/main/java/edabatch/EtlFlowConfiguration.java" target="_blank" rel="noopener">这里</a>。</p>
+<h3 id="第11章"><a href="#第11章" class="headerlink" title="第11章"></a>第11章</h3><p>本章介绍Spring<a href="https://docs.spring.io/spring-batch/4.0.x/reference/html/index.html" target="_blank" rel="noopener">批处理</a>、任务、定时器的功能，代码示例参考<a href="https://github.com/cloud-native-java/integration" target="_blank" rel="noopener">这里</a>。</p>
+<h3 id="第12章"><a href="#第12章" class="headerlink" title="第12章"></a>第12章</h3><p>本章介绍分布式系统下的数据集成。有关分布式的相关理论如下：</p>
+<p>1.CAP</p>
+<p><a href="https://zh.wikipedia.org/wiki/CAP%E5%AE%9A%E7%90%86" target="_blank" rel="noopener">C(Consistency)A(Availability)P(Partition)</a>是分布式系统数据完整性相关的理论，其中：</p>
+<ul>
+<li>Consistency：一致性，等同于所有节点访问同一份最新的数据副本；</li>
+<li>Availability：可用性，每次请求都能获得非错的响应，但不能保证获取的数据为最新数据；</li>
+<li>Partition：分区容错性，以实际效果而演言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。</li>
+</ul>
+<p><img src="https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png" alt="alt text" title="CAP理论"></p>
+<p><img src="http://book.mixu.net/distsys/images/CAP.png" alt="alt text" title="CAP理论"></p>
+<p>该理论规定分布式系统只能满足三项中的两项，不可能全部满足。该理论的<a href="http://www.cs.berkeley.edu/~brewer/cs262b-2004/PODC-keynote.pdf" target="_blank" rel="noopener">猜想</a>于2000年提出，在2002年得到<a href="http://lpd.epfl.ch/sgilbert/pubs/BrewesConjecture-SigAct.pdf" target="_blank" rel="noopener">证明</a>。</p>
+<p>2.BASE</p>
+<p><a href="https://en.wikipedia.org/wiki/Eventual_consistency" target="_blank" rel="noopener">Basically Availability,Soft State,Eventual Consistency</a>是CAP的延伸，表示即使无法做到强一致性，但可以保证最终一致性，与传统的<a href="https://en.wikipedia.org/wiki/ACID" target="_blank" rel="noopener">ACID</a>形成对比，是两种不同的设计理念，其中：</p>
+<ul>
+<li>Basically Availability：基本可用，指系统允许部分功能可用，保证核心功能可能，如<code>SOA</code>下的服务降级；</li>
+<li>Soft State：软状态，指允许系统存在中间状态，而该中间状态不会影响系统整体可用性。分布式存储中一般一份数据至少会有三个副本，允许不同节点间副本同步的延时就是软状态的体现。mysql replication的异步复制也是一种体现；</li>
+<li>Eventual Consistency：最终一致性，指系统中的所有数据副本经过一定时间后，最终能够达到一致的状态。</li>
+</ul>
+<p><a href="https://en.wikipedia.org/wiki/Consistency_model" target="_blank" rel="noopener">一致性模型</a>可以大致分为：</p>
+<ul>
+<li>强一致性：当更新操作完成之后，任何多个后续进程或者线程的访问都会返回最新的更新过的值。这种是对用户最友好的，就是用户上一次写什么，下一次就保证能读到什么。但是这种实现对性能影响较大；</li>
+<li>弱一致性：系统并不保证续进程或者线程的访问都会返回最新的更新过的值。系统在数据写入成功之后，不承诺立即可以读到最新写入的值，也不会具体的承诺多久之后可以读到。但会尽可能保证在某个时间级别（比如秒级别）之后，可以让数据达到一致性状态；</li>
+<li>最终一致性：弱一致性的特定形式。系统保证在没有后续更新的前提下，系统最终返回上一次更新操作的值。在没有故障发生的前提下，不一致窗口的时间主要受通信延迟，系统负载和复制副本的个数影响。DNS是一个典型的最终一致性系统。最终一致性的变种有因果一致性、读已所写一致性、会话一致性、单调读一致性、单调写一致性。</li>
+</ul>
+<p>对于大多数应用，并不需要强一致性，因此牺牲一致性而换取高可用性。</p>
+<p>3.Paxos</p>
+<p><a href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">Paxos</a>一种基于消息传递且具有高度容错特性的一致性算法。</p>
+<p>4.2PC</p>
+<p><a href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4" target="_blank" rel="noopener">2PC</a>（Two-Phase Commit），二阶段提交，指为了使基于分布式系统架构下的所有节点在进行事务提交时保持一致性而设计的一种算法。最大缺点就在于它的执行过程中间，节点都处于阻塞状态。</p>
+<p>5.Saga</p>
+<p>Saga模式用来处理long-lived事务，将事务分成很小单元的事务，每个小单元事务都有一个补偿事务，用来回滚事务，保证一致性。SEC（Saga execution Coordinator）存储saga日志，saga日志存储了进行中事务的记录。</p>
+<p>6.CQRS</p>
+<p>CQRS(Command Query Responsibility Segregation)提供一种解决方案即separate the writes from the reads。Command驱使微服务更新，Query用来查询结果。任意时刻一个Command更新数据时会触发一个事件依靠Query来更新所有相关服务更新自己的数据。大致流程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">+--------+          +-----------+         +-------------+          +-----------------+</span><br><span class="line">| client | ---1---&gt; | Service 1 | ---2--&gt; | Command Bus | ---3---&gt; | Command Handler |</span><br><span class="line">+--------+          +-----------+         +-------------+          +-------+---------+</span><br><span class="line">                                                                           |</span><br><span class="line">                                                                           4</span><br><span class="line">                                                                           |</span><br><span class="line">                                                                           V</span><br><span class="line">                                             +-----------+         +----------------+</span><br><span class="line">                                             | Service 2 |&lt;---5--- | Event Handler  |</span><br><span class="line">                                             +-----------+         +----------------+</span><br></pre></td></tr></table></figure>
+<p>步骤说明如下：</p>
+<p>(1)：用户访问一个一个接口，可能是Rest API，使Service 1更新了某条数据；</p>
+<p>(2)：Service 1更新某条数据后，向Command总线发送了一个Command；</p>
+<p>(3)：Command处理器处理来自Command总线的新Command，验证有效性后发送一个或者多个事件；</p>
+<p>(4)：事件处理器处理Command处理器发来的事件，它可能会产生更多的事件并发送给Service 2；</p>
+<p>(5)：Service 2消耗事件，对系统做出响应的修改。</p>
+<p>CQRS的实现方式可用直接使用<code>Spring Cloud Stream</code>和<code>Spring Data</code>，本章介绍使用<a href="https://docs.axonframework.org/" target="_blank" rel="noopener">Axon</a>框架实现。</p>
+<p>7.SEDA</p>
+<p>SEDA(Staged event-driven architectures)</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjfxjttq200008fxyodvbeqq0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0o81560000s2xy9zgtgguu" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -193,7 +243,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjfxjttqf00098fxytxc97sq5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg0o815e0004s2xytkj86wja" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -231,7 +281,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjfxjttq600018fxydvl11yyx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg0o815h0009s2xynvr0wjo2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -298,7 +348,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjfxjttqe00088fxyyov7f785" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg0o815l000es2xy3beizxnk" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -337,7 +387,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjfxjttqc00058fxyk6ddsiz2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg0o815f0005s2xya8gemsi6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -384,7 +434,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjfxjttqb00048fxy94foohje" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg0o81590001s2xyp350egcr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -448,7 +498,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjfxjttqh000c8fxyea2no8yi" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg0o815g0008s2xycyxlccpv" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -494,7 +544,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjfxjttqa00038fxyrg6xm8zr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg0o815d0003s2xyo2t0jtg4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
