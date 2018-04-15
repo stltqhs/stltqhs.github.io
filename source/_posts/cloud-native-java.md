@@ -309,3 +309,11 @@ counterService.increment("customers.read.not-found"/*metric name*/);
 my-service-id是spring.application.name指定的服务id，73b62c0f90d11e06是trace id，73b6etydf90d11e06是span id。
 
 本章介绍了[OpenZipkin](https://github.com/openzipkin/zipkin)，它是一种分布式日志跟踪系统，提供用户界面查看系统各个服务的运行状态。Spring Boot Admin和Ordina提供了其他方式来查看服务状态。
+
+### 第14章
+
+本章介绍Cloud Foundry的服务化。
+
+### 第15章
+
+本章介绍持续发布，介绍的工具是[Concourse](https://github.com/concourse/concourse)，它与[Jenkins](https://jenkins.io/doc/)或者Travis有两点不同，即容器和管道，使用示例参考[这里](https://github.com/cloud-native-java/continuous-delivery)。
