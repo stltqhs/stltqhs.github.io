@@ -109,7 +109,7 @@ greetingsClient.greet(name);
 
 ##### 3.Netflix Zuul
 
-Zuul的核心是代理或者过滤器。使用`@EnableZuulProxy`和`Zulu.routes.*`来配置zuul代理，使`边界服务`（`Edge Service`）直连`服务提供者`，例如：
+Zuul的核心是代理或者过滤器。使用`@EnableZuulProxy`和`Zuul.routes.*`来配置zuul代理，使`边界服务`（`Edge Service`）直连`服务提供者`，例如：
 
 ```java
 // ZuulConfiguration.java
