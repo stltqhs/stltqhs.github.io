@@ -201,9 +201,9 @@ Java代码的实现参考[这里](https://github.com/cloud-native-java/messaging
 * Availability：可用性，每次请求都能获得非错的响应，但不能保证获取的数据为最新数据；
 * Partition：分区容错性，以实际效果而演言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。
 
-![alt text](https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png "CAP理论")
+![CAP理论](https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png "CAP理论")
 
-![alt text](http://book.mixu.net/distsys/images/CAP.png "CAP理论")
+![CAP之协议](http://book.mixu.net/distsys/images/CAP.png "CAP理论")
 
 该理论规定分布式系统只能满足三项中的两项，不可能全部满足。该理论的[猜想](http://www.cs.berkeley.edu/~brewer/cs262b-2004/PODC-keynote.pdf)于2000年提出，在2002年得到[证明](http://lpd.epfl.ch/sgilbert/pubs/BrewesConjecture-SigAct.pdf)。
 
@@ -260,12 +260,52 @@ CQRS(Command Query Responsibility Segregation)提供一种解决方案即separat
 
 (3)：Command处理器处理来自Command总线的新Command，验证有效性后发送一个或者多个事件；
 
-(4)：事件处理器处理Command处理器发来的事件，它可能会产生更多的事件并发送给Service 2；
+(4)：事件处理器处理Command处理器发来的事件，它可能会产生更多的事件并发送给Service 2，event-sourcing类型的事件支持重放功能；
 
 (5)：Service 2消耗事件，对系统做出响应的修改。
 
-CQRS的实现方式可用直接使用`Spring Cloud Stream`和`Spring Data`，本章介绍使用[Axon](https://docs.axonframework.org/)框架实现。
+CQRS的实现方式可用直接使用`Spring Cloud Stream`和`Spring Data`，本章介绍使用[Axon](https://docs.axonframework.org/)框架实现，示例代码参考[这里](https://github.com/cloud-native-java/data-integration)，比较重要的类有CommandGateway，@TargetAggregateHandler，@CommandHandler，@EventSourcingHandler，@EventListener，@EventHandler。
 
 7.SEDA
 
-SEDA(Staged event-driven architectures)
+SEDA(Staged event-driven architectures)指将基于事件驱动的应用程序拆分为基于消息队列的场景集合(a set of stages connected by queues)，是云端服务需要足够健壮的平衡负载和扩容的理想设计模式。本章介绍使用`Spring Cloud Data Flow`来实现这种设计模式或者架构。
+
+
+
+本章还介绍了[Hystrix](https://github.com/Netflix/Hystrix/wiki)，它是一种分布式容错系统。
+
+### 第13章
+
+本章介绍服务监控，使用[Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html)捕获系统当前状态。`Actuator`的接口见下表（部分）：
+
+| Endpoint  | Usage                                                        |
+| --------- | ------------------------------------------------------------ |
+| /info     | Exposes information about current service.                   |
+| /metrics  | Exposes quantifiable values about service.                   |
+| /beans    | Exposes a graph of all the objects that Spring Boot has created for you. |
+| /health   | A description of the state of components in the system: UP,DOWN,etc.Also returns HTTP status codes. |
+| /mappings | Exposes all the HTTP endpoints that Spring Boot is aware of in this application as well as any other metadata(such as specified content-types or HTTP verbs in the Spring MVC mapping). |
+| /env      | returns all of the known environment properties, such as those in the operating system's environment variables or the results of System.getProperties(). |
+
+使用CounterService来增加自己的指标数据，使用GaugeService获取相关数据，示例如下：
+
+```java
+@Autowired
+private CounterService counterService;
+
+@Autowired
+private GaugeService gaugeService;
+// ...
+
+counterService.increment("customers.read.not-found"/*metric name*/);
+```
+
+使用[Spring Cloud Sleuth](http://cloud.spring.io/spring-cloud-sleuth/1.3.x/)建立分布式跟踪服务，帮助我们建立系统context，编译监测系统真实状态。Trace id是第一次请求时系统自动生成，贯穿整个请求流程（跨多个组件或者服务），当请求进入到新的组件或者服务时一个新的span id会生成。`Spring Cloud Sleuth`可用在日志中记录trace id和span id，不管请求时来自于消息中间件、Spring MVC、Netflix Zuul、RestTemplate、Netflix Feign Rest客户端，日志格式如下：
+
+```text
+2016-02-11 17:12:45.404 INFO [my-service-id,73b62c0f90d11e06,73b6etydf90d11e06,false] 85184 --- [nio-8080-exec-1] com.example.MysimpleComponentMakingARequest : ...
+```
+
+my-service-id是spring.application.name指定的服务id，73b62c0f90d11e06是trace id，73b6etydf90d11e06是span id。
+
+本章介绍了[OpenZipkin](https://github.com/openzipkin/zipkin)，它是一种分布式日志跟踪系统，提供用户界面查看系统各个服务的运行状态。Spring Boot Admin和Ordina提供了其他方式来查看服务状态。
