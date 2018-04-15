@@ -201,7 +201,7 @@ Java代码的实现参考[这里](https://github.com/cloud-native-java/messaging
 * Availability：可用性，每次请求都能获得非错的响应，但不能保证获取的数据为最新数据；
 * Partition：分区容错性，以实际效果而演言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。
 
-![CAP理论](https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png "CAP理论")
+![CAP理论](/images/cap.jpg "CAP理论")
 
 ![CAP之协议](http://book.mixu.net/distsys/images/CAP.png "CAP理论")
 
