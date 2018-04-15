@@ -17,7 +17,7 @@
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png">
 <meta property="og:image" content="http://book.mixu.net/distsys/images/CAP.png">
-<meta property="og:updated_time" content="2018-04-15T11:32:50.678Z">
+<meta property="og:updated_time" content="2018-04-15T14:44:04.035Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Cloud Native Java阅读笔记">
 <meta name="twitter:description" content="《Cloud Native Java》主要介绍使用Spring Cloud开发微服务应用，包括业务逻辑层，缓存，分布式事务及数据持久化。 第1章-第2章这两章主要介绍Spring Boot的使用，不过叙述太过简单，关于Spring Boot的使用可以阅读《Spring Boot In Action》。Spring Boot比较重要的就是条件配置。 第3章本章主要介绍集中化配置。从Spring的属性">
@@ -210,11 +210,13 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2016-02-11 17:12:45.404 INFO [my-service-id,73b62c0f90d11e06,73b6etydf90d11e06,false] 85184 --- [nio-8080-exec-1] com.example.MysimpleComponentMakingARequest : ...</span><br></pre></td></tr></table></figure>
 <p>my-service-id是spring.application.name指定的服务id，73b62c0f90d11e06是trace id，73b6etydf90d11e06是span id。</p>
 <p>本章介绍了<a href="https://github.com/openzipkin/zipkin" target="_blank" rel="noopener">OpenZipkin</a>，它是一种分布式日志跟踪系统，提供用户界面查看系统各个服务的运行状态。Spring Boot Admin和Ordina提供了其他方式来查看服务状态。</p>
+<h3 id="第14章"><a href="#第14章" class="headerlink" title="第14章"></a>第14章</h3><p>本章介绍Cloud Foundry的服务化。</p>
+<h3 id="第15章"><a href="#第15章" class="headerlink" title="第15章"></a>第15章</h3><p>本章介绍持续发布，介绍的工具是<a href="https://github.com/concourse/concourse" target="_blank" rel="noopener">Concourse</a>，它与<a href="https://jenkins.io/doc/" target="_blank" rel="noopener">Jenkins</a>或者Travis有两点不同，即容器和管道，使用示例参考<a href="https://github.com/cloud-native-java/continuous-delivery" target="_blank" rel="noopener">这里</a>。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0qf7pf00005dxy0trut0hb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg0x9xv20000b8xyh2403ob4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
