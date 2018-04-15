@@ -28,7 +28,7 @@ tags: java
 
 ### 第6章
 
-本章介绍Restful API开发方式，使用[RestTemplate](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html)来对接Restful接口。使用`@ControllerAdvice`和`@ExceptionHandler`处理请求数据和异常数据。使用`HAL`和`HATEOAS`来描述资源，使用`Spring RESTDocs`来生成Restful API接口文档，不过已习惯使用`swagger`。
+本章介绍Restful API开发方式，使用[RestTemplate](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html)来对接Restful接口。使用`@ControllerAdvice`和`@ExceptionHandler`处理请求数据和异常数据。使用`HAL`和`HATEOAS`来描述资源，使用`Spring RESTDocs`来生成Restful API接口文档。
 
 ### 第7章
 
@@ -162,3 +162,110 @@ public void onHeartbeantEvent(HeartbeatEvent e) {
 详细代码可以参考[RoutesListener](https://github.com/cloud-native-java/edge/blob/master/edge-service/src/main/java/greetings/RoutesListener.java)。
 
 本章还介绍了使用`Spring Security`给服务提供者添加权限相关的特性。
+
+### 第9章
+
+本章主要介绍数据存储的API使用，包括Spring JPA相关内容（如：[CrudRepository](https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/CrudRepository.html) ，使用`@Document`标记的实体可以使Spring访问`MongoDB`），数据库存取API（[JdbcTemplate](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/JdbcTemplate.html)），Redis存取API（[RedisTemplate](https://docs.spring.io/spring-data/redis/docs/current/api/org/springframework/data/redis/core/RedisTemplate.html)），以及缓存控制（[@CacheEvict](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/cache/annotation/CacheEvict.html)，[@Cacheable](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/cache/annotation/Cacheable.html)，[@CachePut](https://docs.spring.io/spring-framework/docs/4.0.x/javadoc-api/org/springframework/cache/annotation/CachePut.html)）。
+
+
+
+另外，本章还介绍了基于图结构的`Nosql`数据存取工具——[Neo4j](https://neo4j.com/docs/developer-manual/current/)，该数据结构可以用在推荐系统中。
+
+### 第10章
+
+本章介绍消息中间件和[Spring Cloud Stream](https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/)。使用`Spring Cloud Stream`可以简化消息中间件的使用，如生产者（基于[Channel](https://github.com/cloud-native-java/messaging/blob/master/stream/stream-producer/src/main/java/stream/producer/channels/StreamProducer.java)或者基于[Gateway](https://github.com/cloud-native-java/messaging/blob/master/stream/stream-producer/src/main/java/stream/producer/ProducerChannels.java)），[消费者](https://github.com/cloud-native-java/messaging/blob/master/stream/stream-consumer/src/main/java/stream/consumer/integration/StreamConsumer.java)。
+
+
+
+本章还介绍了Spring Data Flow，比如实现如下命令的功能：
+
+```shell
+cat input.txt | grep ERROR | wc -l > output.txt
+```
+
+Java代码的实现参考[这里](https://github.com/cloud-native-java/messaging/blob/master/batch-and-integration/src/main/java/edabatch/EtlFlowConfiguration.java)。
+
+### 第11章
+
+本章介绍Spring[批处理](https://docs.spring.io/spring-batch/4.0.x/reference/html/index.html)、任务、定时器的功能，代码示例参考[这里](https://github.com/cloud-native-java/integration)。
+
+### 第12章
+
+本章介绍分布式系统下的数据集成。有关分布式的相关理论如下：
+
+1.CAP
+
+[C(Consistency)A(Availability)P(Partition)](https://zh.wikipedia.org/wiki/CAP%E5%AE%9A%E7%90%86)是分布式系统数据完整性相关的理论，其中：
+
+* Consistency：一致性，等同于所有节点访问同一份最新的数据副本；
+* Availability：可用性，每次请求都能获得非错的响应，但不能保证获取的数据为最新数据；
+* Partition：分区容错性，以实际效果而演言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。
+
+![alt text](https://images2015.cnblogs.com/blog/801753/201511/801753-20151107213219867-1667011131.png "CAP理论")
+
+![alt text](http://book.mixu.net/distsys/images/CAP.png "CAP理论")
+
+该理论规定分布式系统只能满足三项中的两项，不可能全部满足。该理论的[猜想](http://www.cs.berkeley.edu/~brewer/cs262b-2004/PODC-keynote.pdf)于2000年提出，在2002年得到[证明](http://lpd.epfl.ch/sgilbert/pubs/BrewesConjecture-SigAct.pdf)。
+
+2.BASE
+
+[Basically Availability,Soft State,Eventual Consistency](https://en.wikipedia.org/wiki/Eventual_consistency)是CAP的延伸，表示即使无法做到强一致性，但可以保证最终一致性，与传统的[ACID](https://en.wikipedia.org/wiki/ACID)形成对比，是两种不同的设计理念，其中：
+
+* Basically Availability：基本可用，指系统允许部分功能可用，保证核心功能可能，如`SOA`下的服务降级；
+* Soft State：软状态，指允许系统存在中间状态，而该中间状态不会影响系统整体可用性。分布式存储中一般一份数据至少会有三个副本，允许不同节点间副本同步的延时就是软状态的体现。mysql replication的异步复制也是一种体现；
+* Eventual Consistency：最终一致性，指系统中的所有数据副本经过一定时间后，最终能够达到一致的状态。
+
+[一致性模型](https://en.wikipedia.org/wiki/Consistency_model)可以大致分为：
+
+* 强一致性：当更新操作完成之后，任何多个后续进程或者线程的访问都会返回最新的更新过的值。这种是对用户最友好的，就是用户上一次写什么，下一次就保证能读到什么。但是这种实现对性能影响较大；
+* 弱一致性：系统并不保证续进程或者线程的访问都会返回最新的更新过的值。系统在数据写入成功之后，不承诺立即可以读到最新写入的值，也不会具体的承诺多久之后可以读到。但会尽可能保证在某个时间级别（比如秒级别）之后，可以让数据达到一致性状态；
+* 最终一致性：弱一致性的特定形式。系统保证在没有后续更新的前提下，系统最终返回上一次更新操作的值。在没有故障发生的前提下，不一致窗口的时间主要受通信延迟，系统负载和复制副本的个数影响。DNS是一个典型的最终一致性系统。最终一致性的变种有因果一致性、读已所写一致性、会话一致性、单调读一致性、单调写一致性。
+
+对于大多数应用，并不需要强一致性，因此牺牲一致性而换取高可用性。
+
+3.Paxos
+
+[Paxos](https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95)一种基于消息传递且具有高度容错特性的一致性算法。
+
+4.2PC
+
+[2PC](https://zh.wikipedia.org/wiki/%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4)（Two-Phase Commit），二阶段提交，指为了使基于分布式系统架构下的所有节点在进行事务提交时保持一致性而设计的一种算法。最大缺点就在于它的执行过程中间，节点都处于阻塞状态。
+
+5.Saga
+
+Saga模式用来处理long-lived事务，将事务分成很小单元的事务，每个小单元事务都有一个补偿事务，用来回滚事务，保证一致性。SEC（Saga execution Coordinator）存储saga日志，saga日志存储了进行中事务的记录。
+
+6.CQRS
+
+CQRS(Command Query Responsibility Segregation)提供一种解决方案即separate the writes from the reads。Command驱使微服务更新，Query用来查询结果。任意时刻一个Command更新数据时会触发一个事件依靠Query来更新所有相关服务更新自己的数据。大致流程如下：
+
+```text
++--------+          +-----------+         +-------------+          +-----------------+
+| client | ---1---> | Service 1 | ---2--> | Command Bus | ---3---> | Command Handler |
++--------+          +-----------+         +-------------+          +-------+---------+
+                                                                           |
+                                                                           4
+                                                                           |
+                                                                           V
+                                             +-----------+         +----------------+
+                                             | Service 2 |<---5--- | Event Handler  |
+                                             +-----------+         +----------------+
+```
+
+步骤说明如下：
+
+(1)：用户访问一个一个接口，可能是Rest API，使Service 1更新了某条数据；
+
+(2)：Service 1更新某条数据后，向Command总线发送了一个Command；
+
+(3)：Command处理器处理来自Command总线的新Command，验证有效性后发送一个或者多个事件；
+
+(4)：事件处理器处理Command处理器发来的事件，它可能会产生更多的事件并发送给Service 2；
+
+(5)：Service 2消耗事件，对系统做出响应的修改。
+
+CQRS的实现方式可用直接使用`Spring Cloud Stream`和`Spring Data`，本章介绍使用[Axon](https://docs.axonframework.org/)框架实现。
+
+7.SEDA
+
+SEDA(Staged event-driven architectures)
