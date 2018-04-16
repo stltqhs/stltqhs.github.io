@@ -92,7 +92,7 @@ Max_data_length: 0
 
 ### 表结构优化
 
-t_fault表的主键是`varchar(30)`，生成的方式是随机。如果主键是随机生成，当插入一条新记录时，由于mysql的聚集索引的原因，要求主键必须是逻辑上顺序排列。我们知道，对于查询来说，顺序读是非常快的。当插入一条无序记录（指新记录的主键与表中记录的主键没有顺序关系）时，由于要保证主键逻辑有序，因此需要移动数据，使得记录物理上无序，这种情况称为[页分裂](https://www.percona.com/blog/2017/04/10/innodb-page-merging-and-page-splitting/)（page split），导致数据读取性能下降。所以第一步优化是将主键设计为严格单调增，为了简便，这里将主键id设计为自增类型。其次，如果能确定某些列不会存在null的情况时就需要将该列设计为`not null`。新的表明为t_fault_new，表结构如下：
+t_fault表的主键是`varchar(36)`，生成的方式是随机。如果主键是随机生成，当插入一条新记录时，由于mysql的聚集索引的原因，要求主键必须是逻辑上顺序排列。我们知道，对于查询来说，顺序读是非常快的。当插入一条无序记录（指新记录的主键与表中记录的主键没有顺序关系）时，由于要保证主键逻辑有序，因此需要移动数据，使得记录物理上无序，这种情况称为[页分裂](https://www.percona.com/blog/2017/04/10/innodb-page-merging-and-page-splitting/)（page split），导致数据读取性能下降。所以第一步优化是将主键设计为严格单调增，为了简便，这里将主键id设计为自增类型。其次，如果能确定某些列不会存在null的情况时就需要将该列设计为`not null`。新的表名为t_fault_new，表结构如下：
 
 ```sql
 CREATE TABLE `t_fault_new` (
@@ -111,6 +111,51 @@ CREATE TABLE `t_fault_new` (
   `operator_id` varchar(19) not null DEFAULT '0' COMMENT '运营商ID',
   `inter_no` smallint(6) not null DEFAULT '0' COMMENT '充电口，0表示所有充电口'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='故障与报警';
+```
+
+表状态如下：
+
+```sql
+mysql> show table status like 't_fault_new'\G
+*************************** 1. row ***************************
+           Name: t_fault_new
+         Engine: InnoDB
+        Version: 10
+     Row_format: Compact
+           Rows: 16157511
+ Avg_row_length: 97
+    Data_length: 1570766848
+Max_data_length: 0
+   Index_length: 0
+      Data_free: 0
+ Auto_increment: 16252681
+    Create_time: 2018-04-16 11:43:02
+    Update_time: NULL
+     Check_time: NULL
+      Collation: utf8_general_ci
+       Checksum: NULL
+ Create_options: 
+        Comment: 故障与报警
+```
+
+可以看到Avg_row_length从127降到了97，数据量减少了，这样innodb buffer可以缓存更多数据。
+
+将旧表的数据导入到新表中：
+
+```sql
+insert into t_fault_new(pile_id,report_type,fault_code,err_code, solve_status, create_time,record_time,fault_type,update_time,solve_time,operator_id,inter_no)
+select pile_id,report_type,fault_code,err_code, solve_status, create_time,record_time,ifnull(fault_type, 0),update_time,solve_time,operator_id,inter_no from t_fault
+where err_status is not null;
+```
+
+创建相关索引：
+
+```sql
+create index i_fault_common on t_fault_new(err_status,report_type,solve_status,fault_code,record_time);
+create index i_fault_pile_common on t_fault_new(pile_id,err_status,report_type,solve_status,fault_code,record_time);
+
+create index i_fault_operator_common on t_fault_new(operator_id,err_status,report_type,solve_status,fault_code,record_time);
+create index i_fault_operator_pile_common on t_fault_new(operator_id,pile_id,err_status,report_type,solve_status,fault_code,record_time);
 ```
 
 先查询旧表数据：
@@ -153,6 +198,8 @@ mysql> select count(*) as num,fault_code from t_fault_new where err_status = 1 a
 9 rows in set (13.99 sec)
 ```
 
+查询时间从17分钟降到13秒。
+
 ### 索引优化
 
 使用`explain`检查sql的查询计划：
@@ -170,7 +217,7 @@ mysql> explain select count(*) as num,fault_code from t_fault_new where err_stat
 Extra列的解释：
 
 * Using where：需要使用where条件来过滤数据；
-* Using index：直接使用覆盖索引查询数据而不需要回表查询数据
+* Using index：直接使用覆盖索引查询数据而不需要回表查询数据；
 * Using temporary：使用临时表；
 * Using filesort：需要文件排序，排序时需要使用临时表，临时表可能是内存临时表，也有可能是磁盘文件临时表，数据量决定是使用哪种。
 
