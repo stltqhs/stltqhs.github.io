@@ -237,7 +237,7 @@ Saga模式用来处理long-lived事务，将事务分成很小单元的事务，
 
 6.CQRS
 
-CQRS(Command Query Responsibility Segregation)提供一种解决方案即separate the writes from the reads。Command驱使微服务更新，Query用来查询结果。任意时刻一个Command更新数据时会触发一个事件依靠Query来更新所有相关服务更新自己的数据。大致流程如下：
+CQRS(Command Query Responsibility Segregation)提供一种解决方案即separate the writes from the reads。Command驱使微服务更新，Query用来查询结果。大致流程如下：
 
 ```text
 +--------+          +-----------+         +-------------+          +-----------------+
@@ -272,7 +272,7 @@ SEDA(Staged event-driven architectures)指将基于事件驱动的应用程序�
 
 
 
-本章还介绍了[Hystrix](https://github.com/Netflix/Hystrix/wiki)，它是一种分布式容错系统。
+本章还介绍了[Hystrix](https://github.com/Netflix/Hystrix/wiki)，它是一种分布式容错系统，可处理failover或者failfast以及降级。
 
 ### 第13章
 
