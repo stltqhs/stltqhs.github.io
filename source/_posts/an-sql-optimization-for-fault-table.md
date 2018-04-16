@@ -271,3 +271,102 @@ mysql> show status like '%tmp%';
 ```
 
 临时表数量增加了1，变为10，临时表文件数量依然是13，表示并没有使用磁盘临时表。
+
+通过上面的执行计划可以看到，使用的索引长度16字节。由于业务规则，err_status，report_type和solve_status只能有2种状态，因此可以新建一个列，值就是它们的组合（即`((err_status - 1) << 2) | ((report_type - 1) << 1) | (solve_status - 1)`），这样索引就可以少2个字段，数据更加紧凑，查询速度会更快。新表结构如下：
+
+```sql
+CREATE TABLE `t_fault_new_compound` (
+  `id` bigint NOT NULL primary key auto_increment COMMENT '主键ID',
+  `pile_id` varchar(19) DEFAULT NULL,
+  `report_type` int(2) DEFAULT 2 not null COMMENT '上报来源，1:蓝牙；2:gprs桩;',
+  `fault_code` int(2) DEFAULT 20 not null COMMENT '故障代码;20:无故障;0:急停故障；1:电表故障；2:接触器故障；3：读卡器故障；4:内部过温故障；5:连接器故障；6:绝缘故障；7:其他；',
+  `err_code` int(2) DEFAULT 20 not null COMMENT '错误代码；0:电流异常；1:电压异常；2:其他;20:无错误',
+  `err_status` int(2) not null DEFAULT 1 COMMENT '错误状态；1:故障；2：错误',
+  `solve_status` int(2) not null DEFAULT 1 COMMENT '解决状态；1:未解决；2：已解决',
+  `create_time` datetime not null COMMENT '创建时间',
+  `record_time` datetime not null COMMENT '故障时间戳',
+  `fault_type` int(8) not null DEFAULT 0 COMMENT '错误类型，1<<1:交流过压；2:交流欠压；3:交流过流；4:交流漏电；5:交流短路',
+  `update_time` datetime default null COMMENT '更新时间',
+  `solve_time` datetime DEFAULT NULL COMMENT ' 故障解决时间',
+  `operator_id` varchar(19) not null DEFAULT '0' COMMENT '运营商ID',
+  `inter_no` smallint(6) not null DEFAULT '0' COMMENT '充电口，0表示所有充电口',
+  `compound` int(2) not null comment 'err_status,report_type,solve_time组合，取值为 ((err_status - 1) << 2) | ((report_type - 1) << 1) | (solve_status - 1)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='故障与报警';
+```
+
+导入数据：
+
+```sql
+insert into t_fault_new_compound(pile_id,report_type,fault_code,err_code, solve_status, create_time,record_time,fault_type,update_time,solve_time,operator_id,inter_no, compound)
+select pile_id,report_type,fault_code,err_code, solve_status, create_time,record_time,ifnull(fault_type, 0),update_time,solve_time,operator_id,inter_no,((err_status - 1) << 2) | ((report_type - 1) << 1) | (solve_status - 1) from t_fault
+where err_status is not null;
+```
+
+建立索引：
+
+```sql
+create index i_fault_common on t_fault_new_compound(compound,fault_code,record_time);
+create index i_fault_pile_common on t_fault_new_compound(pile_id,compound,fault_code,record_time);
+
+create index i_fault_operator_common on t_fault_new_compound(operator_id,compound,fault_code,record_time);
+create index i_fault_operator_pile_common on t_fault_new_compound(operator_id,compound,fault_code,record_time);
+```
+
+查询执行计划：
+
+```sql
+mysql> explain select count(*) as num,fault_code from t_fault_new_compound where compound in (0,1,2,3,4,5,6,7) and fault_code in (0,1,2,3,4,5,6,7,8) group by fault_code;
++----+-------------+----------------------+-------+-----------------------------------------------------------------------------------------+----------------+---------+------+--------+-----------------------------------------------------------+
+| id | select_type | table                | type  | possible_keys                                                                           | key            | key_len | ref  | rows   | Extra                                                     |
++----+-------------+----------------------+-------+-----------------------------------------------------------------------------------------+----------------+---------+------+--------+-----------------------------------------------------------+
+|  1 | SIMPLE      | t_fault_new_compound | range | i_fault_common,i_fault_pile_common,i_fault_operator_common,i_fault_operator_pile_common | i_fault_common | 8       | NULL | 136296 | Using where; Using index; Using temporary; Using filesort |
++----+-------------+----------------------+-------+-----------------------------------------------------------------------------------------+----------------+---------+------+--------+-----------------------------------------------------------+
+```
+
+可以看到使用的索引长度为8，少了一半。执行查询：
+
+```sql
+mysql> select count(*) as num,fault_code from t_fault_new_compound where compound in (0,1,2,3,4,5,6,7) and fault_code in (0,1,2,3,4,5,6,7,8) group by fault_code;
++----------+------------+
+| num      | fault_code |
++----------+------------+
+|     6202 |          0 |
+|     1532 |          1 |
+|     3199 |          2 |
+|      559 |          3 |
+|       31 |          4 |
+|      115 |          5 |
+|    20186 |          6 |
+|     1966 |          7 |
+| 16143595 |          8 |
++----------+------------+
+9 rows in set (9.69 sec)
+```
+
+查询速度从13秒降到9秒，又快了4秒。
+
+通过上面的结果可以看到，fault_code为8的结果有16143595条，改写sql，单独查询fault_code为8，然后union整个结果，如下：
+
+```sql
+mysql> select sum(num) as num,fault_code from( select count(*) as num,fault_code from t_fault_new_compound where compound in(0,1,2,3,4,5,6,7) and fault_code in (0,1,2,3,4,5,6,7) group by fault_code union select count(*) as num,fault_code from t_fault_new_compound where compound in (0,1,2,3,4,5,6,7) and fault_code = 8 ) t where fault_code is not null group by fault_code;
++----------+------------+
+| num      | fault_code |
++----------+------------+
+|     6202 |          0 |
+|     1532 |          1 |
+|     3199 |          2 |
+|      559 |          3 |
+|       31 |          4 |
+|      115 |          5 |
+|    20186 |          6 |
+|     1966 |          7 |
+| 16143595 |          8 |
++----------+------------+
+9 rows in set (5.94 sec)
+```
+
+查询速度从9秒再次降到6秒，又快了3秒。
+
+### count优化
+
+对于innodb存储引擎来说，count查询不是常量查询，它需要遍历所有数据才能得到结果。对于数据量达到几千万的情况下，sql优化会达到极限，但是依然不能实现秒级查询，此时可以建立一个统计表，count时直接查询统计表即可。
