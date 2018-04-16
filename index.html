@@ -141,7 +141,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjg21n4n80001j3xy3eqzcblo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjg2aakto000gkbxymxfcickq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -181,7 +181,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg21n4nl000fj3xyh8s9v6zh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg2aaktn000ekbxy8klundko" class="article-share-link">Share</a>
       
       
     </footer>
@@ -280,7 +280,7 @@
 <p>5.Saga</p>
 <p>Saga模式用来处理long-lived事务，将事务分成很小单元的事务，每个小单元事务都有一个补偿事务，用来回滚事务，保证一致性。SEC（Saga execution Coordinator）存储saga日志，saga日志存储了进行中事务的记录。</p>
 <p>6.CQRS</p>
-<p>CQRS(Command Query Responsibility Segregation)提供一种解决方案即separate the writes from the reads。Command驱使微服务更新，Query用来查询结果。任意时刻一个Command更新数据时会触发一个事件依靠Query来更新所有相关服务更新自己的数据。大致流程如下：</p>
+<p>CQRS(Command Query Responsibility Segregation)提供一种解决方案即separate the writes from the reads。Command驱使微服务更新，Query用来查询结果。大致流程如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">+--------+          +-----------+         +-------------+          +-----------------+</span><br><span class="line">| client | ---1---&gt; | Service 1 | ---2--&gt; | Command Bus | ---3---&gt; | Command Handler |</span><br><span class="line">+--------+          +-----------+         +-------------+          +-------+---------+</span><br><span class="line">                                                                           |</span><br><span class="line">                                                                           4</span><br><span class="line">                                                                           |</span><br><span class="line">                                                                           V</span><br><span class="line">                                             +-----------+         +----------------+</span><br><span class="line">                                             | Service 2 |&lt;---5--- | Event Handler  |</span><br><span class="line">                                             +-----------+         +----------------+</span><br></pre></td></tr></table></figure>
 <p>步骤说明如下：</p>
 <p>(1)：用户访问一个一个接口，可能是Rest API，使Service 1更新了某条数据；</p>
@@ -291,7 +291,7 @@
 <p>CQRS的实现方式可用直接使用<code>Spring Cloud Stream</code>和<code>Spring Data</code>，本章介绍使用<a href="https://docs.axonframework.org/" target="_blank" rel="noopener">Axon</a>框架实现，示例代码参考<a href="https://github.com/cloud-native-java/data-integration" target="_blank" rel="noopener">这里</a>，比较重要的类有CommandGateway，@TargetAggregateHandler，@CommandHandler，@EventSourcingHandler，@EventListener，@EventHandler。</p>
 <p>7.SEDA</p>
 <p>SEDA(Staged event-driven architectures)指将基于事件驱动的应用程序拆分为基于消息队列的场景集合(a set of stages connected by queues)，是云端服务需要足够健壮的平衡负载和扩容的理想设计模式。本章介绍使用<code>Spring Cloud Data Flow</code>来实现这种设计模式或者架构。</p>
-<p>本章还介绍了<a href="https://github.com/Netflix/Hystrix/wiki" target="_blank" rel="noopener">Hystrix</a>，它是一种分布式容错系统。</p>
+<p>本章还介绍了<a href="https://github.com/Netflix/Hystrix/wiki" target="_blank" rel="noopener">Hystrix</a>，它是一种分布式容错系统，可处理failover或者failfast以及降级。</p>
 <h3 id="第13章"><a href="#第13章" class="headerlink" title="第13章"></a>第13章</h3><p>本章介绍服务监控，使用<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html" target="_blank" rel="noopener">Spring Boot Actuator</a>捕获系统当前状态。<code>Actuator</code>的接口见下表（部分）：</p>
 <table>
 <thead>
@@ -339,7 +339,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg21n4nd0004j3xyb10yoi4c" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg2aakt20003kbxyue0ue9bp" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -378,7 +378,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg21n4ne0005j3xybzulo3tp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg2aaktl000ckbxy1potth63" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -416,7 +416,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg21n4nh0008j3xyfuav17cz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg2aaktk000bkbxygghyh79k" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -483,7 +483,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg21n4nk000dj3xya4rl0k81" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg2aaktp000hkbxy1vnv3u0m" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -522,7 +522,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg21n4nn000ij3xyb1vcccoo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg2aakt30004kbxyybuittcn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -569,7 +569,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg21n4nb0003j3xylruothvl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg2aaksw0000kbxyho2nkgyo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -633,7 +633,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg21n4ni000aj3xyn870hizp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg2aaktq000jkbxyvj485icn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -679,7 +679,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg21n4n30000j3xy2lf6qqpx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg2aaksz0001kbxyhn0zusrb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
