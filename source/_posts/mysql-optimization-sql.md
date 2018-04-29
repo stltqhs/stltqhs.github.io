@@ -125,3 +125,31 @@ if buffer is not empty {
 
 ### Order by优化
 
+如果`order by`无法命中索引，mysql将使用文件排序，即filesort。所以提高order by的效率，就需要使得order by命中索引。按照btree的结构，命中索引的要求是按照最左前缀匹配，当遇到范围查询时，后续的索引字段不会再考虑使用索引，假设索引为`create index idx on t(key_col1,key_col2,key_col3)`，命中索引的排序的情况如下：
+
+```sql
+select * from t where key_col1 = 1 order by key_col2;
+select * from t where key_col1 = 2 and key_col2 > 3 order by key_col2;
+```
+
+不会命中索引的排序如下：
+
+```sql
+select * from t where key_col1 = 1 order by key_col2 desc, key_col3 asc;
+select * from t where key_col1 = 1 and key_col2 > 3 order by key_col3;
+select * from t where key_col1 = 1 order by abs(key_col2);
+select * from t where kehy_col1 = 1 order by -key_col2;
+```
+
+对于`group by`操作，mysql默认都会做排序操作，可以通过`order by null`来取消排序，如：
+
+```sql
+select a,count(*) from bar group by a order by null;
+```
+
+对于filesort的优化，如果是数据量少是，会使用sort buffer来排序，否在还是磁盘临时表排序。
+
+### Group by优化
+
+1.松散索引扫描（Loose Index Scan）
+
