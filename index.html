@@ -84,19 +84,19 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://github.com/mysql/mysql-server" target="_blank" rel="noopener">mysql-server</a>是当前非常流行的开源<code>RDBMS</code>，在其基础上还有多个开源版本，如<code>Percona</code>、<code>Maria DB</code>等，其中以<code>Percona</code>最为常用，不仅包括对<code>mysql-server</code>的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读<code>mysql-server</code>源码需要参考<a href="https://dev.mysql.com/doc/internals/en/" target="_blank" rel="noopener">MySQL Internals Manual</a>，还可以阅读书籍，如<a href="http://shop.oreilly.com/product/9780596009571.do" target="_blank" rel="noopener">Understanding Mysql Internals</a>。关于<code>mysql-server</code>的编译与调试可以参考<a href="https://stltqhs.github.io/2018/03/31/mysql-compile/" target="_blank" rel="noopener">mysql-server编译与调试</a>。</p>
-<h1 id="mysql-server模块"><a href="#mysql-server模块" class="headerlink" title="mysql-server模块"></a>mysql-server模块</h1><p><img src="/images/mysql-modules.jpg" alt="mysql-server模块" title="mysql-server模块"></p>
+        <h1 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h1><p><a href="https://github.com/mysql/mysql-server" target="_blank" rel="noopener">mysql-server</a>是当前非常流行的开源<code>RDBMS</code>，在其基础上还有多个开源版本，如<code>Percona</code>、<code>Maria DB</code>等，其中以<code>Percona</code>最为常用，不仅包括对<code>mysql-server</code>的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读<code>mysql-server</code>源码需要参考<a href="https://dev.mysql.com/doc/internals/en/" target="_blank" rel="noopener">MySQL Internals Manual</a>，还可以阅读书籍，如<a href="http://shop.oreilly.com/product/9780596009571.do" target="_blank" rel="noopener">Understanding Mysql Internals</a>。关于<code>mysql-server</code>的编译与调试可以参考<a href="https://stltqhs.github.io/2018/03/31/mysql-compile/" target="_blank" rel="noopener">mysql-server编译与调试</a>。</p>
+<h1 id="二、mysql-server模块"><a href="#二、mysql-server模块" class="headerlink" title="二、mysql-server模块"></a>二、mysql-server模块</h1><p><img src="/images/mysql-modules.jpg" alt="mysql-server模块" title="mysql-server模块"></p>
 <h3 id="1-服务器初始化模块"><a href="#1-服务器初始化模块" class="headerlink" title="1.服务器初始化模块"></a>1.服务器初始化模块</h3><p><code>mysqld</code>是<code>mysql-server</code>服务器的二进制文件，可以启动整个<code>mysql-server</code>程序，自然的<code>mysqld</code>就包含一个<code>main</code>方法，是整个程序的入口，该<code>main</code>方法位于<code>sql/mysqld.cc</code>。比较重要的方法有以下几个：</p>
 <ul>
-<li>Init_command_variables()</li>
-<li>Init_thread_environment()</li>
-<li>Init_server_components()</li>
-<li>sql/sql_acl.cc中的grant_init()</li>
-<li>sql/slave.cc中的init_slave()</li>
-<li>get_options()</li>
+<li><code>init_command_variables()</code></li>
+<li><code>init_thread_environment()</code></li>
+<li><code>init_server_components()</code></li>
+<li><code>sql/sql_acl.cc</code>中的<code>grant_init()</code></li>
+<li><code>sql/slave.cc</code>中的<code>init_slave()</code></li>
+<li><code>get_options()</code></li>
 </ul>
 <h3 id="2-连接器管理"><a href="#2-连接器管理" class="headerlink" title="2.连接器管理"></a>2.连接器管理</h3><p>监听来自客户端的链接，然后将请求派发给线程管理器，入口方法是<code>sql/mysqld.cc</code>中的<code>handle_connections_sockets()</code>。</p>
-<h3 id="3-线程管理器"><a href="#3-线程管理器" class="headerlink" title="3.线程管理器"></a>3.线程管理器</h3><p>线程管理器负责跟踪线程，确保分配线程，以处理来自客户端的链接。入口方法是<code>sql/mysqld.cc</code>中的create_new_thread()，还有一个特别的方法是<code>start_cached_thread()</code>。</p>
+<h3 id="3-线程管理器"><a href="#3-线程管理器" class="headerlink" title="3.线程管理器"></a>3.线程管理器</h3><p>线程管理器负责跟踪线程，确保分配线程，以处理来自客户端的链接。入口方法是<code>sql/mysqld.cc</code>中的<code>create_new_thread()</code>，还有一个特别的方法是<code>start_cached_thread()</code>。</p>
 <h3 id="4-连接线程"><a href="#4-连接线程" class="headerlink" title="4.连接线程"></a>4.连接线程</h3><p>在一个已建立的连接上处理客户端请求，入口方法是<code>sql/sql_parse.cc中</code>的<code>handle_one_connection()</code>。</p>
 <h3 id="5-用户验证"><a href="#5-用户验证" class="headerlink" title="5.用户验证"></a>5.用户验证</h3><p>验证所连接的用户，并对包含该用户层权限信息的结构和变量进行初始化，入口是<code>sql/sql_parse.cc</code>中的<code>check_connection()</code>，有关函数有：</p>
 <ul>
@@ -197,11 +197,22 @@
 </ul>
 <h3 id="19-低层次网络IO-API"><a href="#19-低层次网络IO-API" class="headerlink" title="19.低层次网络IO API"></a>19.低层次网络IO API</h3><p>低层次网络IO API提供了低层次网络IO和SSL会话抽象，代码在<code>vio/</code>目录下，方法都是以<code>vio_</code>开头</p>
 <h3 id="20-核心API"><a href="#20-核心API" class="headerlink" title="20.核心API"></a>20.核心API</h3><p>提供了可移植的文件IO、内存管理、字符串操作、文件系统导航、格式化打印、丰富的数据结构和算法集，代码在<code>mysys/</code>和<code>strings/</code>目录下。</p>
+<h1 id="三、核心类、结构、变量及API"><a href="#三、核心类、结构、变量及API" class="headerlink" title="三、核心类、结构、变量及API"></a>三、核心类、结构、变量及API</h1><h3 id="1-核心类"><a href="#1-核心类" class="headerlink" title="1.核心类"></a>1.核心类</h3><ul>
+<li><code>THD</code>：线程描述符，在<code>sql/sql_class.h</code>中定义，在<code>sql/sql_class.cc</code>中实现，它是最常使用的类</li>
+<li><code>NET</code>：网络链接描述符，在<code>include/mysql_com.h</code>中定义</li>
+<li><code>Table</code>： 表描述符，在<code>sql/table.h</code>中定义为<code>struct st_table</code>，在<code>sql/handler.h</code>中使用<code>typedef</code>定义为<code>Table</code>别名</li>
+<li><code>Field</code>：列描述符，在<code>sql/field.h</code>中定义，在<code>sql/field.cc</code>中实现</li>
+</ul>
+<h3 id="2-API"><a href="#2-API" class="headerlink" title="2.API"></a>2.API</h3><ul>
+<li><code>mysys/my_malloc.c</code>中的<code>gptr my_malloc(unit size, myf MyFlags)</code>，用户全局缓冲区和其他生命周期大于一次查询的对象以及大型内存快分配内存块</li>
+<li><code>mysys/my_malloc.c</code>中的<code>void free(gptr ptr, myf MyFlags)</code>，释放由<code>my_malloc()</code>分配的内存块</li>
+<li><code>sql/thr_malloc.cc</code>中的<code>gptr sql_alloc(uint size)</code>，从当前线程描述符池中分配内存，应用于在处理一个查询时进行小型内存分配，查询结束时，内存自动释放</li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/29/mysql-server-source-ep01/" data-id="cjgkslbmm000a7xxyhh8u61pl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/29/mysql-server-source-ep01/" data-id="cjgktmxo10008dtxyl1h2p32s" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -292,7 +303,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjgkslbmk00087xxyuo0t477i" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjgktmxny0004dtxy48u8zyuf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -332,7 +343,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjgkslbmt000j7xxy5uz9aa8m" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjgktmxo9000kdtxyiidg1vti" class="article-share-link">Share</a>
       
       
     </footer>
@@ -490,7 +501,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjgkslbmc00017xxysop1b9hq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjgktmxnz0005dtxyimrum5zy" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -529,7 +540,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjgkslbmo000d7xxykqkhz1j4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjgktmxo3000adtxyv9kl2i6p" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -567,7 +578,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjgkslbmj00057xxy6ym4l0d1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjgktmxo5000ddtxyxq6tpzit" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -642,7 +653,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjgkslbmr000h7xxyfqz8jp8h" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjgktmxo8000idtxymr4kviik" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -681,7 +692,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjgkslbmg00037xxy4chxjqnl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjgktmxnw0003dtxy6pz0diyh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -740,7 +751,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjgkslbmi00047xxyb3l4xor0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjgktmxnt0001dtxy675ypswe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -804,7 +815,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjgkslbmq000f7xxyhni20xb4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjgktmxo6000fdtxy0b03jmiz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
