@@ -5,20 +5,20 @@
   
 
   
-  <title>mysql编译 | 海东青</title>
+  <title>mysql编译与调试 | 海东青</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Windows系统下的编译过程1.获取源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快">
+  <meta name="description" content="一、源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。 1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mysql编译">
+<meta property="og:title" content="mysql编译与调试">
 <meta property="og:url" content="http://yoursite.com/2018/03/31/mysql-compile/index.html">
 <meta property="og:site_name" content="海东青">
-<meta property="og:description" content="Windows系统下的编译过程1.获取源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快">
+<meta property="og:description" content="一、源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。 1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-04-01T03:27:49.515Z">
+<meta property="og:updated_time" content="2018-04-29T04:18:02.049Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mysql编译">
-<meta name="twitter:description" content="Windows系统下的编译过程1.获取源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快">
+<meta name="twitter:title" content="mysql编译与调试">
+<meta name="twitter:description" content="一、源码mysql-server的源码放在github中，代码仓库路径是：https://github.com/mysql/mysql-server.git，使用下面的命令将代码复制到本地计算机中。 1git clone https://github.com/mysql/mysql-server.git 这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从">
   
     <link rel="alternate" href="/atom.xml" title="海东青" type="application/atom+xml">
   
@@ -79,7 +79,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      mysql编译
+      mysql编译与调试
     </h1>
   
 
@@ -87,20 +87,32 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Windows系统下的编译过程"><a href="#Windows系统下的编译过程" class="headerlink" title="Windows系统下的编译过程"></a>Windows系统下的编译过程</h1><h3 id="1-获取源码"><a href="#1-获取源码" class="headerlink" title="1.获取源码"></a>1.获取源码</h3><p><code>mysql-server</code>的源码放在github中，代码仓库路径是：<code>https://github.com/mysql/mysql-server.git</code>，使用下面的命令将代码复制到本地计算机中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mysql/mysql-server.git</span><br></pre></td></tr></table></figure></p>
+        <h2 id="一、源码"><a href="#一、源码" class="headerlink" title="一、源码"></a>一、源码</h2><p><code>mysql-server</code>的源码放在github中，代码仓库路径是：<code>https://github.com/mysql/mysql-server.git</code>，使用下面的命令将代码复制到本地计算机中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mysql/mysql-server.git</span><br></pre></td></tr></table></figure>
 <p>这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从github中下载。</p>
-<h3 id="2-生成visual-studio项目配置文件"><a href="#2-生成visual-studio项目配置文件" class="headerlink" title="2.生成visual studio项目配置文件"></a>2.生成<code>visual studio</code>项目配置文件</h3><p>需要使用<code>cmake</code>命令和<code>bison</code>的支持，需要将这2项下载好，添加到PATH环境变量中。<br>执行下面的命令生成VS2013的项目配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G &quot;Visual Studio 12 2013&quot;</span><br></pre></td></tr></table></figure></p>
-<h3 id="3-VS编译"><a href="#3-VS编译" class="headerlink" title="3.VS编译"></a>3.VS编译</h3><p>（1）编译时可能出现<code>sql_locale.cc</code>编译失败，出现错误的字符等等。可以将该文件转换为<code>Unicode(UTF8 BOM)</code>型文件；<br>（2）SIGABRT问题需要将<code>sql/mysqld.cc</code>中的 <code>DBUG_ASSERT(0)</code> 注释掉；<br>（3）因为权限问题无法操作注册表，可以以管理员身份运行<code>VS</code>。<br>设置<code>mysqld</code>为默认启动项，然后编译，由于<code>mysqld</code>启动时需要加载<code>data</code>目录（使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录），因此可以设置启动参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="二、Windows"><a href="#二、Windows" class="headerlink" title="二、Windows"></a>二、Windows</h2><h3 id="1-生成visual-studio项目配置文件"><a href="#1-生成visual-studio项目配置文件" class="headerlink" title="1.生成visual studio项目配置文件"></a>1.生成<code>visual studio</code>项目配置文件</h3><p>需要使用<code>cmake</code>命令和<code>bison</code>的支持，需要将这2项下载好，添加到PATH环境变量中。<br>执行下面的命令生成VS2013的项目配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G &quot;Visual Studio 12 2013&quot;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-VS编译"><a href="#2-VS编译" class="headerlink" title="2.VS编译"></a>2.VS编译</h3><p>（1）编译时可能出现<code>sql_locale.cc</code>编译失败，出现错误的字符等等。可以将该文件转换为<code>Unicode(UTF8 BOM)</code>型文件；<br>（2）SIGABRT问题需要将<code>sql/mysqld.cc</code>中的 <code>DBUG_ASSERT(0)</code> 注释掉；<br>（3）因为权限问题无法操作注册表，可以以管理员身份运行<code>VS</code>。<br>设置<code>mysqld</code>为默认启动项，然后编译，由于<code>mysqld</code>启动时需要加载<code>data</code>目录（使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录），因此可以设置启动参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
 <p>其中<code>&lt;my.ini&gt;</code>为<code>mysql</code>的配置文件，此时就可以调试。<br>需要配置<code>lc_messages_dir=&lt;mysql-server-source-dir&gt;/sql/share</code></p>
 <p>总结：<br>1.初始数据文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</span><br></pre></td></tr></table></figure></p>
 <p>2.设置启动参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
 <p>3.将日志调试时不要隐藏窗口<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--console</span><br></pre></td></tr></table></figure></p>
-<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>1.mysql5.6在windows下的编译与调试：<a href="http://www.voidcn.com/blog/fei33423/article/p-4830278.html" target="_blank" rel="noopener">http://www.voidcn.com/blog/fei33423/article/p-4830278.html</a></p>
+<h2 id="三、OS-X"><a href="#三、OS-X" class="headerlink" title="三、OS X"></a>三、OS X</h2><h3 id="1-Developer目录设置"><a href="#1-Developer目录设置" class="headerlink" title="1.Developer目录设置"></a>1.Developer目录设置</h3><p>当安装了Xcode后，需要设置Developer目录，默认是/Library/Developer，需要设置到Xcode的Developer目录，执行命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo xcode-select -s /Applications/Xcode.app/Contents/Developer</span><br></pre></td></tr></table></figure>
+<h3 id="2-生成Xcode工程"><a href="#2-生成Xcode工程" class="headerlink" title="2.生成Xcode工程"></a>2.生成Xcode工程</h3><p>执行命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G <span class="string">'Xcode'</span> -DCMAKE_BUILD_TYPE=Debug</span><br></pre></td></tr></table></figure>
+<h3 id="3-编译"><a href="#3-编译" class="headerlink" title="3.编译"></a>3.编译</h3><p>使用Xcode打开mysql-server工程，自动生成Schema，开始编译。编译完成后，选择mysqld这个Schema，需要编辑该Schema，设置mysqld命令的参数。</p>
+<p>1).使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录，这里<code>data</code>目录设置为${PRODUCT_DIR}/data</p>
+<p>2).编辑mysqld的Schema，选择左侧的Run，点击右侧的Arguments，设置datadir</p>
+<p>3).可能还需要设置lc-messages-dir</p>
+<p>此时就可以运行mysqld程序。</p>
+<h3 id="4-调试"><a href="#4-调试" class="headerlink" title="4.调试"></a>4.调试</h3><p>打开sql模块下的sql_select.cc文件，在handle_query方法下的某一行打下断点，然后在mysql客户端执行<code>select</code>就会被断下来。</p>
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p>1.mysql5.6在windows下的编译与调试，<a href="http://www.voidcn.com/blog/fei33423/article/p-4830278.html；" target="_blank" rel="noopener">http://www.voidcn.com/blog/fei33423/article/p-4830278.html；</a></p>
+<p>2.使用cmake编译，<a href="https://dev.mysql.com/doc/internals/en/cmake.html；" target="_blank" rel="noopener">https://dev.mysql.com/doc/internals/en/cmake.html；</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg2aaksw0000kbxyho2nkgyo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjgkb2bci00033nxyj6xtgm5v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>

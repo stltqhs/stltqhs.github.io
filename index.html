@@ -141,7 +141,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjg2aakto000gkbxymxfcickq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjgkb2bcb00003nxy0xcwdq7s" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -181,7 +181,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjg2aaktn000ekbxy8klundko" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjgkb2bd2000j3nxyh0fvvnjq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -339,7 +339,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjg2aakt20003kbxyue0ue9bp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjgkb2bcf00013nxy8i3x7n59" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -378,7 +378,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjg2aaktl000ckbxy1potth63" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjgkb2bcp000d3nxyuqjxz8zg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -416,7 +416,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjg2aaktk000bkbxygghyh79k" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjgkb2bcl00083nxymtifvqpe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -479,11 +479,19 @@
 <p>带join buffer时：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each row in t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t2 matching reference key &#123;</span><br><span class="line">    store used columns from t1, t2 in join buffer</span><br><span class="line">    <span class="keyword">if</span> buffer is full &#123;</span><br><span class="line">      <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">        <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">          <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      empty join buffer</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> buffer is <span class="keyword">not</span> empty &#123;</span><br><span class="line">  <span class="keyword">for</span> each row in t3 &#123;</span><br><span class="line">    <span class="keyword">for</span> each t1, t2 combination in join buffer &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="MRR优化"><a href="#MRR优化" class="headerlink" title="MRR优化"></a>MRR优化</h3><p>该优化本质是减少随机读，通过将存储引擎层的查询到的索引数据按照主键排序，回表查询时就可以表现出顺序读。可以参考<a href="http://mysql.taobao.org/monthly/2016/01/04/" target="_blank" rel="noopener">这里</a>。</p>
-<h3 id="Order-by优化"><a href="#Order-by优化" class="headerlink" title="Order by优化"></a>Order by优化</h3>
+<h3 id="Order-by优化"><a href="#Order-by优化" class="headerlink" title="Order by优化"></a>Order by优化</h3><p>如果<code>order by</code>无法命中索引，mysql将使用文件排序，即filesort。所以提高order by的效率，就需要使得order by命中索引。按照btree的结构，命中索引的要求是按照最左前缀匹配，当遇到范围查询时，后续的索引字段不会再考虑使用索引，假设索引为<code>create index idx on t(key_col1,key_col2,key_col3)</code>，命中索引的排序的情况如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> t <span class="keyword">where</span> key_col1 = <span class="number">1</span> <span class="keyword">order</span> <span class="keyword">by</span> key_col2;</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> t <span class="keyword">where</span> key_col1 = <span class="number">2</span> <span class="keyword">and</span> key_col2 &gt; <span class="number">3</span> <span class="keyword">order</span> <span class="keyword">by</span> key_col2;</span><br></pre></td></tr></table></figure>
+<p>不会命中索引的排序如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> t <span class="keyword">where</span> key_col1 = <span class="number">1</span> <span class="keyword">order</span> <span class="keyword">by</span> key_col2 <span class="keyword">desc</span>, key_col3 <span class="keyword">asc</span>;</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> t <span class="keyword">where</span> key_col1 = <span class="number">1</span> <span class="keyword">and</span> key_col2 &gt; <span class="number">3</span> <span class="keyword">order</span> <span class="keyword">by</span> key_col3;</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> t <span class="keyword">where</span> key_col1 = <span class="number">1</span> <span class="keyword">order</span> <span class="keyword">by</span> <span class="keyword">abs</span>(key_col2);</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> t <span class="keyword">where</span> kehy_col1 = <span class="number">1</span> <span class="keyword">order</span> <span class="keyword">by</span> -key_col2;</span><br></pre></td></tr></table></figure>
+<p>对于<code>group by</code>操作，mysql默认都会做排序操作，可以通过<code>order by null</code>来取消排序，如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> a,<span class="keyword">count</span>(*) <span class="keyword">from</span> bar <span class="keyword">group</span> <span class="keyword">by</span> a <span class="keyword">order</span> <span class="keyword">by</span> <span class="literal">null</span>;</span><br></pre></td></tr></table></figure>
+<p>对于filesort的优化，如果是数据量少是，会使用sort buffer来排序，否在还是磁盘临时表排序。</p>
+<h3 id="Group-by优化"><a href="#Group-by优化" class="headerlink" title="Group by优化"></a>Group by优化</h3><p>1.松散索引扫描（Loose Index Scan）</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjg2aaktp000hkbxy1vnv3u0m" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjgkb2bci00043nxyi9o9vxz7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -522,7 +530,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjg2aakt30004kbxyybuittcn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjgkb2bcn000a3nxynwolt67e" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -548,7 +556,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/31/mysql-compile/">mysql编译</a>
+      <a class="article-title" href="/2018/03/31/mysql-compile/">mysql编译与调试</a>
     </h1>
   
 
@@ -556,20 +564,32 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Windows系统下的编译过程"><a href="#Windows系统下的编译过程" class="headerlink" title="Windows系统下的编译过程"></a>Windows系统下的编译过程</h1><h3 id="1-获取源码"><a href="#1-获取源码" class="headerlink" title="1.获取源码"></a>1.获取源码</h3><p><code>mysql-server</code>的源码放在github中，代码仓库路径是：<code>https://github.com/mysql/mysql-server.git</code>，使用下面的命令将代码复制到本地计算机中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mysql/mysql-server.git</span><br></pre></td></tr></table></figure></p>
+        <h2 id="一、源码"><a href="#一、源码" class="headerlink" title="一、源码"></a>一、源码</h2><p><code>mysql-server</code>的源码放在github中，代码仓库路径是：<code>https://github.com/mysql/mysql-server.git</code>，使用下面的命令将代码复制到本地计算机中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mysql/mysql-server.git</span><br></pre></td></tr></table></figure>
 <p>这可能会花费1小时的时间，因为文件总共有670M左右，可能最快的方式是直接获取源代码，而不是从github中下载。</p>
-<h3 id="2-生成visual-studio项目配置文件"><a href="#2-生成visual-studio项目配置文件" class="headerlink" title="2.生成visual studio项目配置文件"></a>2.生成<code>visual studio</code>项目配置文件</h3><p>需要使用<code>cmake</code>命令和<code>bison</code>的支持，需要将这2项下载好，添加到PATH环境变量中。<br>执行下面的命令生成VS2013的项目配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G &quot;Visual Studio 12 2013&quot;</span><br></pre></td></tr></table></figure></p>
-<h3 id="3-VS编译"><a href="#3-VS编译" class="headerlink" title="3.VS编译"></a>3.VS编译</h3><p>（1）编译时可能出现<code>sql_locale.cc</code>编译失败，出现错误的字符等等。可以将该文件转换为<code>Unicode(UTF8 BOM)</code>型文件；<br>（2）SIGABRT问题需要将<code>sql/mysqld.cc</code>中的 <code>DBUG_ASSERT(0)</code> 注释掉；<br>（3）因为权限问题无法操作注册表，可以以管理员身份运行<code>VS</code>。<br>设置<code>mysqld</code>为默认启动项，然后编译，由于<code>mysqld</code>启动时需要加载<code>data</code>目录（使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录），因此可以设置启动参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="二、Windows"><a href="#二、Windows" class="headerlink" title="二、Windows"></a>二、Windows</h2><h3 id="1-生成visual-studio项目配置文件"><a href="#1-生成visual-studio项目配置文件" class="headerlink" title="1.生成visual studio项目配置文件"></a>1.生成<code>visual studio</code>项目配置文件</h3><p>需要使用<code>cmake</code>命令和<code>bison</code>的支持，需要将这2项下载好，添加到PATH环境变量中。<br>执行下面的命令生成VS2013的项目配置文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G &quot;Visual Studio 12 2013&quot;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-VS编译"><a href="#2-VS编译" class="headerlink" title="2.VS编译"></a>2.VS编译</h3><p>（1）编译时可能出现<code>sql_locale.cc</code>编译失败，出现错误的字符等等。可以将该文件转换为<code>Unicode(UTF8 BOM)</code>型文件；<br>（2）SIGABRT问题需要将<code>sql/mysqld.cc</code>中的 <code>DBUG_ASSERT(0)</code> 注释掉；<br>（3）因为权限问题无法操作注册表，可以以管理员身份运行<code>VS</code>。<br>设置<code>mysqld</code>为默认启动项，然后编译，由于<code>mysqld</code>启动时需要加载<code>data</code>目录（使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录），因此可以设置启动参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
 <p>其中<code>&lt;my.ini&gt;</code>为<code>mysql</code>的配置文件，此时就可以调试。<br>需要配置<code>lc_messages_dir=&lt;mysql-server-source-dir&gt;/sql/share</code></p>
 <p>总结：<br>1.初始数据文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</span><br></pre></td></tr></table></figure></p>
 <p>2.设置启动参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file=&lt;my.ini&gt;</span><br></pre></td></tr></table></figure></p>
 <p>3.将日志调试时不要隐藏窗口<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--console</span><br></pre></td></tr></table></figure></p>
-<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>1.mysql5.6在windows下的编译与调试：<a href="http://www.voidcn.com/blog/fei33423/article/p-4830278.html" target="_blank" rel="noopener">http://www.voidcn.com/blog/fei33423/article/p-4830278.html</a></p>
+<h2 id="三、OS-X"><a href="#三、OS-X" class="headerlink" title="三、OS X"></a>三、OS X</h2><h3 id="1-Developer目录设置"><a href="#1-Developer目录设置" class="headerlink" title="1.Developer目录设置"></a>1.Developer目录设置</h3><p>当安装了Xcode后，需要设置Developer目录，默认是/Library/Developer，需要设置到Xcode的Developer目录，执行命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo xcode-select -s /Applications/Xcode.app/Contents/Developer</span><br></pre></td></tr></table></figure>
+<h3 id="2-生成Xcode工程"><a href="#2-生成Xcode工程" class="headerlink" title="2.生成Xcode工程"></a>2.生成Xcode工程</h3><p>执行命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -G <span class="string">'Xcode'</span> -DCMAKE_BUILD_TYPE=Debug</span><br></pre></td></tr></table></figure>
+<h3 id="3-编译"><a href="#3-编译" class="headerlink" title="3.编译"></a>3.编译</h3><p>使用Xcode打开mysql-server工程，自动生成Schema，开始编译。编译完成后，选择mysqld这个Schema，需要编辑该Schema，设置mysqld命令的参数。</p>
+<p>1).使用<code>mysqld --initialize --datadir=&lt;datadir&gt; --lc-messages-dir=&lt;mysql-server-source-dir&gt;/sql/share</code> 初始化<code>data</code>目录，这里<code>data</code>目录设置为${PRODUCT_DIR}/data</p>
+<p>2).编辑mysqld的Schema，选择左侧的Run，点击右侧的Arguments，设置datadir</p>
+<p>3).可能还需要设置lc-messages-dir</p>
+<p>此时就可以运行mysqld程序。</p>
+<h3 id="4-调试"><a href="#4-调试" class="headerlink" title="4.调试"></a>4.调试</h3><p>打开sql模块下的sql_select.cc文件，在handle_query方法下的某一行打下断点，然后在mysql客户端执行<code>select</code>就会被断下来。</p>
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p>1.mysql5.6在windows下的编译与调试，<a href="http://www.voidcn.com/blog/fei33423/article/p-4830278.html；" target="_blank" rel="noopener">http://www.voidcn.com/blog/fei33423/article/p-4830278.html；</a></p>
+<p>2.使用cmake编译，<a href="https://dev.mysql.com/doc/internals/en/cmake.html；" target="_blank" rel="noopener">https://dev.mysql.com/doc/internals/en/cmake.html；</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjg2aaksw0000kbxyho2nkgyo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjgkb2bci00033nxyj6xtgm5v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -633,7 +653,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjg2aaktq000jkbxyvj485icn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjgkb2bd3000k3nxynnngtixz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -679,7 +699,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjg2aaksz0001kbxyhn0zusrb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjgkb2bcj00053nxyavgqnyqh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
