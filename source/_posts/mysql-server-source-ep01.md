@@ -4,11 +4,11 @@ date: 2018-04-29 18:46:59
 tags: mysql
 ---
 
-# 前言
+# 一、前言
 
 [mysql-server](https://github.com/mysql/mysql-server)是当前非常流行的开源`RDBMS`，在其基础上还有多个开源版本，如`Percona`、`Maria DB`等，其中以`Percona`最为常用，不仅包括对`mysql-server`的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读`mysql-server`源码需要参考[MySQL Internals Manual](https://dev.mysql.com/doc/internals/en/)，还可以阅读书籍，如[Understanding Mysql Internals](http://shop.oreilly.com/product/9780596009571.do)。关于`mysql-server`的编译与调试可以参考[mysql-server编译与调试](https://stltqhs.github.io/2018/03/31/mysql-compile/)。
 
-# mysql-server模块
+# 二、mysql-server模块
 
 ![mysql-server模块](/images/mysql-modules.jpg "mysql-server模块")
 
@@ -16,12 +16,12 @@ tags: mysql
 
 `mysqld`是`mysql-server`服务器的二进制文件，可以启动整个`mysql-server`程序，自然的`mysqld`就包含一个`main`方法，是整个程序的入口，该`main`方法位于`sql/mysqld.cc`。比较重要的方法有以下几个：
 
-* Init_command_variables()
-* Init_thread_environment()
-* Init_server_components()
-* sql/sql_acl.cc中的grant_init()
-* sql/slave.cc中的init_slave()
-* get_options()
+* `init_command_variables()`
+* `init_thread_environment()`
+* `init_server_components()`
+* `sql/sql_acl.cc`中的`grant_init()`
+* `sql/slave.cc`中的`init_slave()`
+* `get_options()`
 
 ### 2.连接器管理
 
@@ -29,7 +29,7 @@ tags: mysql
 
 ### 3.线程管理器
 
-线程管理器负责跟踪线程，确保分配线程，以处理来自客户端的链接。入口方法是`sql/mysqld.cc`中的create_new_thread()，还有一个特别的方法是`start_cached_thread()`。
+线程管理器负责跟踪线程，确保分配线程，以处理来自客户端的链接。入口方法是`sql/mysqld.cc`中的`create_new_thread()`，还有一个特别的方法是`start_cached_thread()`。
 
 ### 4.连接线程
 
@@ -172,3 +172,19 @@ acl是Access Control List的缩写，即访问控制列表，所以该模块的�
 ### 20.核心API
 
 提供了可移植的文件IO、内存管理、字符串操作、文件系统导航、格式化打印、丰富的数据结构和算法集，代码在`mysys/`和`strings/`目录下。
+
+# 三、核心类、结构、变量及API
+
+### 1.核心类
+
+* `THD`：线程描述符，在`sql/sql_class.h`中定义，在`sql/sql_class.cc`中实现，它是最常使用的类
+* `NET`：网络链接描述符，在`include/mysql_com.h`中定义
+* `Table`： 表描述符，在`sql/table.h`中定义为`struct st_table`，在`sql/handler.h`中使用`typedef`定义为`Table`别名
+* `Field`：列描述符，在`sql/field.h`中定义，在`sql/field.cc`中实现
+
+### 2.API
+
+* `mysys/my_malloc.c`中的`gptr my_malloc(unit size, myf MyFlags)`，用户全局缓冲区和其他生命周期大于一次查询的对象以及大型内存快分配内存块
+* `mysys/my_malloc.c`中的`void free(gptr ptr, myf MyFlags)`，释放由`my_malloc()`分配的内存块
+* `sql/thr_malloc.cc`中的`gptr sql_alloc(uint size)`，从当前线程描述符池中分配内存，应用于在处理一个查询时进行小型内存分配，查询结束时，内存自动释放
+
