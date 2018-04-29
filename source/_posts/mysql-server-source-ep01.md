@@ -10,7 +10,7 @@ tags: mysql
 
 # mysql-server模块
 
-![mysql-server模块](/images/mysql-moudles.jpg "mysql-server模块")
+![mysql-server模块](/images/mysql-modules.jpg "mysql-server模块")
 
 ### 1.服务器初始化模块
 
