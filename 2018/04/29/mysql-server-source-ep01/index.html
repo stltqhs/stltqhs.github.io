@@ -15,12 +15,12 @@
 <meta property="og:site_name" content="海东青">
 <meta property="og:description" content="前言mysql-server是当前非常流行的开源RDBMS，在其基础上还有多个开源版本，如Percona、Maria DB等，其中以Percona最为常用，不仅包括对mysql-server的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读mysql-server源码需要参考MySQL Internals Manual，还可以阅读书籍，如Understanding Mysql Interna">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/images/mysql-moudles.jpg">
-<meta property="og:updated_time" content="2018-04-29T12:22:52.714Z">
+<meta property="og:image" content="http://yoursite.com/images/mysql-modules.jpg">
+<meta property="og:updated_time" content="2018-04-29T12:29:08.564Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql-server源码阅读01 - mysql-server模块与架构">
 <meta name="twitter:description" content="前言mysql-server是当前非常流行的开源RDBMS，在其基础上还有多个开源版本，如Percona、Maria DB等，其中以Percona最为常用，不仅包括对mysql-server的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读mysql-server源码需要参考MySQL Internals Manual，还可以阅读书籍，如Understanding Mysql Interna">
-<meta name="twitter:image" content="http://yoursite.com/images/mysql-moudles.jpg">
+<meta name="twitter:image" content="http://yoursite.com/images/mysql-modules.jpg">
   
     <link rel="alternate" href="/atom.xml" title="海东青" type="application/atom+xml">
   
@@ -90,7 +90,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://github.com/mysql/mysql-server" target="_blank" rel="noopener">mysql-server</a>是当前非常流行的开源<code>RDBMS</code>，在其基础上还有多个开源版本，如<code>Percona</code>、<code>Maria DB</code>等，其中以<code>Percona</code>最为常用，不仅包括对<code>mysql-server</code>的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读<code>mysql-server</code>源码需要参考<a href="https://dev.mysql.com/doc/internals/en/" target="_blank" rel="noopener">MySQL Internals Manual</a>，还可以阅读书籍，如<a href="http://shop.oreilly.com/product/9780596009571.do" target="_blank" rel="noopener">Understanding Mysql Internals</a>。关于<code>mysql-server</code>的编译与调试可以参考<a href="https://stltqhs.github.io/2018/03/31/mysql-compile/" target="_blank" rel="noopener">mysql-server编译与调试</a>。</p>
-<h1 id="mysql-server模块"><a href="#mysql-server模块" class="headerlink" title="mysql-server模块"></a>mysql-server模块</h1><p><img src="/images/mysql-moudles.jpg" alt="mysql-server模块" title="mysql-server模块"></p>
+<h1 id="mysql-server模块"><a href="#mysql-server模块" class="headerlink" title="mysql-server模块"></a>mysql-server模块</h1><p><img src="/images/mysql-modules.jpg" alt="mysql-server模块" title="mysql-server模块"></p>
 <h3 id="1-服务器初始化模块"><a href="#1-服务器初始化模块" class="headerlink" title="1.服务器初始化模块"></a>1.服务器初始化模块</h3><p><code>mysqld</code>是<code>mysql-server</code>服务器的二进制文件，可以启动整个<code>mysql-server</code>程序，自然的<code>mysqld</code>就包含一个<code>main</code>方法，是整个程序的入口，该<code>main</code>方法位于<code>sql/mysqld.cc</code>。比较重要的方法有以下几个：</p>
 <ul>
 <li>Init_command_variables()</li>
@@ -206,7 +206,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/29/mysql-server-source-ep01/" data-id="cjgkseqjd000d6exyue58msyr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/29/mysql-server-source-ep01/" data-id="cjgkslbmm000a7xxyhh8u61pl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
