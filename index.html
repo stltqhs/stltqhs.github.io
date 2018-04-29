@@ -62,6 +62,157 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mysql-server-source-ep01" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/29/mysql-server-source-ep01/" class="article-date">
+  <time datetime="2018-04-29T10:46:59.000Z" itemprop="datePublished">2018-04-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/29/mysql-server-source-ep01/">mysql-server源码阅读01 - mysql-server模块与架构</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://github.com/mysql/mysql-server" target="_blank" rel="noopener">mysql-server</a>是当前非常流行的开源<code>RDBMS</code>，在其基础上还有多个开源版本，如<code>Percona</code>、<code>Maria DB</code>等，其中以<code>Percona</code>最为常用，不仅包括对<code>mysql-server</code>的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读<code>mysql-server</code>源码需要参考<a href="https://dev.mysql.com/doc/internals/en/" target="_blank" rel="noopener">MySQL Internals Manual</a>，还可以阅读书籍，如<a href="http://shop.oreilly.com/product/9780596009571.do" target="_blank" rel="noopener">Understanding Mysql Internals</a>。关于<code>mysql-server</code>的编译与调试可以参考<a href="https://stltqhs.github.io/2018/03/31/mysql-compile/" target="_blank" rel="noopener">mysql-server编译与调试</a>。</p>
+<h1 id="mysql-server模块"><a href="#mysql-server模块" class="headerlink" title="mysql-server模块"></a>mysql-server模块</h1><p><img src="/images/mysql-moudles.jpg" alt="mysql-server模块" title="mysql-server模块"></p>
+<h3 id="1-服务器初始化模块"><a href="#1-服务器初始化模块" class="headerlink" title="1.服务器初始化模块"></a>1.服务器初始化模块</h3><p><code>mysqld</code>是<code>mysql-server</code>服务器的二进制文件，可以启动整个<code>mysql-server</code>程序，自然的<code>mysqld</code>就包含一个<code>main</code>方法，是整个程序的入口，该<code>main</code>方法位于<code>sql/mysqld.cc</code>。比较重要的方法有以下几个：</p>
+<ul>
+<li>Init_command_variables()</li>
+<li>Init_thread_environment()</li>
+<li>Init_server_components()</li>
+<li>sql/sql_acl.cc中的grant_init()</li>
+<li>sql/slave.cc中的init_slave()</li>
+<li>get_options()</li>
+</ul>
+<h3 id="2-连接器管理"><a href="#2-连接器管理" class="headerlink" title="2.连接器管理"></a>2.连接器管理</h3><p>监听来自客户端的链接，然后将请求派发给线程管理器，入口方法是<code>sql/mysqld.cc</code>中的<code>handle_connections_sockets()</code>。</p>
+<h3 id="3-线程管理器"><a href="#3-线程管理器" class="headerlink" title="3.线程管理器"></a>3.线程管理器</h3><p>线程管理器负责跟踪线程，确保分配线程，以处理来自客户端的链接。入口方法是<code>sql/mysqld.cc</code>中的create_new_thread()，还有一个特别的方法是<code>start_cached_thread()</code>。</p>
+<h3 id="4-连接线程"><a href="#4-连接线程" class="headerlink" title="4.连接线程"></a>4.连接线程</h3><p>在一个已建立的连接上处理客户端请求，入口方法是<code>sql/sql_parse.cc中</code>的<code>handle_one_connection()</code>。</p>
+<h3 id="5-用户验证"><a href="#5-用户验证" class="headerlink" title="5.用户验证"></a>5.用户验证</h3><p>验证所连接的用户，并对包含该用户层权限信息的结构和变量进行初始化，入口是<code>sql/sql_parse.cc</code>中的<code>check_connection()</code>，有关函数有：</p>
+<ul>
+<li><code>sql/sql_acl.ccc</code>中的<code>all_check_host()</code>和<code>all_getroot()</code></li>
+<li><code>sql/password.cc</code>中的<code>create_random_string()</code></li>
+<li><code>sql/sql_parse.cc</code>中的<code>check_user()</code></li>
+</ul>
+<h3 id="6-访问控制"><a href="#6-访问控制" class="headerlink" title="6.访问控制"></a>6.访问控制</h3><p>acl是Access Control List的缩写，即访问控制列表，所以该模块的代码主要在<code>sql/sql_acl.cc</code>中，有关方法如下：</p>
+<ul>
+<li><code>check_access()</code></li>
+<li>位于<code>sql/sql_parse.cc</code>中的<code>check_table_access()</code></li>
+<li><code>check_grant_column()</code></li>
+<li><code>all_get()</code></li>
+</ul>
+<h3 id="6-解析器"><a href="#6-解析器" class="headerlink" title="6.解析器"></a>6.解析器</h3><p>负责解析查询并生成解析树，入口点是<code>sql/sql_parse.cc</code>中的<code>mysql_parse()</code>，该函数负责执行某些初始化函数，然后调用<code>sql/sql_yacc.cc</code>中的<code>yyparse()</code>，由<code>sql/sql_yacc.yy</code>中的<a href="https://www.gnu.org/software/bison/" target="_blank" rel="noopener">GNU Bison</a>生成。有关文件如下：</p>
+<ul>
+<li><code>sql/gen_lex_hash.cc</code></li>
+<li><code>sql/lex</code></li>
+<li><code>sql/lex_symbol.h</code></li>
+<li><code>sql/lex_hash.h</code></li>
+<li><code>sql/sql_lex.h</code></li>
+<li><code>sql/sql_lex.cc</code></li>
+<li><code>sql/item_*.h</code></li>
+<li><code>sql/item_*.cc</code></li>
+</ul>
+<h3 id="7-命令调度"><a href="#7-命令调度" class="headerlink" title="7.命令调度"></a>7.命令调度</h3><p>负责将请求转发给知道如何处理这些请求的较低层次模块，包括<code>sql/sql_parse.cc</code>中的两个函数：<code>do_command()</code>和<code>dispatch_command()</code>。</p>
+<h3 id="8-查询高速缓存"><a href="#8-查询高速缓存" class="headerlink" title="8.查询高速缓存"></a>8.查询高速缓存</h3><p>缓存查询结果并提供查询缓存功能，有关方法有<code>sql/sql_cache.cc</code>中的：</p>
+<ul>
+<li><code>Query_Cache::store_query()</code></li>
+<li><code>Query_Cache::send_result_to_client()</code></li>
+</ul>
+<h3 id="9-优化器"><a href="#9-优化器" class="headerlink" title="9.优化器"></a>9.优化器</h3><p>负责<code>explain</code>、改写sql等相关执行计划的功能。入口是<code>sql/sql_select.cc</code>中的<code>mysql_select()</code>，相关方法如下：</p>
+<ul>
+<li><code>JOIN::prepare()</code></li>
+<li><code>JOIN::optimize()</code></li>
+<li><code>JOIN::exec()</code></li>
+<li><code>make_join_statistics()</code></li>
+<li><code>find_best_combination()</code></li>
+<li><code>Optimize_cond()</code></li>
+<li><code>sql/opt_range.cc</code>中的<code>SQL_SELECT::test_quick_select()</code></li>
+</ul>
+<h3 id="10-表管理器"><a href="#10-表管理器" class="headerlink" title="10.表管理器"></a>10.表管理器</h3><p>负责创建、读取和修改表定义文件（.frm扩展名）、维护表描述符高速缓存、表管理锁，有关方法如下：</p>
+<ul>
+<li><code>sql/table.cc</code>中的<code>openfrm()</code></li>
+<li><code>sql/unireg.cc</code>中的<code>mysql_create_frm()</code></li>
+<li><code>sql/sql_base.cc</code>中的<code>open_table()</code>、<code>open_tables()</code>、<code>open_ltable()</code></li>
+<li><code>sql/lock.cc</code>中的<code>mysql_lock_table()</code></li>
+</ul>
+<h3 id="11-表修改"><a href="#11-表修改" class="headerlink" title="11.表修改"></a>11.表修改</h3><p>负责表的创建、修改、重命名、移除、更新、插入等操作，相关方法如下：</p>
+<ul>
+<li><code>sql/sql_update.cc</code>中的<code>mysql_update()</code>和<code>mysql_multi_update()</code></li>
+<li><code>sql/sql_insert.cc</code>中的<code>mysql_insert()</code></li>
+<li><code>sql/sql_table.cc</code>中的<code>mysql_create_table()</code>、<code>mysql_alter_table()</code>、<code>mysql_rm_table()</code></li>
+<li><code>sql/sql_delete.cc</code>中的<code>mysql_delete.cc</code></li>
+</ul>
+<h3 id="12-表维护"><a href="#12-表维护" class="headerlink" title="12.表维护"></a>12.表维护</h3><p>负责表维护工作，包括检查、修复、备份、恢复、优化（碎片整理）及解析（更新键分布统计），代码位于<code>sql/sql_table.cc</code>中，核心方法是<code>mysql_admin_table()</code>，其他包括：</p>
+<ul>
+<li><code>mysql_check_table()</code></li>
+<li><code>mysql_repair_table()</code></li>
+<li><code>mysql_backup_table()</code></li>
+<li><code>mysql_restore_table()</code></li>
+<li><code>mysql_optimize_table()</code></li>
+<li><code>mysql_analyze_table()</code></li>
+</ul>
+<h3 id="13-状态报告"><a href="#13-状态报告" class="headerlink" title="13.状态报告"></a>13.状态报告</h3><p>处理<code>show</code>命令，代码在<code>sql/sql_show.cc</code>中，包括：</p>
+<ul>
+<li><code>mysql_list_processes()</code></li>
+<li><code>mysqld_show()</code></li>
+<li><code>mysqld_show_create()</code></li>
+<li><code>mysqld_show_fields()</code></li>
+<li><code>mysqld_show_open_tables()</code></li>
+<li><code>mysqld_show_warnings()</code></li>
+<li><code>sql/slave.cc</code>中的<code>show_master_info()</code></li>
+<li><code>sql/sql_repl.cc</code>中的<code>show_binlog_info()</code></li>
+</ul>
+<h3 id="14-抽象存储引擎接口（表处理器）"><a href="#14-抽象存储引擎接口（表处理器）" class="headerlink" title="14.抽象存储引擎接口（表处理器）"></a>14.抽象存储引擎接口（表处理器）</h3><p>本模块实际上是一个名为<code>handler</code>的抽象类和一个名为<code>handlerton</code>的结构，代码在<code>sql/handler.h</code>和<code>sql/handler.cc</code>中。</p>
+<h3 id="15-表存储引擎的实现（MyISAM、InnoDB、MEMORY）"><a href="#15-表存储引擎的实现（MyISAM、InnoDB、MEMORY）" class="headerlink" title="15.表存储引擎的实现（MyISAM、InnoDB、MEMORY）"></a>15.表存储引擎的实现（MyISAM、InnoDB、MEMORY）</h3><p>每个存储引擎都通过扩展<code>handler</code>类提供的操作接口，相关方法如下：</p>
+<ul>
+<li><code>sql/ha_myisam.h</code>和<code>sql/ha_myisam.cc</code></li>
+<li><code>sql/ha_innodb.h</code>和<code>sql/ha_innodb.cc</code></li>
+<li><code>sql/ha_heap.h</code>和<code>sql/ha_heap.cc</code></li>
+<li><code>sql/ha_ndbcluster.h</code>和<code>sql/ha_ndbcluster.cc</code></li>
+<li><code>myisam/</code></li>
+<li><code>innobase/</code></li>
+<li><code>heap/</code></li>
+<li><code>ndb/</code></li>
+</ul>
+<h3 id="16-日志记录"><a href="#16-日志记录" class="headerlink" title="16.日志记录"></a>16.日志记录</h3><p>负责较高层次的日志维护，代码在<code>sql/log.cc</code>和<code>sql/log_event.cc</code>（二进制日志）</p>
+<h3 id="17-主从复制"><a href="#17-主从复制" class="headerlink" title="17.主从复制"></a>17.主从复制</h3><p>负责主从复制功能，相关代码如下：</p>
+<ul>
+<li><code>sql/sql_repl.cc</code>中的<code>mysql_binlog_send()</code></li>
+<li><code>sql/slave.cc</code>中的<code>handle_slave_io()</code>和<code>handle_slave_sql()</code></li>
+</ul>
+<h3 id="18-客户端-服务端协议API"><a href="#18-客户端-服务端协议API" class="headerlink" title="18.客户端/服务端协议API"></a>18.客户端/服务端协议API</h3><p>负责创建、读取、解析和发送协议包，代码在<code>sql/protocol.cc</code>、<code>sql/protocol.h</code>、<code>sql/net_serv.cc</code>中。相关类有<code>Protocal</code>、<code>Protocol_simple</code>、<code>Protocol_prep</code>、<code>Protocol_cursor</code>，有关函数如下：</p>
+<ul>
+<li><code>sql/net_serv.cc</code>中的<code>my_net_read()</code>和<code>my_net_write()</code></li>
+<li><code>sql/protocol.cc</code>中的<code>net_store_data()</code>和<code>send_ok()</code>和<code>send_error()</code></li>
+</ul>
+<h3 id="19-低层次网络IO-API"><a href="#19-低层次网络IO-API" class="headerlink" title="19.低层次网络IO API"></a>19.低层次网络IO API</h3><p>低层次网络IO API提供了低层次网络IO和SSL会话抽象，代码在<code>vio/</code>目录下，方法都是以<code>vio_</code>开头</p>
+<h3 id="20-核心API"><a href="#20-核心API" class="headerlink" title="20.核心API"></a>20.核心API</h3><p>提供了可移植的文件IO、内存管理、字符串操作、文件系统导航、格式化打印、丰富的数据结构和算法集，代码在<code>mysys/</code>和<code>strings/</code>目录下。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/29/mysql-server-source-ep01/" data-id="cjgkseqjd000d6exyue58msyr" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-an-sql-optimization-for-fault-table" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/04/16/an-sql-optimization-for-fault-table/" class="article-date">
@@ -141,7 +292,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjgkb2bcb00003nxy0xcwdq7s" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/an-sql-optimization-for-fault-table/" data-id="cjgkseqj300016exydv5o8vo2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -181,7 +332,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjgkb2bd2000j3nxyh0fvvnjq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/13/openjdk-introduction/" data-id="cjgkseqjc000a6exyn5ob01y0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -339,7 +490,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjgkb2bcf00013nxy8i3x7n59" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/10/cloud-native-java/" data-id="cjgkseqja00086exyh02b9rbs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -378,7 +529,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjgkb2bcp000d3nxyuqjxz8zg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-scalability/" data-id="cjgkseqje000f6exypx1ndux6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -416,7 +567,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjgkb2bcl00083nxymtifvqpe" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-index/" data-id="cjgkseqj700046exy5obqy7h5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -491,7 +642,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjgkb2bci00043nxyi9o9vxz7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-sql/" data-id="cjgkseqjh000k6exyfoflhck5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -530,7 +681,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjgkb2bcn000a3nxynwolt67e" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/01/mysql-optimization-data-type/" data-id="cjgkseqj800056exyazyajlbg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -589,7 +740,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjgkb2bci00033nxyj6xtgm5v" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/mysql-compile/" data-id="cjgkseqj600036exybqzsx8vx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
@@ -653,7 +804,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjgkb2bd3000k3nxynnngtixz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjgkseqjf000i6exy2053n8sg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
@@ -665,53 +816,12 @@
 
 
   
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/03/31/hello-world/" class="article-date">
-  <time datetime="2018-03-31T03:23:49.000Z" itemprop="datePublished">2018-03-31</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/31/hello-world/">数据库性能分析</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="1-查询锁等待的sql"><a href="#1-查询锁等待的sql" class="headerlink" title="1.查询锁等待的sql"></a>1.查询锁等待的sql</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select requesting_trx_id,requested_lock_id,t1.trx_query as request_trx_query,blocking_trx_id,blocking_lock_id,t2.trx_query as blocking_trx_query from innodb_lock_waits left join innodb_trx t1 on requesting_trx_id=t1.trx_id left join innodb_trx t2 on blocking_trx_id = t2.trx_id\G</span><br></pre></td></tr></table></figure>
-<h1 id="2-profile"><a href="#2-profile" class="headerlink" title="2.profile"></a>2.profile</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">show profiles;</span><br><span class="line">set profiling=1;// 默认关闭</span><br><span class="line">show profile [source] for query 2;</span><br><span class="line">show profile block io,cpu for query 2;</span><br></pre></td></tr></table></figure>
-<p>还可以查询PROFILING视图</p>
-<h1 id="3-查看临时表"><a href="#3-查看临时表" class="headerlink" title="3.查看临时表"></a>3.查看临时表</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; show global status like &apos;%tmp%&apos;;</span><br><span class="line">+-------------------------+---------+</span><br><span class="line">| Variable_name           | Value   |</span><br><span class="line">+-------------------------+---------+</span><br><span class="line">| Created_tmp_disk_tables | 5155228 |</span><br><span class="line">| Created_tmp_files       | 8261    |</span><br><span class="line">| Created_tmp_tables      | 7046409 |</span><br><span class="line">+-------------------------+---------+</span><br><span class="line">Created_tmp_disk_tables / Created_tmp_tables * 100% &lt;= 25%（该值不清楚）</span><br></pre></td></tr></table></figure>
-<h1 id="4-查看innodb状态"><a href="#4-查看innodb状态" class="headerlink" title="4.查看innodb状态"></a>4.查看innodb状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show engine innodb status\G</span><br></pre></td></tr></table></figure>
-<p>可以看到IO情况，事务加锁的情况等。</p>
-<h1 id="5-查看表状态"><a href="#5-查看表状态" class="headerlink" title="5.查看表状态"></a>5.查看表状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">show table status like &apos;t_charging&apos;\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">           Name: t_charging</span><br><span class="line">         Engine: InnoDB</span><br><span class="line">        Version: 10</span><br><span class="line">     Row_format: Compact</span><br><span class="line">           Rows: 5926799</span><br><span class="line"> Avg_row_length: 323</span><br><span class="line">    Data_length: 1917845504</span><br><span class="line">Max_data_length: 0</span><br><span class="line">   Index_length: 1267597312</span><br><span class="line">      Data_free: 0</span><br><span class="line"> Auto_increment: NULL</span><br><span class="line">    Create_time: 2017-09-07 10:49:00</span><br><span class="line">    Update_time: NULL</span><br><span class="line">     Check_time: NULL</span><br><span class="line">      Collation: utf8_general_ci</span><br><span class="line">       Checksum: NULL</span><br><span class="line"> Create_options:</span><br><span class="line">        Comment: 充电记录</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
-<h1 id="6-开启optimizer-trace"><a href="#6-开启optimizer-trace" class="headerlink" title="6.开启optimizer_trace"></a>6.开启optimizer_trace</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">set optimizer_trace=&quot;enabled=on&quot;;</span><br><span class="line">select sum(length(val)) from t where j = 2 and i between 100 and 200;</span><br><span class="line">select * from information_schema.optimizer_trace;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/hello-world/" data-id="cjgkb2bcj00053nxyavgqnyqh" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -756,6 +866,10 @@
       <ul>
         
           <li>
+            <a href="/2018/04/29/mysql-server-source-ep01/">mysql-server源码阅读01 - mysql-server模块与架构</a>
+          </li>
+        
+          <li>
             <a href="/2018/04/16/an-sql-optimization-for-fault-table/">记一次sql优化的过程</a>
           </li>
         
@@ -769,10 +883,6 @@
         
           <li>
             <a href="/2018/04/01/mysql-scalability/">Mysql扩展</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/01/mysql-optimization-index/">Mysql优化 - 索引</a>
           </li>
         
       </ul>
