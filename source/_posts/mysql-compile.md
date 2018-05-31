@@ -63,25 +63,31 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ###  2.生成Xcode工程
 
-执行命令：
+使用cmake的`out-of-source`方式构建，执行命令：
 
 ```sh
-cmake -G 'Xcode' -DCMAKE_BUILD_TYPE=Debug
+mkdir bld_debug
+cd bld_debug
+cmake .. -G 'Xcode' -DCMAKE_BUILD_TYPE=Debug
 ```
 
 ### 3.编译
 
 使用Xcode打开mysql-server工程，自动生成Schema，开始编译。编译完成后，选择mysqld这个Schema，需要编辑该Schema，设置mysqld命令的参数。
 
-1).使用`mysqld --initialize --datadir=<datadir> --lc-messages-dir=<mysql-server-source-dir>/sql/share` 初始化`data`目录，这里`data`目录设置为${PRODUCT_DIR}/data
+1).使用`mysqld --initialize --datadir=<datadir> --lc-messages-dir=<mysql-server-source-dir>/sql/share` 初始化`data`目录，这里`data`目录设置为`${PRODUCT_DIR}/data`；
 
-2).编辑mysqld的Schema，选择左侧的Run，点击右侧的Arguments，设置datadir
+2).编辑mysqld的Schema，选择左侧的Run，点击右侧的Arguments，设置`datadir`；
 
-3).可能还需要设置lc-messages-dir
+3).可能还需要设置`lc-messages-dir`；
 
 此时就可以运行mysqld程序。
 
 ### 4.调试
+
+当以Debug模式编译成功后，运行mysqld时会生成`/tmp/mysqld.trace`，显示`mysqld`的执行细节。
+
+
 
 打开sql模块下的sql_select.cc文件，在handle_query方法下的某一行打下断点，然后在mysql客户端执行`select `就会被断下来。
 
