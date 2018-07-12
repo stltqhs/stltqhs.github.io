@@ -72,6 +72,10 @@ tags: java
 
 #### 6.ReentrantLock,Condition,Semaphore,ReadWriteLock,CoundDownLatch,CyclicBarrier,LockSupport的原理 
 
+#### 7.AtomicInteger和AtomicLong
+
+#### 8.锁的升级和降级
+
 # 五、Servlet
 
 #### 1.HttpServlet生命周期
