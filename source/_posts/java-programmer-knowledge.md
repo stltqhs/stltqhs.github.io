@@ -98,30 +98,229 @@ assert condition : expression // 第二种方式
 
 #### 6.Java8新特性
 
+* Lambda表达式和函数式接口
+
+  Lambda表达式（也称为闭包）可以将函数作为参数传递，语法参考[Lambda Expression](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html#syntax)；函数式接口指只有一个抽象方法的接口，可以使用`@FunctionalInterface`标记函数式接口，让编译器检查接口是否为有效的函数式接口。
+
+  常用的函数接口有：[java.lang.Runnable](https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html)，[java.util.concurrent.Callable](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Callable.html)，[java.util.function.Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)，[java.util.function.Predicate](https://docs.oracle.com/javase/8/docs/api/java/util/function/Predicate.html)，[java.util.function.Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html)，[java.util.function.Consumer](https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html)
+
+* 接口默认方法和静态方法
+
+  接口的默认方法使用`default`修饰并且包括方法体，它不需要接口实现类实现，但可以重写；静态方法的语法同一般类的静态方法。
+
+* 方法引用
+
+  方法引用必须与Lambda表达式结合使用，不能直接将方法引用赋值给一个变量。方法应用的类型有：
+
+类型|示例
+--- | ---
+引用静态方法 | ContainingClasss::staticMethodName
+引用实例方法 | containingObject::instanceMethodName
+引用任意类型的实例方法 | ContainingType::methodName
+引用构造器方法 | ClassName::new
+
+
+* 重复注解
+
+  可使用`@Repeatable`添加多个相同的注解
+
+* 更好的类型推断
+
+  编译器增强了类型推送功能，比如：
+
+  ```java
+  public class Value< T > {
+      public static< T > T defaultValue() { 
+          return null; 
+      }
+      
+      public T getOrDefault( T value, T defaultValue ) {
+          return ( value != null ) ? value : defaultValue;
+      }
+  }
+  
+  public class TypeInference {
+      public static void main(String[] args) {
+          final Value< String > value = new Value<>();
+          value.getOrDefault( "22", Value.defaultValue() ); // 这里不需要强制转换类型，编译器可以推断出来
+      }
+  }
+  ```
+
+  
+
+* 拓宽注解应用场景
+
+  Java8添加了`ElementType.TYPE_USER`和`ElementType.TYPE_PARAMETER`用来描述注解的使用场景。
+
+* 参数名称
+
+  当编译时加上`-parameters`参数时，编译器不会擦除方法的参数名称，此时可以使用`Parameter.getName()`获取参数名称。
+
+* Optional
+
+  为了解决大量的`NullPointerException`添加了一个容器类型`Optional`，其常用方法如下：
+
+方法名 | 说明
+------|----
+isPresent() | 如果`Optional`实例持有一个非空值，该方法返回`true`，否则返回`false`
+orElseGet() | 如果`Optional`实例持有一个空值，则返回lambda表达式的值，如：`name.orElseGet(() -> "anonymous")`
+map()       | map()可以将现有的`Optional`实例转换为新值，如：`name.map(n -> 'Hi ' + n + "!").orElse("Hi Stranger!")`
+orElse()    | `orElse()`与`orElseGet()`类似，区别是`orElse()`参数为一个类型T，`orElseGet()`为一个lambda表达式。
+
+* Streams
+
+  Java8新增了Stream API，可以方便灵活处理容器的`filter`、`map`、`reduce`、`sort`等串行和并行的聚合操作，Stream由流管道组成，一个流管道由源数据（如数组和集合）、中间操作（产生新的stream对象）、终止操作（产生一个结果）详细参考[java.util.stream.Stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html)。
+
+* Date/Time API
+
+  时间可以纳秒级表示。
+
+* Nashorn Javascript引擎
+
+  添加了`jjs`来运行javascript代码文件，也可以使用Java代码运行javascript内容，如：
+
+  ```java
+  ScriptEngineManager manager = new ScriptEngineManager();
+  ScriptEngine engine = manager.getEngineByName( "JavaScript" );
+          
+  System.out.println( engine.getClass().getName() );
+  System.out.println( "Result:" + engine.eval( "function f() { return 1; }; f() + 1;" ) );
+  ```
+
+  
+
+* Base64
+
+  添加了`java.util.Base64`，支持`Base64`功能。
+
+* 并行数组
+
+  可支持并行数组处理，如`Arrays.parallelSetAll()`、`Arrays.parallelSort()`。
+
+* 并发性
+
+  改进了`java.util.concurrent.ConcurrentHashMap`，添加了`java.util.concurrent.locks.StampedLock`替代`java.util.concurrent.locks.ReadWriteLock`。
+
+* JVM新特性
+
+  使用Metaspace替代PermGen Space，
+
+参考：[Java 8的新特性—终极版](https://www.jianshu.com/p/5b800057f2d8)
+
 #### 7.Java序列化与反序列化
+
+Java序列化允许将Java对象保存为一组字节，之后可以读取这组字节组建一个新的对象（该操作为反序列化），对象序列化不会关注类中的静态变量，被`transient`修饰的变量不会被序列化存储。在RMI和RPC中经常使用到Java序列化和反序列化。
+
+
+
+只要类实现了`java.io.Serializable`接口时，其对象就可以序列化，需要用到的流对象是`java.io.ObjectInputStream`（反序列化）和`java.io.ObjectOutputStream`（序列化）。
+
+
+
+虚拟机是否允许反序列化，不仅取决于类路径和功能代码是否一致，一个非常重要的一点是两个类的序列化 ID 是否一致（就是 `private static final long serialVersionUID`）。
+
+
+
+参考：[深入分析Java的序列化与反序列化](http://www.hollischuang.com/archives/1140)，[java序列化和反序列化](https://www.jianshu.com/p/5a85011de960)
 
 #### 8.反射
 
+反射机制是程序可以在运行时获取类型或者实例的字段和方法，然后进行操作。通过反射的方式可以获取对象字段的值，也可以使用`sun.misc.Unsafe`来快速读取对象的字段值。
+
+
+
+参考：[深入分析Java的序列化与反序列化](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)
+
 #### 9.Statement和PreparedStatement的区别，如何防止SQL注入
+
+JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedStatement`、`CallableStatement`，描述如下表：
+
+类名 | 作用
+----|----
+Statement | 通用查询
+PreparedStatemnt | 预编译语句查询，可以解决SQL注入问题，由于是预编译，所以可以减少数据库对SQL代码的解析操作，提高效率
+CallableStatement | 存储过程查询
+
+参考：[JDBC为什么要使用PreparedStatement而不是Statement](http://www.importnew.com/5006.html)
 
 #### 10.Java命令
 
 * java
+
+  启动JVM运行Java字节码的工具；
+
 * javac
+
+  编译Java代码的工具，或者称为java编译器（javac就是java compiler的缩写）；
+
 * jar
+
+  操作jar文件的工具；
+
 * jdb
+
+  java调试器工具，作用和用法与gnu的gdb类型；
+
 * javah
+
+  开发JNI时使用的工具，它可以根据Java代码声明的`native`方法自动生成C的头文件；
+
 * javap
+
+  java字节码反编译工具；
+
 * jps
+
+  Java Virtual Machine Process Status Tool，用来查看java虚拟机进程状态；
+
+* jjs
+
+  运行javascript代码的工具；
+
+* jdeps
+
+  分析java依赖的工具；
+
 * jinfo
+
+  查看JVM配置信息的工具；
+
 * jstack
+
+  查看JVM线程栈工具；
+
 * jmap
+
+  导出JVM内存的工具；
+
 * jhat
+
+  分析jmap导出的文件的工具；
+
 * jconsole
+
+  查看虚拟机内存、线程等信息的工具；
+
 * jvisualvm
+
+  jconsole的增强工具；
+
 * javadoc
+
+  生成java api文档的工具；
+
 * keytool
+
+  操作RSA或者证书相关的工具；
+
 * rmiregistry
+
+  RMI相关工具。
+
+
+
+参考：[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)
 
 # 二、集合类 
 
@@ -196,6 +395,8 @@ assert condition : expression // 第二种方式
 #### 3.引用计数器和GC root 
 
 #### 4.垃圾收集方法 
+
+参考：[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)
 
 #### 5.内存泄漏 
 
