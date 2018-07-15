@@ -230,7 +230,7 @@ Java序列化允许将Java对象保存为一组字节，之后可以读取这组
 
 
 
-参考：[深入分析Java的序列化与反序列化](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)
+参考：[深入解析Java反射（1） - 基础](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)
 
 #### 9.Statement和PreparedStatement的区别，如何防止SQL注入
 
@@ -322,15 +322,159 @@ CallableStatement | 存储过程查询
 
 参考：[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)
 
-# 二、集合类 
+# 二、容器类 
 
-#### 1.HashMap，TreeMap，Hashtable的实现方式 
+#### 1.HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式 
+
+* HashMap
+
+  HashMap由数组和链表组成，元素的类型是Map.Entry，其`table[]`字段就是数组类型，而Map.Entry.next字段组成链表。使用链表的原因是存在hash碰撞，即不同key计算出来的hash值一样。HashMap不是线程安全的，也不保证元素插入的顺序。HashMap可以接受`null`键。
+
+  
+
+  当调用`HashMap.put()`方法时，会先判断`key`是否为`null`，如果是，`value`需要放在`table[0]`的链表中。如果`key`已经存在，替换旧值，否则放在链表头部（代码：`table[indexFor(hash,table.length)] = new Entry<>(hash, key, value, e);size++`）。
+
+  
+
+  当调用`HashMap.get()`方法时，根据`key`的hash值，通过`indexFor(hash,table.length)`计算索引位置（如果key为`null`，索引位置是0），从链表头部开始搜索，当元素e与`key`满足：`e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))`时返回e.value，否则通过`e.next`获取下一个元素继续比较。
+
+  
+
+  每次调用`addEntry`添加一个新元素时，都会通过`(size >= threshold) && (null != table[bucketIndex])`（其中`threshold = (int) Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + 1);`）来判断是否需要扩容，如果需要，则调用`resize(2 * table.length)`创建一个新的table，大小为原来的两倍，通过`transfer`方法将旧数据移动到新的table上来，此时会重新计算这些元素的索引位置，称为重hash。
+
+  
+
+  当构造一个HashMap时可以指定table数组大小（默认为16），但HashMap要求table数组实际大小必须是2的幂次，即必须是偶数，而不是奇数，原因是计算hash索引的`indexFor()`方法使用的是位运算，而不是模运算，代码是`h & (length-1)`。当length为偶数时，length-1就是奇数，最低位恒为1，与h按位与运算后，值可以是偶数，也可以是奇数。而当length为奇数时length-1就是偶数，最低位恒为0，与h按位与运算后，值是偶数，不可能存在奇数的可能，此时碰撞的概率增加。
+
+  
+
+  最坏情况下，所有的key通过`indexFor()`计算的值都相同，此时HashMap退化成链表，时间复杂度从O(1)提高到O(n)，Java8对此进行优化，将最坏情况下的时间复杂度降低到O(logn)。原理是当链表长度大于TREEIFY_THRESHOLD时（默认为8），会将链表转换为二叉树，此时查找时间复杂度就是O(logn)。
+
+  
+
+  参考：[HashMap 的实现原理](http://wiki.jikexueyuan.com/project/java-collection/hashmap.html)，[Java 8：HashMap的性能提升](http://www.importnew.com/14417.html)
+
+* LinkedHashMap
+
+  LinkedHashMap解决HashMap不保证插入顺序的问题。实现方式是在HashMap的基础上添加一个双向链表（`Entry.after`和`Entry.before`组成双向链表），用来记录插入顺序。LinkedHashMap与HashMap一样可以接受`null`键。
+
+  
+
+  `LinkedHashMap.put`基本与`HashMap.put`操作一致，只是`LinkedHashMap.put`多了一个将新元素添加到双向链表的尾部（`Entry.addBefore(header)`），如果不是新元素，则调用`Entry.recordAccess()`方法记录访问操作（如果`accessOrder`为`false`则什么也不做，默认为`false`）。
+
+  
+
+  `LinkedHashMap.get`基本与`HashMap.get`操作一致，如果能找到元素，则调用`Entry.recordAccess`方法记录访问操作。
+
+  
+
+  `accessOrder`可以用来控制是按照插入顺序还是访问顺序迭代元素，默认是插入顺序，当`accessOrder`为`true`时表示按照访问顺序迭代元素，此时`Entry.recordAcess()`的操作就是将元素添加到双向链表的尾部，表示该元素刚刚被访问过。在`addEntry`方法中添加一个新元素时，会调用`removeEldestEntry(header.after)`来判断是否进行删除长时间未被访问的记录，如果是则调用`removeEntryForKey(header.after.key)`删除长时间未被访问的记录。不过`removeEldestEntry()`默认返回`false`，该方法可以被重写，用来实现简单的`LRU`算法。
+
+  
+
+  `LinkedHashMap.resize()`与`HashMap.resize()`一致，但是`LinkedHashMap.transfer()`重写了`HashMap.transfer`方法，重hash时直接遍历双向链表即可。
+
+  
+
+  参考：[Map 综述（二）：彻头彻尾理解 LinkedHashMap](https://blog.csdn.net/justloveyou_/article/details/71713781)
+
+* TreeMap
+
+  TreeMap按照key的顺序排序存储，使用的数据结构时“红黑树”。由于是按照key的顺序排序，所以如果没有通过构造函数指定`Comparator`时，key就需要实现`Comparable`接口。TreeMap不接受`null`键。
+
+  
+
+  当调用`TreeMap.put()`时，以跟节点开始寻找与key相等的节点，如果找到，设置新值，如果不存在，添加新节点，调整树结构。
+
+  参考：[Java提高篇（二七）-----TreeMap](https://blog.csdn.net/chenssy/article/details/26668941)
+
+* Hashtable
+
+  Hashtable与HashMap基本一样，出来Hashtable不接受`null`键也不接受`null`值，且是线程安全的（因为put和get方法都是同步方法）。
+
+  
+
+  参考：[Map 综述（四）：彻头彻尾理解 HashTable](https://blog.csdn.net/justloveyou_/article/details/72862373)
 
 #### 2.ArrayList和LinkedList实现方式以及SubList实现方式 
 
+* ArrayList
+
+  ArrayList是一个动态数组实现的线性表，其容量可以自动增长，新容量为`(原始容量*3)/2 + 1`。`elementData`是用来存在添加的元素，`size`记录元素个数。ArrayList查找元素使用`indexOf(E)`，原理就是遍历所有元素，效率低下。由于其为数组，可以使用索引快速访问（实现了`RandomAccess`接口）。当删除元素时，需要将后面的元素全部向前移动，效率低下。ArrayList不是线程安全的。
+
+  
+
+  参考：[Java 集合系列03之 ArrayList详细介绍(源码解析)和使用示例](https://www.cnblogs.com/skywang12345/p/3308556.html)
+
+* CopyOnWriteArrayList
+
+  CopyOnWriteArrayList是线程安全的ArrayList，通过“写时复制”来提高“读多写少”的并发操作场景。每次对`array`（定义为`private volatile transient Object[] array;`）修改时，首先获取独占锁（`ReentrantLock`），复制数组，新数组的大小为`len+1`，然后赋值给`array`，最后释放锁。它的迭代器也是通过将`array`赋值给`snopshot`，然后迭代`snopshot`的内容，而且`snopshot`被定义为`final`类型。迭代器不支持`remove`操作，或者说所有修改操作都不支持。
+
+  
+
+  参考：[Java 7之多线程并发容器 - CopyOnWriteArrayList](https://blog.csdn.net/mazhimazh/article/details/19210547)
+
+* LinkedList
+
+  LinkedList是一个双向链表实现的线性表。使用索引访问时需要从header开始查找索引位置，效率低下。插入元素时只需要修改元素`next`和`previous`指针即可，不需要移动元素，效率高。
+
+  
+
+  参考：[LinkedList - Java提高篇](http://wiki.jikexueyuan.com/project/java-enhancement/java-twentytwo.html)
+
+* ArrayList.subList和Arrays.asList(T...a)
+
+  ArrayList.subList的返回值类型是ArrayList内部类SubList，该对象表示ArrayList的一个视图，所以修改SubList会影响到ArrayList。如果ArrayList被修改（`modCount`值改变）时，SubList就无效了，因为SubList记录的`modCount`和ArrayList的`modCount`不一致，任何操作都会报`ConcurrentModificationException`。
+
+  
+
+  Arrays.asList使用适配器模式构建一个Arrays.ArrayList类型的数据，不支持添加、删除调整，原数组的修改将会影响到该Arrays.ArrayList。
+
+  
+
+  参考：[使用ArrayList.subList()和Arrays.asList()方法要注意的地方](https://www.jianshu.com/p/d2a69f7dc563)
+
+* Vector
+
+  与ArrayList基本一致，但是Vector是线程安全的（方法为`synchronized`），而且扩容时新容量的大小与`capacityIncrement`有关，如果`capacityIncrement`大于0，则新容量的大小为`oldCapacity + capacityIncrement`，否则为`oldCapacity * 2`。
+
+  
+
+  参考：[Java 集合系列06之 Vector详细介绍(源码解析)和使用示例](https://www.cnblogs.com/skywang12345/p/3308833.html)
+
 #### 3.HashSet实现方式 
 
-#### 4.Set,Queue,List,Map,Stack,Vector 
+HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, PRESENT)`来实现的，map就是HashMap类型，PRESENT为一个Object类型，用来作为HashMap的值对象。
+
+
+
+参考：[HashSet 的实现原理](http://wiki.jikexueyuan.com/project/java-collection/hashset.html)
+
+#### 4.Set,Queue,List,Map,Stack 
+
+* Set
+
+  集合，不存在重复元素。当`e1.equals(e2)`时表示e1和e2重复。最多只有一个`null`元素。
+
+* Queue
+
+  FIFO队列，`offer(e)`添加元素，`poll()`移除元素，`peek()`查看元素。
+
+* Deque
+
+  “double ended queue”即Deque，表示双端队列，可以在线性表两端进行添加和删除元素。
+
+* List
+
+  线性表，可以存在重复的元素。
+
+* Map
+
+  Key-value pair
+
+* Stack
+
+  LIFO队列
 
 #### 5.ConcurrentHashMap的实现方式 
 
@@ -352,9 +496,7 @@ CallableStatement | 存储过程查询
 
 #### 5.ThreadLocal实现方式 
 
-#### 6.多种方式实现生产者和消费者 
-
-#### 7.中断机制 
+#### 6.中断机制 
 
 # 四、并发 
 
@@ -368,11 +510,13 @@ CallableStatement | 存储过程查询
 
 #### 5.CAS 
 
-#### 6.ReentrantLock,Condition,Semaphore,ReadWriteLock,CoundDownLatch,CyclicBarrier,LockSupport的原理 
+#### 6.ReentrantLock,Condition,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,LockSupport的原理 
 
 #### 7.AtomicInteger和AtomicLong
 
 #### 8.锁的升级和降级
+
+#### 9.多种方式实现生产者和消费者
 
 # 五、Servlet
 
@@ -490,9 +634,17 @@ CallableStatement | 存储过程查询
 
 #### 6.Spring声明性事务实现方式
 
-# 十四、算法 
+# 十四、算法和数据结构 
 
-#### 1.哪些排序算法 
+[Leetcode](https://leetcode.com/)有各种经典算法的代码，也是算法题库。
+
+#### 1.排序算法 
+
+#### 2.查找算法
+
+参考：[Data Structure Visualizations](https://www.cs.usfca.edu/~galles/visualization/Algorithms.html)
+
+#### 3.LRU
 
 # 十五、架构
 
