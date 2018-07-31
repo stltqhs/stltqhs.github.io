@@ -126,7 +126,7 @@ assert condition : expression // 第二种方式
 
 * 更好的类型推断
 
-  编译器增强了类型推送功能，比如：
+  编译器增强了类型推断功能，比如：
 
   ```java
   public class Value< T > {
@@ -322,6 +322,18 @@ CallableStatement | 存储过程查询
 
 参考：[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)
 
+#### 11.NoClassDefFoundError和ClassNotFoundException
+
+`NoClassDefFoundError`和`ClassNotFoundException`都是由于在`CLASSPATH`下找不到对应的类而引起的，通常是缺少对应的jar包或者jar包冲突导致，具体如下：
+
+* `ClassNotFoundException`是在代码中显示调用加载类的方法导致，如`Class.forName`、`ClassLoader.findSystemClass()`和`ClassLoader.loadClass()`等；
+
+* `NoClassDefFoundError`是JVM链接时找不到类时抛出的错误，如`new`一个实例或者调用静态方法等。
+
+  
+
+  参考：[NoClassDefFoundError和ClassNotFoundException的不同](https://www.jianshu.com/p/93d0db07d2e3)
+
 # 二、容器类 
 
 #### 1.HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式 
@@ -478,159 +490,259 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
 #### 5.ConcurrentHashMap的实现方式 
 
-#### 6.Collection.synchronized实现方式 
+ConcurrentHashMap使用`锁分段`的方式来实现高效的HashMap，使用`不变性`和`volatile`来减少加锁操作，提高线程并发。
+
+ConcurrentHashMap包含n个segment（segment是ReentrantLock的子类，初始时n为16，且n为2的幂次），segment的3个重要成员变量定义如下：
+
+```java
+transient volatile int count;
+transient int modCount;
+transient int threshold;
+transient volatile HashEntry<K,V>[] table;
+final float loadFactor;
+```
+
+每个segment由HashEntry组成，HashEntry的3个重要的成员变量的声明如下：
+
+```java
+final K key;
+final int hash;
+volatile V value;
+final HashEntry<K,V> next;
+```
+
+ConcurrentHashMap数据结构如下图：
+![ConcurrentHashMap结构](http://static.zybuluo.com/Rico123/zaqxg0nmu1qq79lm6wpwss2f/ConcurrentHashMap.jpg "ConcurrentHashMap结构")
+
+由于`HashEntry.next`是`final`类型，链表的`put`操作需要在表头添加一个新元素，该操作不影响读取或者对链表的遍历操作，因此读取可以不用加锁（除了`value`为`null`时需要加锁再读一次），`remove`操作是复制被删除节点的前驱节点构造新链表，同时将被删除节点的`next`值复制到该链表的尾节点的`next`，该操作不影响读取或者对链表的遍历操作。对于`size()`操作，先使用不加锁的方式计算每个segment的count，同时比较计算前和计算后的`modCount`值是否改变，如果改变，表示计算期间存在修改情况，此时再加锁计算。
+
+参考：[探索 ConcurrentHashMap 高并发性的实现机制](https://www.ibm.com/developerworks/cn/java/java-lo-concurrenthashmap/index.html)，[Map 综述（三）：彻头彻尾理解 ConcurrentHashMap](https://blog.csdn.net/justloveyou_/article/details/72783008)
+
+#### 6.Collections.synchronizedMap实现方式 
+
+使用`装饰模式`封装相关方法，且方法为同步方法。相关代码如下：
+
+```java
+public static <K,V> Map<K,V> synchronizedMap(Map<K,V> m) {
+        return new SynchronizedMap<>(m);
+}
+
+// SyncrhonizedMap
+private static class SynchronizedMap<K,V>
+        implements Map<K,V>, Serializable {
+       private static final long serialVersionUID = 1978198479659022715L;
+
+        private final Map<K,V> m;     // Backing Map
+        final Object      mutex;        // Object on which to synchronize
+
+        SynchronizedMap(Map<K,V> m) {
+            if (m==null)
+                throw new NullPointerException();
+            this.m = m;
+            mutex = this;
+        }
+
+        SynchronizedMap(Map<K,V> m, Object mutex) {
+            this.m = m;
+            this.mutex = mutex;
+        }
+
+        public int size() {
+            synchronized (mutex) {return m.size();}
+        }
+        /* ... */
+}
+```
+
+
+
+参考：[Wrapper Implementations](https://docs.oracle.com/javase/tutorial/collections/implementations/wrapper.html)
 
 #### 7.hashCode()和equals()方法的作用 
 
-#### 8.Arrays.sort()和Collections.sort()的实现方式
+hashCode和equals方法在Object类中定义，其中hashCode方法为native方法，equals方法定义如下：
+
+```java
+public boolean equals(Object obj) {
+        return (this == obj);
+    }
+```
+
+在不重写equals方法时，equals和==操作符是等价的。
+
+hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时hashCode和equals方法存在关联，因为查找元素时先获得对象的hashCode，定位hash索引，然后调用equals方法查找对象。
+
+重写equals方法需要遵循如下要求：
+
+- **自反性**（reflexive）。对于任意不为`null`的引用值x，`x.equals(x)`一定是`true`。
+- **对称性**（symmetric）。对于任意不为`null`的引用值`x`和`y`，当且仅当`x.equals(y)`是`true`时，`y.equals(x)`也是`true`。
+- **传递性**（transitive）。对于任意不为`null`的引用值`x`、`y`和`z`，如果`x.equals(y)`是`true`，同时`y.equals(z)`是`true`，那么`x.equals(z)`一定是`true`。
+- **一致性**（consistent）。对于任意不为`null`的引用值`x`和`y`，如果用于equals比较的对象信息没有被修改的话，多次调用时`x.equals(y)`要么一致地返回`true`要么一致地返回`false`。
+- 对于任意不为`null`的引用值`x`，`x.equals(null)`返回`false`。
+
+重写hashCode方法时需要遵循如下要求：
+
+- 在一个Java应用的执行期间，如果一个对象提供给equals做比较的信息没有被修改的话，该对象多次调用`hashCode()`方法，该方法必须始终如一返回同一个integer。
+
+- 如果两个对象根据`equals(Object)`方法是相等的，那么调用二者各自的`hashCode()`方法必须产生同一个integer结果。
+
+  
+
+  基于上述两个性质，一般是重写equals方法就要重写hashCode方法。
+
+参考：[Java hashCode() 和 equals()的若干问题解答](https://www.cnblogs.com/skywang12345/p/3324958.html)，[Java提高篇——equals()与hashCode()方法详解](https://www.cnblogs.com/Qian123/p/5703507.html)
+
+#### 8.Arrays.sort()和Collections.sort()的实现方式@2018-07-31
 
 # 三、线程 
 
 #### 1.线程生命周期 
 
-#### 2.wait()、sleep()、notify()区别 
+#### 2.wait()、sleep()、notify()区别@2018-08-01 
 
 #### 3.ThreadPoolExecutor实现方式 
 
-#### 4.线程池原理及如何使用线程池 
+#### 4.线程池原理及如何使用线程池@2018-08-02 
 
 #### 5.ThreadLocal实现方式 
 
-#### 6.中断机制 
+#### 6.中断机制@2018-08-03 
 
 # 四、并发 
 
 #### 1.happens-before原则 
 
-#### 2.volatile作用 
+#### 2.volatile作用@2018-08-04 
 
 #### 3.AQS原理 
 
-#### 4.synchronized和lock的区别 
+#### 4.synchronized和lock的区别@2018-08-05 
 
 #### 5.CAS 
 
-#### 6.ReentrantLock,Condition,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,LockSupport的原理 
+#### 6.ReentrantLock,Condition,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,LockSupport的原理@2018-08-06 
 
 #### 7.AtomicInteger和AtomicLong
 
-#### 8.锁的升级和降级
+#### 8.锁的升级和降级@2018-08-07
 
 #### 9.多种方式实现生产者和消费者
 
 # 五、Servlet
 
-#### 1.HttpServlet生命周期
+#### 1.HttpServlet生命周期@2018-08-08
 
 #### 2.Servlet工作原理
 
-#### 3.Session和Cookie的区别
+#### 3.Session和Cookie的区别@2018-08-09
 
 #### 4.Tomcat架构
 
-#### 5.Servlet3.0的异步请求
+#### 5.Servlet3.0的异步请求@2018-08-010
 
 # 六、jvm 
 
 #### 1.类加载机制和双亲委派模型 
 
-#### 2.JVM内存模型和运行时数据区 
+#### 2.JVM内存模型和运行时数据区@2018-08-11 
 
 #### 3.引用计数器和GC root 
 
-#### 4.垃圾收集方法 
+#### 4.垃圾收集方法@2018-08-12 
 
 参考：[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)
 
 #### 5.内存泄漏 
 
-#### 6.调优方法 
+#### 6.调优方法@2018-08-13 
 
 # 七、mysql 
 
 #### 1.事务隔离级别 
 
-#### 2.三范式 
+#### 2.三范式@2018-08-14 
 
 #### 3.mysql有哪些索引，区别是什么 
 
-#### 4.悲观锁和乐观锁 
+#### 4.悲观锁和乐观锁@2018-08-15 
 
 #### 5.分布式原理 
 
-#### 6.mysql有哪些锁 
+#### 6.mysql有哪些锁@2018-08-16 
 
 #### 7.mysql实现B+树的原理 
 
-#### 8.数据一致性
+#### 8.数据一致性@2018-08-17
 
 #### 9.mysql的innodb、myisam和memory引擎的优缺点
 
-#### 10.什么是nosql，与sql的优缺点
+#### 10.什么是nosql，与sql的优缺点@2018-08-18
 
 #### 11.TPS压测
 
-#### 12.Page Split
+#### 12.Page Split@2018-08-19
 
 #### 13.SQL优化
 
 # 八、redis 
 
-#### 1.哨兵模式和主从数据同步 
+#### 1.哨兵模式和主从数据同步@2018-08-20 
 
 #### 2.集群原理 
 
-#### 3.redis与memcached区别 
+#### 3.redis与memcached区别@2018-08-21 
 
 #### 4.过期策略 
 
-#### 5.如何保证一致性 
+#### 5.如何保证一致性@2018-08-22 
 
 #### 6.缓存热点与击穿 
 
-#### 7.redis内存淘汰机制 
+#### 7.redis内存淘汰机制@2018-08-23 
 
 # 九、mybatis 
 
 #### 1.mybaits一级缓存和二级缓存
 
-#### 2.与hibernate优缺点
+#### 2.与hibernate优缺点@2018-08-24
 
 #### 3.mybatis工作流程
 
 # 十、MessageQueue 
 
-#### 1.重复消费问题 
+#### 1.重复消费问题@2018-08-25 
 
 #### 2.顺序问题
 
 # 十一、设计模式 
 
-#### 1.有哪些原则 
+#### 1.有哪些原则@2018-08-26 
 
 #### 2.常用设计模式
 
+参考：[Software design pattern](https://en.wikipedia.org/wiki/Software_design_pattern)
+
 # 十二、网络 
 
-#### 1.TCP和UDP的区别 
+#### 1.TCP和UDP的区别@2018-08-27 
 
 #### 2.TCP三次握手 
 
-#### 3.IO多路复用 
+#### 3.IO多路复用@2018-08-28 
 
 #### 4.NIO 
 
 # 十三、Spring 
 
-#### 1.IoC和AOP 
+#### 1.IoC和AOP@2018-08-29 
 
 #### 2.Spring Boot的条件’加载’ 
 
-#### 3.Spring容器启动过程 
+#### 3.Spring容器启动过程@2018-08-30 
 
 #### 4.Spring bean生命周期 
 
-#### 5.Spring MVC生命周期 
+#### 5.Spring MVC生命周期@2018-08-31 
 
 #### 6.Spring声明性事务实现方式
 
@@ -638,18 +750,18 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
 [Leetcode](https://leetcode.com/)有各种经典算法的代码，也是算法题库。
 
-#### 1.排序算法 
+#### 1.排序算法@2018-09-01 
 
 #### 2.查找算法
 
 参考：[Data Structure Visualizations](https://www.cs.usfca.edu/~galles/visualization/Algorithms.html)
 
-#### 3.LRU
+#### 3.LRU@2018-09-02
 
 # 十五、架构
 
 #### 1.分布式锁的实现方式
 
-#### 2.流量控制
+#### 2.流量控制@2018-09-03
 
-#### 3.全文搜索引擎
+#### 3.全文搜索引擎@2018-09-04
