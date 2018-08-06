@@ -4,6 +4,37 @@ date: 2018-07-12 21:16:30
 tags: java
 ---
 
+# 目录
+
+### [基础](#一、基础)
+
+- [Throwable，Error，Exception，RuntimeException](#1-Throwable，Error，Exception，RuntimeException)
+- [对象克隆](#2-对象克隆)
+- [强引用与弱引用](#3-强引用与弱引用)
+- [断言](#4-断言)
+- [静态初始化和实例初始化](#5-静态初始化和实例初始化)
+- [Java8新特性](#6-Java8新特性)
+- [Java序列化与反序列化](#7-Java序列化与反序列化)
+- [反射](#8-反射)
+- [Statement和PreparedStatement的区别，如何防止SQL注入](#9-Statement和PreparedStatement的区别，如何防止SQL注入)
+- [Java命令](#10-Java命令)
+- [NoClassDefFoundError和ClassNotFoundException](#11-NoClassDefFoundError和ClassNotFoundException)
+
+### [容器类](#二、容器类)
+
+- [HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式](#1-HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式)
+- [ArrayList和LinkedList实现方式以及SubList实现方式](#2-ArrayList和LinkedList实现方式以及SubList实现方式)
+- [HashSet实现方式](#3-HashSet实现方式)
+- [Set,Queue,List,Map,Stack](#4-Set-Queue-List-Map-Stack)
+- [ConcurrentHashMap的实现方式](#5-ConcurrentHashMap的实现方式)
+- [Collections.synchronizedMap实现方式](#6-Collections-synchronizedMap实现方式)
+- [hashCode()和equals()方法的作用](#7-hashCode-和equals-方法的作用)
+- [Arrays.sort()和Collections.sort()的实现方式](#8-Arrays-sort-和Collections-sort-的实现方式)
+### [线程](#三、线程)
+- [线程生命周期](#1-线程生命周期)
+- [wait()、sleep()、notify()区别](#2-wait-、sleep-、notify-区别)
+- [ThreadPoolExecutor原理](#3-ThreadPoolExecutor原理)
+
 # 一、基础 
 
 ### 1.Throwable，Error，Exception，RuntimeException
@@ -592,21 +623,215 @@ hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时has
 
 参考：[Java hashCode() 和 equals()的若干问题解答](https://www.cnblogs.com/skywang12345/p/3324958.html)，[Java提高篇——equals()与hashCode()方法详解](https://www.cnblogs.com/Qian123/p/5703507.html)
 
-#### 8.Arrays.sort()和Collections.sort()的实现方式@2018-07-31
+#### 8.Arrays.sort()和Collections.sort()的实现方式
+
+`Arrays.sort(int[])`排序算法使用`DualPivotQuicksort.sort`方法，称为“双轴快速排序“，该方法会根据数组长度和数值的连续性来使用不同的排序算法。如果数组长度大于等于286且连续性好的话，就用归并排序，如果大于等于286且连续性不好的话就用双轴快速排序。如果长度小于286且大于等于47的话就用双轴快速排序，如果长度小于47的话就用插入排序。
+
+`Collections.sort`内部会使用`Arrays.sort(T[] a, Comparator<? super T> c)`方法排序，方法定义如下：
+
+```java
+public static <T> void sort(T[] a, Comparator<? super T> c) {
+    if (c == null) {
+        sort(a);
+    } else {
+        if (LegacyMergeSort.userRequested)
+            legacyMergeSort(a, c);
+        else
+            TimSort.sort(a, 0, a.length, c, null, 0, 0);
+    }
+}
+```
+
+该方法内部使用了TimSort排序（如果`LegacyMergeSort.userRequested`为`true`，则使用旧版的归并排序）。Timsort是结合了合并排序（merge sort）和插入排序（insertion sort）而得出的排序算法。
+
+
+
+注意：如果没有实现好`Comparator`接口时可能存在问题，详情见[JDK7中的排序算法详解--Collections.sort和Arrays.sort](http://blog.sina.com.cn/s/blog_8e6f1b330101h7fa.html)。
+
+参考：[Collections.sort()和Arrays.sort()排序算法选择](https://blog.csdn.net/TimHeath/article/details/68930482)
 
 # 三、线程 
 
 #### 1.线程生命周期 
 
-#### 2.wait()、sleep()、notify()区别@2018-08-01 
+  `Thread.threadStatus`变量记录了线程状态，包括是否处于等待监视锁，是否处于等待`Object.wait()`，可选的值如下：
 
-#### 3.ThreadPoolExecutor实现方式 
+```c++
+// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.h
+enum {
+    JVMTI_THREAD_STATE_ALIVE = 0x0001,
+    JVMTI_THREAD_STATE_TERMINATED = 0x0002,
+    JVMTI_THREAD_STATE_RUNNABLE = 0x0004,
+    JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER = 0x0400,
+    JVMTI_THREAD_STATE_WAITING = 0x0080,
+    JVMTI_THREAD_STATE_WAITING_INDEFINITELY = 0x0010,
+    JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT = 0x0020,
+    JVMTI_THREAD_STATE_SLEEPING = 0x0040,
+    JVMTI_THREAD_STATE_IN_OBJECT_WAIT = 0x0100,
+    JVMTI_THREAD_STATE_PARKED = 0x0200,
+    JVMTI_THREAD_STATE_SUSPENDED = 0x100000,
+    JVMTI_THREAD_STATE_INTERRUPTED = 0x200000,
+    JVMTI_THREAD_STATE_IN_NATIVE = 0x400000,
+    JVMTI_THREAD_STATE_VENDOR_1 = 0x10000000,
+    JVMTI_THREAD_STATE_VENDOR_2 = 0x20000000,
+    JVMTI_THREAD_STATE_VENDOR_3 = 0x40000000
+};
+```
 
-#### 4.线程池原理及如何使用线程池@2018-08-02 
 
-#### 5.ThreadLocal实现方式 
 
-#### 6.中断机制@2018-08-03 
+`Thread.threadStatus`与`Thread.State`的转换规则如下：
+
+```c++
+// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.h
+enum {
+    JVMTI_JAVA_LANG_THREAD_STATE_MASK = JVMTI_THREAD_STATE_TERMINATED | JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_RUNNABLE | JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER | JVMTI_THREAD_STATE_WAITING | JVMTI_THREAD_STATE_WAITING_INDEFINITELY | JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT,
+    JVMTI_JAVA_LANG_THREAD_STATE_NEW = 0,
+    JVMTI_JAVA_LANG_THREAD_STATE_TERMINATED = JVMTI_THREAD_STATE_TERMINATED,
+    JVMTI_JAVA_LANG_THREAD_STATE_RUNNABLE = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_RUNNABLE,
+    JVMTI_JAVA_LANG_THREAD_STATE_BLOCKED = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER,
+    JVMTI_JAVA_LANG_THREAD_STATE_WAITING = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_WAITING | JVMTI_THREAD_STATE_WAITING_INDEFINITELY,
+    JVMTI_JAVA_LANG_THREAD_STATE_TIMED_WAITING = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_WAITING | JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT
+};
+```
+
+
+
+  从上可以看到`Thread.State`定义了六种状态，分别为：
+
+* New（新建）
+
+  当构造一个线程时（如`new Thread()`），则该线程的状态是`New`，此时`Thread.threadStatus = 0`，当调用`Thread.getState()`时返回`Thread.State.NEW`；
+
+* Runnable（运行）
+
+  该状态线的线程可能正在执行或者正在等待线程调度器选中，一般会将该状态拆分为Ready（就绪）和Running（运行），而Ready状态到Runnable状态是操作系统控制；
+
+* Waiting（无限期等待）
+
+  线程处于无限期等待某一个条件触发，处于该状态的原因是调用了`Object.wait()`、`Thread.join()`、`LockSupport.park()`方法。
+
+* Timed_Waiting（限期等待）
+
+  线程处于限期等待，处于该状态的原因是调用了`Object.wait(long)`、`Thread.join(long)`、`LockSupport.parkNanos(long)`、`LockSupport.parkUntil(long)`。
+
+* Blocked（阻塞）
+
+  线程正在等待监视锁以进入到`synchronized`方法和语句快；
+
+* Terminated（结束）
+
+  线程`run()`方法或者主线程`main()`方法结束或者抛出未捕获的异常时；
+
+  
+
+某些资料或者书籍会将Waiting、Timed_Waiting以及Blocked合并为一个状态，称为Blocked，即阻塞。
+
+  
+
+下图展示线程状态转换流程。
+
+![线程状态机](https://i.stack.imgur.com/FTHOR.png "线程状态机")
+
+参考：[Java多线程学习(三)---线程的生命周期](https://www.cnblogs.com/sunddenly/p/4106562.html)，[一张图让你看懂JAVA线程间的状态转换](https://my.oschina.net/mingdongcheng/blog/139263)，[对Java线程概念的理解](https://blog.csdn.net/fuzhongmin05/article/details/71425191)，[visualvm thread states](https://stackoverflow.com/questions/27406200/visualvm-thread-states)
+
+#### 2.wait()、sleep()、notify()区别 
+
+* wait
+
+  使线程处于Waiting或者Timed_Waiting，该线程进入wait queue，而且会释放对象的监视锁。使用wait方法时，该线程必须拥有wait对象的监视锁，即wait方法只能放在对象的同步方法或者同步语句块中，如：
+
+  ```java
+  Object mon = ...;
+  synchronized (mon) {
+      mon.wait();
+  }
+  ```
+
+  wait方法是在Object中定义的native方法。
+
+* sleep
+
+  使线程处于Waiting或者Timed_Waiting，但是不会使线程释放监视锁，且该方法为Thread的静态方法；
+
+* notify
+
+  释放该对象的监视锁，从对象的wait queue中唤醒一个线程或者多个线程（此时调用notifyAll方法），被唤醒的线程需要重新获取该对象的监视锁，以进入同步块。使用notify方法时，该线程必须拥有notify对象的监视锁，即notify方法只能放在对象的同步方法或者同步语句块中，如：
+
+  ```java
+  Object mon = ...;
+  synchronized(mon) {
+      mon.notify();
+  }
+  ```
+
+  
+
+参考：[difference between wait and sleep](https://stackoverflow.com/questions/1036754/difference-between-wait-and-sleep)
+
+#### 3.ThreadPoolExecutor原理 
+
+线程的创建和销毁是一个重量级操作，涉及到操作系统底层调用和资源分配问题。操作系统可创建的线程数量有内存限制，即当线程越多消耗的内存越大，且操作系统线程调度的开销也越多。依靠线程池技术可以有较解决这些问题。
+
+
+
+Java提供了两个线程池实现类，分别是ThreadPoolExecutor和ScheduledThreadPoolExecutor，继承关系如下：
+
+```java
+                +-------------------+
+                |     Executor      |
+                +-------------------+
+                          ^
+                          |
+              +-----------+------------+
+              |    ExecutorService     |
+              +------------------------+
+                          ^
+                          |
+             +------------+--------------+
+             |  AbstractExecutorService  |
+             +---------------------------+
+                          ^
+                          |
+         +----------------+-------------------+
+         |                                    |
++--------+-------+                  +---------+----------+
+|  ForkJoinPool  |                  | ThreadPoolExecutor |
++----------------+                  +--------------------+
+                                              ^
+                                              |
+                                +-------------+----------------+       
+                                | ScheduledThreadPoolExecutor  |
+                                +------------------------------+
+```
+
+其中Executor和ExecutorService为接口。
+
+
+
+ThreadPoolExecutor的构造函数如下：
+
+```java
+public ThreadPoolExecutor(int corePoolSize, // 线程池基本大小
+                              int maximumPoolSize, // 线程池最大线程数
+                              long keepAliveTime, // 空闲线程允许存活的时间
+                              TimeUnit unit, // keepAliveTime的时间单位
+                              BlockingQueue<Runnable> workQueue, // 任务队列
+                              ThreadFactory threadFactory, // 线程工厂，用于创建线程
+                              RejectedExecutionHandler handler/*workQueue满时的拒绝策略*/) {
+        // ...
+    }
+```
+
+当调用`ThreadPoolExecutor.execute(Runnable command)`时，先检查`corePoolSize`是否已满，如果不是，创建一个线程执行`command`任务，如果已满，检查`workQueue`是否已满，如果不是，则将`command`加入到`workQueue`中，如果已满，检查`maximumPoolSize`是否已满，如果是，执行拒绝策略，如果不是，创建新线程执行`command`任务。
+
+参考：[线程池的实现原理](https://blog.csdn.net/wzq6578702/article/details/68926320)
+
+#### 4.ThreadLocal实现方式 
+
+#### 5.中断机制@2018-08-03 
+
+#### 6.活跃性
 
 # 四、并发 
 
@@ -636,9 +861,9 @@ hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时has
 
 #### 3.Session和Cookie的区别@2018-08-09
 
-#### 4.Tomcat架构
+#### 4.Servlet3.0的异步请求
 
-#### 5.Servlet3.0的异步请求@2018-08-010
+#### 5.Tomcat架构@2018-08-010
 
 # 六、jvm 
 
@@ -654,7 +879,9 @@ hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时has
 
 #### 5.内存泄漏 
 
-#### 6.调优方法@2018-08-13 
+#### 6.JVM关闭
+
+#### 7.调优方法@2018-08-13 
 
 # 七、mysql 
 
