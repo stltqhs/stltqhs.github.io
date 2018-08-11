@@ -30,10 +30,27 @@ tags: java
 - [Collections.synchronizedMap实现方式](#6-Collections-synchronizedMap实现方式)
 - [hashCode()和equals()方法的作用](#7-hashCode-和equals-方法的作用)
 - [Arrays.sort()和Collections.sort()的实现方式](#8-Arrays-sort-和Collections-sort-的实现方式)
+
 ### [线程](#三、线程)
+
 - [线程生命周期](#1-线程生命周期)
 - [wait()、sleep()、notify()区别](#2-wait-、sleep-、notify-区别)
 - [ThreadPoolExecutor原理](#3-ThreadPoolExecutor原理)
+- [ThreadLocal实现方式](#4-ThreadLocal实现方式)
+- [中断机制](#5-中断机制)
+- [活跃性](#6-活跃性)
+
+### [并发](#四、并发)
+
+- [happens-before原则](#1-happens-before原则)
+- [volatile作用](#2-volatile作用)
+- [CAS](#3-CAS)
+- [AQS原理](#4-AQS原理)
+- [ReentrantLock,Condition,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,LockSupport的原理](#5-ReentrantLock-Condition-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier-LockSupport的原理)
+- [synchronized和lock的区别](#6-synchronized和lock的区别)
+- [AtomicInteger和AtomicLong](#7-AtomicInteger和AtomicLong)
+- [锁的升级和降级](#8-锁的升级和降级)
+- [多种方式实现生产者和消费者](#9-多种方式实现生产者和消费者)
 
 # 一、基础 
 
@@ -825,33 +842,283 @@ public ThreadPoolExecutor(int corePoolSize, // 线程池基本大小
 
 当调用`ThreadPoolExecutor.execute(Runnable command)`时，先检查`corePoolSize`是否已满，如果不是，创建一个线程执行`command`任务，如果已满，检查`workQueue`是否已满，如果不是，则将`command`加入到`workQueue`中，如果已满，检查`maximumPoolSize`是否已满，如果是，执行拒绝策略，如果不是，创建新线程执行`command`任务。
 
+
+
+当创建新线程执行`command`任务时，需要构建一个`Worker`对象，`Worker`的声明如下：
+
+```java
+private final class Worker
+        extends AbstractQueuedSynchronizer
+        implements Runnable {
+        // ...
+        /** Thread this worker is running in.  Null if factory fails. */
+        final Thread thread;
+        /** Initial task to run.  Possibly null. */
+        Runnable firstTask;
+        /** Per-thread task counter */
+        volatile long completedTasks;
+
+        /**
+         * Creates with given first task and thread from ThreadFactory.
+         * @param firstTask the first task (null if none)
+         */
+        Worker(Runnable firstTask) {
+            setState(-1); // inhibit interrupts until runWorker
+            this.firstTask = firstTask;
+            this.thread = getThreadFactory().newThread(this);
+        }
+
+        /** Delegates main run loop to outer runWorker  */
+        public void run() {
+            runWorker(this);
+        }
+        // ..
+        }
+```
+
+`Worker`继承了`AbstractQueuedSynchronizer`，所以`Worker`也具备锁的功能，且`Worker`实现了`Runnable`接口，可以用于创建线程。从`this.thread = getThreadFactory().newThread(this);`可以看到，线程运行时将会执行`Worker`的`run`方法。`runWorker`方法在`ThreadPoolExecutor`中定义，作用是循环的向`workQueue`中取出任务并运行任务（实现`Runnable`接口的任务，执行该任务时直接调用`run`方法即可）。
+
+
+
+`AbstractExecutorService.submit(Callable<T> Task)`用于执行带返回值的任务，该方法内部会执行`new FutureTask<T>(callable)`来构造一个`Runnable`任务，调用`execute`方法执行。`FutureTask`同时实现了`Runnable`和`Future`接口，其中`Future`接口表示一个异步计算的结果。
+
+
+
+线程池线程数量的规划需要根据任务的性质决定。如果是CPU密集型任务，应配置尽可能小的线程数，一般配置Ncpu+1个线程的线程池；如果是IO密集型任务，由于IO密集型任务线程并不是一直在执行任务，则应配置尽可能多的线程，如2*Ncpu。混合型的任务，如果可以拆分，将其拆分成一个CPU密集型任务  和一个IO密集型任务，只要这两个任务执行的时间相差不是太大，那么分解后执行的吞吐量将高于串行执行的吞吐量。如果这两个任务执行时间相差太大，则没必要进行分解。
+
 参考：[线程池的实现原理](https://blog.csdn.net/wzq6578702/article/details/68926320)
 
 #### 4.ThreadLocal实现方式 
 
-#### 5.中断机制@2018-08-03 
+在多线程环境中，如果多个线程并发操作同一个共享变量，由于Java内存模型的原因，存在脏读、丢失更新等内存数据不一致的情况，解决该问题的方式是使用互斥锁。但是使用互斥锁时会降低线程执行的效率，因此在某些情况下可以不使用共享变量，而是使用局部变量。对于方法级别的局部变量，不存在`race condition`（竟态条件），因为该变量只能被该线程访问，但是会造成对象创建过多，导致垃圾回收效率慢。如果可以将变量与某个线程绑定，该变量同样只能被该线程访问，不存在`race condition`，而且对象创建的数量也不会太多，这样线程的执行的效率将会大大提高。
+
+`Thread`类中定义了`ThreadLocal.ThreadLocalMap threadLocals = null;`，表示一个线程的局部变量。`ThreadLocal.ThreadLocalMap`的实现方式类似`HashMap`，该类的`Entry`继承了`WeakReference`，定义如下：
+
+```java
+static class Entry extends WeakReference<ThreadLocal> {
+            /** The value associated with this ThreadLocal. */
+            Object value;
+
+            Entry(ThreadLocal k, Object v) {
+                super(k);
+                value = v;
+            }
+        }
+```
+
+从上可知，`ThreadLocal.ThreadLocalMap`的键是`ThreadLocal`，而且键是**弱引用**，值为强引用。
+
+调用`ThreadLocal.get()`方法时，首先获取当前线程的`threadLocals`变量，类型是`ThreadLocal.ThreadLocalMap`，如果为`null`，则调用`createMap`创建（`t.threadLocals = new ThreadLocalMap(this, firstValue);`），然后返回初始值。如果`threadLocals`不为`null`，则调用`ThreadLocal.ThreadLocalMap.getEntry(ThreadLocal)`方法，根据`ThreadLocal`的哈希值获取`Entry`，如果`Entry.get()`（由于`Entry`继承了`WeakReference`，`Entry.get()`实际上是调用了`WeakReference.get()`方法，由于`Entry`在构造函数中调用了`super(k)`，将键作为弱引用对象，所以`Entry.get()`返回的是键的引用）返回为`null`，表示垃圾收集器回收了键对象，为避免**内存泄漏**，需要调用`ThreadLocal.ThreadLocalMap.expungeStaleEntry`方法回收`Entry`所占用的`slot`，将`value`清空，然后再重哈希。
+
+`ThreadLocal.set()`方法类似`ThreadLocal.get()`方法。
+
+参考：[Java进阶（七）正确理解Thread Local的原理与适用场景](http://www.jasongj.com/java/threadlocal/)
+
+#### 5.中断机制 
+
+Java中断机制是一种协作方式，仅仅是通知一个线程可以中断执行，但是线程本身也可以忽略中断信息什么也不做。从设计上来说，一个线程不应该由其他线程来强制中断或停止，而是应该由线程自己自行停止。所以使用中断机制来替代`Thread.stop()`, `Thread.suspend()`, `Thread.resume()`。
+
+
+
+当调用`Thread.interrupt()`方法时，可以为某个线程对象设置中断标记位，即`Thread.threadStatus`的`JVMTI_THREAD_STATE_INTERRUPTED`标记位被打开，此时被设置中断标记位的线程调用`Thread.isInterrupted()`方法会返回`true`。此时如果被设置中断标记位的线程调用`Thread.interrupted()`方法时，返回`true`的同时还会清除中断标记位。
+
+
+
+线程需要自己检查是否被中断，检查的方法一般是调用`Thread.interrupted()`方法。如果检查到自己被中断了，可以根据业务规则处理该中断，也可以将中断信息往线程调用栈上报，方式是抛出`InterruptedException`。如果捕获到了`InterruptedException`时，不能什么也不做（除非自己知道业务无需关注中断），要么将异常再抛出，要么再设置中断信息，如下：
+
+```java
+try {
+   // ...
+} catch (InterruptedException e) {
+    Thread.currentThread().interrupt(); // or throw e;
+}
+```
+
+
+
+一般来说，当方法声明了要跑出`InterruptedException`则暗示该方法可中断，即方法内部会检查中断标记位，然后抛出异常，并且清除中断标记位。Java中很多阻塞方法如`BlockingQueue.put`、`BlockingQueue.take`、`Object.wait`、`Thread.sleep`。
+
+参考：[详细分析Java中断机制](http://www.infoq.com/cn/articles/java-interrupt-mechanism)
 
 #### 6.活跃性
+
+* 死锁
+
+  如果多个线程以固定的顺序来获取锁时，那么他们将不回存在死锁的问题。死锁发生表示获取锁的顺序不一致导致互相占用各自需要获取的锁。死锁的解决方法有：1)限制锁的调用顺序，2)缩小锁的范围，3)使用显示锁替换内置锁，灵活控制锁策略。
+
+* 饥饿
+
+  由于线程得不到需要的资源，不能正常执行，就会造成线程饥饿。如对线程的优先级设置不当，造成线程不能获得CPU周期执行导致饥饿，或者其他线程长时间持有锁，导致其他线程长时间等待，造成的饥饿。
+
+* 活锁
+
+  活锁问题不会导致线程阻塞，但是活锁会导致线程不能继续正常执行。比如这样一个消息系统中，从队列里边取的消息，然后执行，但是由于某种业务原因，失败了，那么把它放到队列头，然后再拿出来执行，自然还是失败的，这样线程虽然没有阻塞，但是也不能正常的处理其他的消息。
+
+  
+
+  当出现活跃性故障时，除了终止应用程序之外没有其他任何机制可以帮助从这种故障恢复过来。
+
+参考：[java并发编程中的活跃性问题](http://study-a-j8.iteye.com/blog/2366489)
 
 # 四、并发 
 
 #### 1.happens-before原则 
 
-#### 2.volatile作用@2018-08-04 
+在共享内存的多处理器体系结构中，每个处理器都拥有自己的缓存，并且定期地与主内存进行协调。此时就存在处理器P1修改变量A时，在同步变量A到主内存之前，处理器P2读取变量A将是一个旧值。此类问题只能由程序来控制这种**内存不一致**的问题。
 
-#### 3.AQS原理 
+Java为各种处理器体系不同的内存模型，抽象了Java自身的内存模型（Java Memory Model，或简称JMM）。所以Java内存模型不是一个具体的内存，而是抽象的内存，包括处理器多级缓存、寄存器缓存、处理器指令重排序、JVM指令重排序等。
 
-#### 4.synchronized和lock的区别@2018-08-05 
+为了解决上述**内存不一致**的情况，Java需要根据自身的语言要求在特定位置插入内存栅栏来刷新缓存数据，保证内存数据和处理器中的缓存数据一致，或者禁止处理器重排序。
 
-#### 5.CAS 
+Java内存模型为程序中所有的操作定义了一个偏序关系（偏序关系 π 是集合上的一种关系，具有反对称、自反和传递属性，但对于任意两个元素x、y来说，并不需要一定满足x π y或者y π x的关系），称之为Happens-Before。**要想保证执行操作B的线程看到操作A的结果（无论A和B是否在同一个线程中执行），那么在A和B之间必须满足Happens-Before关系**。如果两个操作之前缺乏Happends-Before关系，那么JVM可以对他们任意地重排序。
 
-#### 6.ReentrantLock,Condition,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,LockSupport的原理@2018-08-06 
+Happens-Before的规则包括：
+
+* **程序顺序规则** 如果程序中操作A在操作B之前，那么线程中A操作将在B操作之前执行。如果A happens- before B，JMM并不要求A一定要在B之前执行。JMM仅仅要求前一个操作（执行的结果）对后一个操作可见，且前一个操作按顺序排在第二个操作之前；
+* **监视器锁规则** 在监视器锁上的解锁操作必须在同一个监视器锁上的加锁操作之前执行；
+* **volatile变量规则** 对volatile变量的写入操作必须在对该变量的读取操作之前执行；
+* **线程启动规则** 在线程上对`Thread.start()`的调用必须在该线程中执行任何操作之前执行；
+* **线程结束规则** 线程中的任何操作都必须在其他线程检测到该线程已经结束之前执行，或者从`Thread.join()`中成功返回，或者在调用`Thread.isAlive()`时返回`false`；
+* **中断规则** 当一个线程在另一个线程上调用`interrupt`时，必须在被中断线程检测到`interrupt`调用之前执行（通过抛出`InterruptedException`，或者调用`isInterrupted()`或`interrupted()`）；
+* **终结器规则** 对象的构造函数必须在启动该对象的终结器之前执行完成；
+* **传递性** 如果操作A在操作B之前执行，并且操作B在操作C之前执行，那么操作A必须在操作C之前执行。
+
+JVM可以保证在调用任何类的静态方法或者静态字段时，JVM都已经对类正确的执行了静态初始化，即调用类的静态初始化函数（`<cinit>`方法）是原子操作。
+
+JVM可以保证`final`字段可以在构造函数退出前完成初始化，不会把`final`字段初始化重排序的构造函数外执行（这里有个前提是在构造函数中没有把`this`逸出）。例如：
+
+```java
+public class FinalFieldExample {
+    private int i;
+    private final int j;
+    private FinalFieldExample self;
+    private FinalFieldExample obj;
+    public FinalFieldExample() {
+        i = 2; // JVM可能将 i = 2 重排序到构造函数外
+        j = 5; // JVM不回将 j = 5 重排序到构造函数外
+        self = this; // this逸出，不安全的操作，因为该操作可能被重排序到 j = 5之前执行
+    }
+    
+    public static void write() {
+        obj = new FinalFieldExample();
+    }
+    
+    public static void read() {
+        while (obj == null);
+        System.out.println(obj.i);
+    }
+    
+    public static void main(String args[]) {
+        Thread t1 = new Thread(new Runnable() {
+            FinalFieldExample.write();
+        });
+        t1.start();
+        Thread t2 = new Thread(new Runnable() {
+            FinalFieldExample.read();
+        });
+        t2.start();
+        // t2线程调用read时会检查obj是否为null，如果不为null，打印变量i的值
+        // t1线程调用write，由于write操作可能执行的是先将引用赋值给obj，然后执行 i = 2的初始化
+        // 而当t1线程执行将引用赋值给obj值执行t2，t2读到obj引用存在，于是打印i，但此时i还未初始化
+    }
+}
+```
+
+
+
+参考：[深入理解Java内存模型（一）——基础](http://www.infoq.com/cn/articles/java-memory-model-1)，[深入理解Java内存模型（二）——重排序](http://www.infoq.com/cn/articles/java-memory-model-2)，[深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)，[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)，[深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)，[深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)
+
+#### 2.volatile作用 
+
+volatile有两个作用，一个是将long和double类型的读取和写入操作原子化（由于long和double是64位，JVM内部会将long和double的操作分为两个32位的操作，而且不是原子操作），另一个是控制变量线程间的可见性（**volatile变量规则**规定对volatile变量的写入操作必须在对该变量的读取操作之前执行）。
+
+
+
+如果一个int类型变量i被volatile修饰，那么`i++`操作并不是线程安全的操作。`volatile`只能保证变量读取和写入是原子性，且读取变量时会刷新缓存，保证线程间的可见性。而`i++`操作包含3个操作，首先是读取变量到临时变量中，然后临时变量加1，再将临时变量写入，这3个操作合起来并不是原子操作，所以不是线程安全的。
+
+参考：[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)
+
+#### 3.CAS 
+
+CAS是“Compare And Swap”的简称，中文含义是“比较并交换”。CAS操作基于CPU提供的原子操作指令实现。
+
+从intel的[CMPXCHG](https://c9x.me/x86/html/file_module_x86_id_41.html)指令来看，CAS的操作流程是比较旧值是否与期望的值一致，如果一致将ZF程序状态字打开，将新值写入。如果与期望的值不一致将ZF程序状态字清除。因此程序可以通过检查ZF来判断CAS操作是否为预期操作，如果不是，读取新写入的值，再次进行CAS操作。所以CAS操作一般都是放在循环中执行。
+
+Java实现CAS操作依然是靠底层处理器来完成，CAS操作方法定义在`sun.misc.Unsafe`，如下：
+
+```java
+    /**
+     * Atomically update Java variable to <tt>x</tt> if it is currently
+     * holding <tt>expected</tt>.
+     * @return <tt>true</tt> if successful
+     */
+    public final native boolean compareAndSwapObject(Object o, long offset,
+                                                     Object expected,
+                                                     Object x);
+
+    /**
+     * Atomically update Java variable to <tt>x</tt> if it is currently
+     * holding <tt>expected</tt>.
+     * @return <tt>true</tt> if successful
+     */
+    public final native boolean compareAndSwapInt(Object o, long offset,
+                                                  int expected,
+                                                  int x);
+
+    /**
+     * Atomically update Java variable to <tt>x</tt> if it is currently
+     * holding <tt>expected</tt>.
+     * @return <tt>true</tt> if successful
+     */
+    public final native boolean compareAndSwapLong(Object o, long offset,
+                                                   long expected,
+                                                   long x);
+```
+
+方法都是`native`，会调用C++代码来完成。
+
+程序中会要求很多计算操作（比如自增）为原子操作，而就算一个int类型变量被声明为`volatile`也不能保证`++`操作是原子性，一般就会使用加锁的方式来保证原子性。但是加锁效率太低，因此需要使用CAS操作，因为CAS操作是无锁操作，并发性高。Java提供了`AtomicInteger`（还有`AtomicLong`）类，它提供了很多CAS操作（比如自增）。`getAndIncrement`是自增操作的方法，定义如下：
+
+```java
+	public final int getAndIncrement() {
+        for (;;) {
+            int current = get();
+            int next = current + 1;
+            if (compareAndSet(current, next))
+                return current;
+        }
+    }
+```
+
+上面的代码表明CAS操作是放在一个for循环中完成，每次循环都是获取变量的最新值，然后加1，CAS操作，如果不成功，再循环一次，总有一次会成功。
+
+**ABA**问题是无锁结构实现中常见的一种问题，可基本表述为：
+
+1. 进程P1读取了一个数值A
+
+2. P1被挂起(时间片耗尽、中断等)，进程P2开始执行
+
+3. P2修改数值A为数值B，然后又修改回A
+
+4. P1被唤醒，比较后发现数值A没有变化，程序继续执行。
+
+ABA问题可能会导致灾难性的后果，因此在某些场景需要使用特殊的方法解决**ABA**问题。目前解决**ABA**问题的方法是使用一个修改次数的变量作为版本号。Java提供的`AtomicStampedReference`也是基于版本控制来解决**ABA**问题。
+
+参考：[深入浅出CAS](https://www.jianshu.com/p/fb6e91b013cc)，[比较并交换](https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2)，[JAVA中CAS-ABA的问题解决方案AtomicStampedReference](https://juejin.im/entry/5a7288645188255a8817fe26)
+
+#### 4.AQS原理 
+
+参考：[AQS 和 高级同步器](http://novoland.github.io/%E5%B9%B6%E5%8F%91/2014/07/26/AQS%20%E5%92%8C%20%E9%AB%98%E7%BA%A7%E5%90%8C%E6%AD%A5%E5%99%A8.html)
+
+#### 5.ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,Condition,LockSupport的原理 
+
+#### 6.synchronized和lock的区别@2018-08-06 
 
 #### 7.AtomicInteger和AtomicLong
 
 #### 8.锁的升级和降级@2018-08-07
 
-#### 9.多种方式实现生产者和消费者
+#### 9.多种方式实现生产者和消费者模式
 
 # 五、Servlet
 
@@ -863,7 +1130,7 @@ public ThreadPoolExecutor(int corePoolSize, // 线程池基本大小
 
 #### 4.Servlet3.0的异步请求
 
-#### 5.Tomcat架构@2018-08-010
+#### 5.Tomcat架构@2018-08-10
 
 # 六、jvm 
 
@@ -929,9 +1196,9 @@ public ThreadPoolExecutor(int corePoolSize, // 线程池基本大小
 
 # 九、mybatis 
 
-#### 1.mybaits一级缓存和二级缓存
+#### 1.mybatis一级缓存和二级缓存
 
-#### 2.与hibernate优缺点@2018-08-24
+#### 2.mybatis与hibernate优缺点@2018-08-24
 
 #### 3.mybatis工作流程
 
@@ -961,17 +1228,19 @@ public ThreadPoolExecutor(int corePoolSize, // 线程池基本大小
 
 # 十三、Spring 
 
-#### 1.IoC和AOP@2018-08-29 
+#### 1.IoC 
 
-#### 2.Spring Boot的条件’加载’ 
+#### 2.AOP@2018-08-29 
 
-#### 3.Spring容器启动过程@2018-08-30 
+#### 3.Spring Boot的条件’加载’ 
 
-#### 4.Spring bean生命周期 
+#### 4.Spring容器启动过程@2018-08-30 
 
-#### 5.Spring MVC生命周期@2018-08-31 
+#### 5.Spring bean生命周期 
 
-#### 6.Spring声明性事务实现方式
+#### 6.Spring MVC生命周期@2018-08-31 
+
+#### 7.Spring声明性事务管理实现方式
 
 # 十四、算法和数据结构 
 
@@ -984,6 +1253,8 @@ public ThreadPoolExecutor(int corePoolSize, // 线程池基本大小
 参考：[Data Structure Visualizations](https://www.cs.usfca.edu/~galles/visualization/Algorithms.html)
 
 #### 3.LRU@2018-09-02
+
+#### 4.一致性哈希算法
 
 # 十五、架构
 
