@@ -45,10 +45,10 @@ tags: java
 - [happens-before原则](#1-happens-before原则)
 - [volatile作用](#2-volatile作用)
 - [CAS](#3-CAS)
-- [AQS原理](#4-AQS原理)
-- [ReentrantLock,Condition,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,LockSupport的原理](#5-ReentrantLock-Condition-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier-LockSupport的原理)
-- [synchronized和lock的区别](#6-synchronized和lock的区别)
-- [AtomicInteger和AtomicLong](#7-AtomicInteger和AtomicLong)
+- [LockSupport原理](#4-LockSupport原理)
+- [AQS原理](#5-AQS原理)
+- [ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理](#6-ReentrantLock-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier的原理)
+- [synchronized和lock的区别](#7-synchronized和lock的区别)
 - [锁的升级和降级](#8-锁的升级和降级)
 - [多种方式实现生产者和消费者](#9-多种方式实现生产者和消费者)
 
@@ -1106,15 +1106,180 @@ ABA问题可能会导致灾难性的后果，因此在某些场景需要使用�
 
 参考：[深入浅出CAS](https://www.jianshu.com/p/fb6e91b013cc)，[比较并交换](https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2)，[JAVA中CAS-ABA的问题解决方案AtomicStampedReference](https://juejin.im/entry/5a7288645188255a8817fe26)
 
-#### 4.AQS原理 
+#### 4.LockSupport原理
+
+LockSupport提供了`park`和`unpark`方法用于阻塞线程和解除线程阻塞，调用`park`方法时还可以传一个`Blocker`参数，指明线程阻塞的对象，可以用于线程调试。使用`jstack`来dump线程栈信息时看到`parking to wait for  <0x0000000708f32990>`，0x0000000708f32990这个地址的对象就是`Blocker`，如下所示：
+
+```text
+"scheduler-200" prio=10 tid=0x00007fbfc8018000 nid=0x48d9 waiting on condition [0x00007fbe6d7d6000]
+   java.lang.Thread.State: WAITING (parking)
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x0000000708f32990> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+        at java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1085)
+        at java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:807)
+        at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1068)
+        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
+        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+        at java.lang.Thread.run(Thread.java:745)
+```
+
+`park`和`unpark`方法都是调用`sun.misc.Unsafe`的相关方法实现，这些方法的签名如下：
+
+```java
+public native void unpark(Object thread);
+public native void park(boolean isAbsolute, long time);
+```
+
+这两个方法都是native方法，由底层C++代码实现。不同操作系统平台有不同实现方式，这里以linux平台为例。linux实现的代码在文件`hotspot/src/os/linux/vm/os_linux.cpp `中，方法声明如下：
+
+```c++
+void Parker::park(bool isAbsolute, jlong time);
+void Parker::unpark();
+```
+
+每个线程都有一个许可，但调用`unpark`时，许可置为1，但调用`park`时，如果许可为1，将许可置为0并返回，否则等待许可（由`unpark`释放许可）。这个过程类似于信号量，不同的是许可不能累加，最大值为1。需要特别注意的一点：**`park` 方法还可以在其他任何时间“毫无理由”地返回，因此通常必须在重新检查返回条件的循环里调用此方法**。`unpark`方法可以先于`park`调用。
+
+`Parker`类使用`_counter`字段表示许可，当调用`park`方法时，先尝试将`_counter`置为0（`if (Atomic::xchg(0, &_counter) > 0) return;`当`_counter`大于0时才会成功地设置为0），如果成功，`park`方法返回，如果不成功，调用`pthread_mutex_trylock`方法尝试锁住互斥变量`_mutex `。如果获取锁不成功，`park`方法返回，需要由上层代码继续调用`park`方法。如果获取锁成功，检查`_counter`是否大于0，如果大于0，将`_counter`置为0，调用`pthread_mutex_unlock`方法解除互斥锁，然后返回。如果不大于0，表示没有许可，调用`pthread_cond_wait`方法等待许可。
+
+当调用`unpark`方法时，调用`pthread_mutex_lock`方法获取互斥锁，将`_counter`置为1，即添加许可。如果`_counter`之前为0，则调用`pthread_cond_signal `通知其他线程可以。最后调用`pthread_mutex_unlock`释放互斥锁，`unpark`方法返回。
+
+使用`os::Linux::safe_cond_timedwait`方法可以设置等待一个互斥变量的超时时间。
+
+参考： [浅谈Java并发编程系列（八）—— LockSupport原理剖析](https://segmentfault.com/a/1190000008420938)，[Java的LockSupport.park()实现分析](https://blog.csdn.net/hengyunabc/article/details/28126139)
+
+#### 5.AQS原理 
+
+AQS是`AbstractQueuedSynchronizer`类的简称，它是`java.concurrent.util`包里各种独占锁或者共享锁（包括`ReentrantLock`和`Semaphore`等）实现的基础。
+
+AQS使用一个`volatile int state`表示同步状态，并使用CAS操作保证条件判断与动作更新的原子性。线程阻塞和唤醒使用`LockSupport.park()`和`LockSupport.unpark()`完成，使用FIFO队列管理阻塞的线程。
+
+AQS使用下列方法实现独占锁和共享锁：
+
+```java
+// 独占锁
+public final void acquire(int arg);
+public final boolean release(int arg) ;
+
+// 共享锁
+public final void acquireShared(int arg) ;
+public final boolean releaseShared(int arg);
+```
+
+独占锁或者共享锁是否能够获取（`acquire`或者`acquireShared`）或者释放（`release`或者`releaseShared`），需要由子类实现下列抽象方法：
+
+```java
+// 独占锁
+protected boolean tryAcquire(int arg);
+protected boolean tryRelease(int arg);
+
+// 共享锁
+protected int tryAcquireShared(int arg);
+protected boolean tryReleaseShared(int arg);
+```
+
+这是典型的`模板方法`使用案例。
+
+操作`state`的方法如下：
+
+```java
+protected final int getState();
+protected final boolean compareAndSetState(int expect, int update);
+protected final void setState(int newState);
+```
+
+当调用`tryAcquire()`返回true或者`tryAcquireShared()`返回值大于0时，线程不需要阻塞。否则需要向FIFO队列添加一个节点（包括当前线程），阻塞该线程，然后进入`acquireQueued`循环，不停的尝试获取锁。当获取锁时，需要退出`acquireQueued`，同时需要判断后续节点是否为共享模式，如果是，需要将后续线程也唤醒。
+
+当调用`tryRelease()`返回true或者`tryReleaseShared()`返回值大于0时，唤醒FIFO队列head的线程。
+
+`Condition`是AQS定义的内部类`ConditionObject`，必须与独占锁一起使用，它提供了`await`、`signal`和`signalAll`方法来弥补`Object.wait()`、`Object.notify()`和`Object.notifyAll()`的缺陷。`Condition`内部也提供了一个FIFO队列。当调用`await`方法时，释放锁，将当前线程添加到`Condition`的FIFO队列中，阻塞线程，当线程唤醒时需要判断该节点是否进入了AQS的FIFO锁等待队列，如果时，则进入acquire循环获取锁，否则线程继续阻塞。当调用`signal`时，需要将`Condition`的FIFO队列的第一个线程移动到AQS的FIFO队列中，进入锁等待队列。
 
 参考：[AQS 和 高级同步器](http://novoland.github.io/%E5%B9%B6%E5%8F%91/2014/07/26/AQS%20%E5%92%8C%20%E9%AB%98%E7%BA%A7%E5%90%8C%E6%AD%A5%E5%99%A8.html)
 
-#### 5.ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier,Condition,LockSupport的原理 
+#### 6.ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理 
 
-#### 6.synchronized和lock的区别@2018-08-06 
+**1).ReentrantLock**
 
-#### 7.AtomicInteger和AtomicLong
+`ReentrantLock`是可重入互斥锁，使用AQS独占锁实现。`ReentrantLock`的成员变量`Sync`实现了`AbstractQueuedSynchronizier`，内部类`FairSync`和`NonfairSync`分别实现了公平锁和非公平锁。可重入机制需要使用`setExclusiveOwnerThread`和`getExclusiveOwnerThread`方法设置和获取独占锁的线程。
+
+非公平锁的实现方式比较简单，首先尝试抢占锁（`compareAndSetState(0, 1)`），如果抢占失败就获取锁，获取失败时进入等待队列。
+
+公平锁则需要检查等待队列是否存在前驱节点，如果存在，则进入等待队列，否则尝试获取锁。
+
+从效率上来说，非公平锁高于公平锁，因为非公平锁如果抢占成功就少了入队操作，也少了线程阻塞和唤醒的操作系统调用过程。
+
+**2).Semaphore**
+
+信号量Semaphore使用AQS共享锁实现，维护一个许可集，获取n个许可时，许可集减少n，当小于0时则线程阻塞。释放n个许可时，许可集加上n，同时需要唤醒等待许可的线程。
+
+Semaphore使用AQS的state来表示许可集，Semaphore的构造函数接收一个许可集初始容量大小的值。
+
+**3).ReadWriteLock**
+
+`ReadWriteLock`是读写锁的接口，实现该接口的类有`ReentrantReadWriteLock`，这里讲述`ReentrantReadWriteLock`的实现方式。写锁是独占锁，读锁是共享锁，而且读、写锁互斥。`ReentrantReadWriteLock`使用AQS的state字段的高16位为读锁计数器，低16位为写锁计数器。`ReentrantReadWriteLock`内部存在两个实现了`Lock`接口的内部类，分别是`ReadLock`和`WriteLock`，表示读锁和写锁。`ReadLock`的获取和释放锁的方法如下：
+
+```java
+public void lock() {
+    sync.acquireShared(1);
+}
+public  void unlock() {
+    sync.releaseShared(1);
+}
+```
+
+从上面的方法调用可以看到`ReadLock`是调用AQS的共享锁方法。获取读锁时要求state的低16位必须为0，即写锁没有被任何线程获取。如果低16位大于0，表示写锁被线程获取，如果获取写锁的线程不是自己，则线程阻塞。如果线程可以获取读锁，则state的高16位加1（`compareAndSetState(c, c + SHARED_UNIT)`，其中`SHARED_UNIT`为`1 << SHARED_SHIFT`），同时线程局部变量`HoldCounter`（`ThreadLocal`）的计数器count字段需要加1，用来保存线程占用的共享读锁的数量。`HoldCounter`保存的计数器的作用是用来判断当前线程在获得写锁的情况下，是否又再获取读锁，此时读书能够被获取，支持重入机制。当写锁释放时，该线程就降级为只获取读锁。
+
+`WriteLock`的获取和释放锁的方法如下：
+
+```java
+public void lock() {
+    sync.acquire(1);
+}
+public void unlock() {
+    sync.release(1);
+}
+```
+
+获取写锁时，需要判断`state`是否存在写锁或者读锁，如果存在且不是当前线程获取时，当前线程需要阻塞。
+
+**4).CountDownLatch**
+
+闭锁CountDownLatch能够使一个线程等待其他线程完成各自的工作后再执行。
+
+CountDownLatch使用AQS共享锁实现，构造函数的参数`count`作为AQS的state的值。调用`await`方法时，如果state不为0则线程阻塞。调用`count`方法时，state减小，当state为0时则唤醒等待的线程。
+
+**5).CyclicBarrier**
+
+循环屏障CyclicBarrier类似一个可循环使用的CountDownLatch，可以让一组线程达到一个屏障时被阻塞，直到最后一个线程达到屏障时，所有被阻塞的线程才能继续执行。 CyclicBarrier好比一扇门，默认情况下是关闭状态，堵住了线程执行的道路，直到所有线程都就位，门才打开，让所有线程一起通过。
+
+CyclicBarrier几个重要的成员变量如下：
+
+```java
+/** The lock for guarding barrier entry */
+private final ReentrantLock lock = new ReentrantLock();
+/** Condition to wait on until tripped */
+private final Condition trip = lock.newCondition();
+/** The number of parties */
+private final int parties;
+/* The command to run when tripped */
+private final Runnable barrierCommand;
+/** The current generation */
+private Generation generation = new Generation();
+
+/**
+ * Number of parties still waiting. Counts down from parties to 0
+ * on each generation.  It is reset to parties on each new
+ * generation or when broken.
+ */
+private int count;
+```
+
+`lock`用于保护屏障信息，`trip`用于阻塞线程，`parties`表示屏障数量，`count`表示当前消耗的屏障数量。当调用`wait`方法时，`lock`需要调用`lock()`方法获取锁，然后将count减少，如果count不为0，则当前线程进入trip的Condition等待队列。如果count为0，需要生成一个新的`generation`对象，表示新的一轮循环屏障，同时会调用`condition.signalAll()`方法通知所有等待线程。
+
+参考：[Java并发之ReentrantLock详解](https://blog.csdn.net/lipeng_bigdata/article/details/52154637)，[什么时候使用CountDownLatch](http://www.importnew.com/15731.html)，[JAVA多线程--信号量(Semaphore)](https://my.oschina.net/cloudcoder/blog/362974)，[深入浅出java CyclicBarrier](https://www.jianshu.com/p/424374d71b67)，[Java多线程（十）之ReentrantReadWriteLock深入分析](https://my.oschina.net/adan1/blog/158107)
+
+#### 7.synchronized和lock的区别@2018-08-06 
 
 #### 8.锁的升级和降级@2018-08-07
 
@@ -1147,6 +1312,8 @@ ABA问题可能会导致灾难性的后果，因此在某些场景需要使用�
 #### 5.内存泄漏 
 
 #### 6.JVM关闭
+
+参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
 #### 7.调优方法@2018-08-13 
 
@@ -1255,6 +1422,10 @@ ABA问题可能会导致灾难性的后果，因此在某些场景需要使用�
 #### 3.LRU@2018-09-02
 
 #### 4.一致性哈希算法
+
+#### 5.GeoHash
+
+参考：[JAVA实现空间索引编码（GeoHash）](https://blog.csdn.net/xiaojimanman/article/details/50358506)
 
 # 十五、架构
 
