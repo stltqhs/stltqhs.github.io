@@ -1228,7 +1228,7 @@ public  void unlock() {
 }
 ```
 
-从上面的方法调用可以看到`ReadLock`是调用AQS的共享锁方法。获取读锁时要求state的低16位必须为0，即写锁没有被任何线程获取。如果低16位大于0，表示写锁被线程获取，如果获取写锁的线程不是自己，则线程阻塞。如果线程可以获取读锁，则state的高16位加1（`compareAndSetState(c, c + SHARED_UNIT)`，其中`SHARED_UNIT`为`1 << SHARED_SHIFT`），同时线程局部变量`HoldCounter`（`ThreadLocal`）的计数器count字段需要加1，用来保存线程占用的共享读锁的数量。`HoldCounter`保存的计数器的作用是用来判断当前线程在获得写锁的情况下，是否又再获取读锁，此时读书能够被获取，支持重入机制。当写锁释放时，该线程就降级为只获取读锁。
+从上面的方法调用可以看到`ReadLock`是调用AQS的共享锁方法。获取读锁时要求state的低16位必须为0，即写锁没有被任何线程获取。如果低16位大于0，表示写锁被线程获取，如果获取写锁的线程不是自己，则线程阻塞。如果线程可以获取读锁，则state的高16位加1（`compareAndSetState(c, c + SHARED_UNIT)`，其中`SHARED_UNIT`为`1 << SHARED_SHIFT`），同时线程局部变量`HoldCounter`（`ThreadLocal`）的计数器count字段需要加1，用来保存线程占用的共享读锁的数量。`HoldCounter`保存的计数器的作用是用来判断当前线程在获得写锁的情况下，是否又再获取读锁，此时读锁能够被获取，支持重入机制。当写锁释放时，该线程就降级为只获取读锁。
 
 `WriteLock`的获取和释放锁的方法如下：
 
