@@ -1362,6 +1362,8 @@ private int count;
 
 #### 1.哨兵模式和主从数据同步@2018-08-20 
 
+参考：[Redis 深度历险：核心原理与应用实践](https://juejin.im/book/5afc2e5f6fb9a07a9b362527/section)
+
 #### 2.集群原理 
 
 #### 3.redis与memcached区别@2018-08-21 
