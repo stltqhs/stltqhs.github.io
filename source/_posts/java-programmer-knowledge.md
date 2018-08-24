@@ -48,9 +48,9 @@ tags: java
 - [LockSupport原理](#4-LockSupport原理)
 - [AQS原理](#5-AQS原理)
 - [ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理](#6-ReentrantLock-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier的原理)
-- [synchronized和lock的区别](#7-synchronized和lock的区别)
-- [锁的升级和降级](#8-锁的升级和降级)
-- [多种方式实现生产者和消费者](#9-多种方式实现生产者和消费者)
+- [synchronized原理](#8-synchronized原理)
+- [锁的升级和降级](#9-锁的升级和降级)
+- [多种方式实现生产者和消费者](#10-多种方式实现生产者和消费者)
 
 # 一、基础 
 
@@ -381,6 +381,15 @@ CallableStatement | 存储过程查询
   
 
   参考：[NoClassDefFoundError和ClassNotFoundException的不同](https://www.jianshu.com/p/93d0db07d2e3)
+
+#### 12.运行时方法绑定的实现原理（虚方法调用）
+
+
+
+#### 13.异常处理机制（try/catch实现原理）
+
+
+
 
 # 二、容器类 
 
@@ -788,7 +797,7 @@ enum {
 
 #### 3.ThreadPoolExecutor原理 
 
-线程的创建和销毁是一个重量级操作，涉及到操作系统底层调用和资源分配问题。操作系统可创建的线程数量有内存限制，即当线程越多消耗的内存越大，且操作系统线程调度的开销也越多。依靠线程池技术可以有较解决这些问题。
+线程的创建和销毁是一个重量级操作，涉及到操作系统底层调用和资源分配问题。操作系统可创建的线程数量有内存限制，即当线程越多消耗的内存越大，且操作系统线程调度的开销也越多。依靠线程池技术可以有效解决这些问题。
 
 
 
@@ -1279,11 +1288,15 @@ private int count;
 
 参考：[Java并发之ReentrantLock详解](https://blog.csdn.net/lipeng_bigdata/article/details/52154637)，[什么时候使用CountDownLatch](http://www.importnew.com/15731.html)，[JAVA多线程--信号量(Semaphore)](https://my.oschina.net/cloudcoder/blog/362974)，[深入浅出java CyclicBarrier](https://www.jianshu.com/p/424374d71b67)，[Java多线程（十）之ReentrantReadWriteLock深入分析](https://my.oschina.net/adan1/blog/158107)
 
-#### 7.synchronized和lock的区别@2018-08-06 
+#### 7.BlockingQueue原理
 
-#### 8.锁的升级和降级@2018-08-07
+#### 8.synchronized原理 
 
-#### 9.多种方式实现生产者和消费者模式
+参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)
+
+#### 9.锁的升级和降级@2018-08-07
+
+#### 10.多种方式实现生产者和消费者模式
 
 # 五、Servlet
 
@@ -1369,13 +1382,29 @@ private int count;
 
 #### 3.mybatis工作流程
 
-# 十、MessageQueue 
+# 十、Spring
+
+#### 1.IoC
+
+#### 2.AOP@2018-08-29
+
+#### 3.Spring Boot的条件’加载’
+
+#### 4.Spring容器启动过程@2018-08-30
+
+#### 5.Spring bean生命周期
+
+#### 6.Spring MVC生命周期@2018-08-31
+
+#### 7.Spring声明性事务管理实现方式
+
+# 十一、MessageQueue 
 
 #### 1.重复消费问题@2018-08-25 
 
 #### 2.顺序问题
 
-# 十一、设计模式 
+# 十二、设计模式 
 
 #### 1.有哪些原则@2018-08-26 
 
@@ -1383,7 +1412,7 @@ private int count;
 
 参考：[Software design pattern](https://en.wikipedia.org/wiki/Software_design_pattern)
 
-# 十二、网络 
+# 十三、网络 
 
 #### 1.TCP和UDP的区别@2018-08-27 
 
@@ -1392,22 +1421,6 @@ private int count;
 #### 3.IO多路复用@2018-08-28 
 
 #### 4.NIO 
-
-# 十三、Spring 
-
-#### 1.IoC 
-
-#### 2.AOP@2018-08-29 
-
-#### 3.Spring Boot的条件’加载’ 
-
-#### 4.Spring容器启动过程@2018-08-30 
-
-#### 5.Spring bean生命周期 
-
-#### 6.Spring MVC生命周期@2018-08-31 
-
-#### 7.Spring声明性事务管理实现方式
 
 # 十四、算法和数据结构 
 
