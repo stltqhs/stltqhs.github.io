@@ -48,9 +48,17 @@ tags: java
 - [LockSupport原理](#4-LockSupport原理)
 - [AQS原理](#5-AQS原理)
 - [ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理](#6-ReentrantLock-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier的原理)
+- [BlockingQueue原理](#7-BlockingQueue原理)
 - [synchronized原理](#8-synchronized原理)
 - [锁的升级和降级](#9-锁的升级和降级)
 - [多种方式实现生产者和消费者](#10-多种方式实现生产者和消费者)
+
+### [Servlet](#5-Servlet)
+
+* [Servlet生命周期与过滤器](#1-Servlet生命周期与过滤器)
+* [Session和Cookie的区别](#2-Session和Cookie的区别)
+* [Servlet3.0的异步请求](#3-Servlet3-0的异步请求)
+* [Tomcat架构](#4-Tomcat架构)
 
 # 一、基础 
 
@@ -1446,6 +1454,77 @@ private int count;
 
 #### 7.BlockingQueue原理
 
+BlockingQueue接口有两个重要方法，分别是取元素`take`和加入元素`put`。以ArrayBlockingQueue为例，`put`方法如下：
+
+```java
+public void put(E e) throws InterruptedException {
+    checkNotNull(e);
+    final ReentrantLock lock = this.lock;
+    lock.lockInterruptibly();
+    try {
+        while (count == items.length)
+            notFull.await();
+        enqueue(e);
+    } finally {
+        lock.unlock();
+    }
+}
+private void enqueue(E x) {
+    // assert lock.getHoldCount() == 1;
+    // assert items[putIndex] == null;
+    final Object[] items = this.items;
+    items[putIndex] = x;
+    if (++putIndex == items.length)
+        putIndex = 0;
+    count++;
+    notEmpty.signal();
+}
+```
+
+从上可以看到`put`方法使用`ReentrantLock`来实现线程安全操作，当数组元素数量为数组长度时，表示队列已经满了，需要等待队列不满，所以`put`方法也是阻塞方法，而等待的方式使用的是AQS的等待队列。`ArrayBlockingQueue`使用两个变量来存储等待队列不为空和等待队列不为满的线程。如下：
+
+```java
+notEmpty = lock.newCondition();
+notFull =  lock.newCondition();
+```
+
+当添加元素成功时，需要通知`notEmpty`等待的线程，表示队列不是空的。
+
+`take`方法如下：
+
+```java
+public E take() throws InterruptedException {
+    final ReentrantLock lock = this.lock;
+    lock.lockInterruptibly();
+    try {
+        while (count == 0)
+            notEmpty.await();
+        return dequeue();
+    } finally {
+        lock.unlock();
+    }
+}
+private E dequeue() {
+    // assert lock.getHoldCount() == 1;
+    // assert items[takeIndex] != null;
+    final Object[] items = this.items;
+    @SuppressWarnings("unchecked")
+    E x = (E) items[takeIndex];
+    items[takeIndex] = null;
+    if (++takeIndex == items.length)
+        takeIndex = 0;
+    count--;
+    if (itrs != null)
+        itrs.elementDequeued();
+    notFull.signal();
+    return x;
+}
+```
+
+从上可以看到`take`方法使用`ReentrantLock`来实现线程安全操作，当数组元素数量为0时，表示队列已经为空，需要等待队列不为空，所以`take`方法也是阻塞方法。当取出元素成功时，需要通知`notFull`表示线程不是满的。
+
+参考：[Java并发编程-阻塞队列(BlockingQueue)的实现原理](https://blog.csdn.net/chenchaofuck1/article/details/51660119)
+
 #### 8.synchronized原理 
 
 Java同步机制使用`synchronized`关键字实现。`synchronized`有两种用法，第一种是修饰方法，即同步方法块，第二种是同步代码块，同步代码块和同步方法块被称为临界区。
@@ -1466,7 +1545,7 @@ void syncCodeBlock() {
 hash:25 —>| age:4 biased_lock:1 lock:2
 ```
 
-hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示锁标状态。`Mark Word`是Java实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。Java对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁，~~锁状态的变化只能是从低到高，不能从高到低，即只存在锁升级，不存在锁降级~~<sup>[HotSpot VM重量级锁降级机制的实现原理](https://zhuanlan.zhihu.com/p/28505703)</sup>。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为Java同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁<sup>[java重量锁，轻量锁，偏向锁](https://focusvirtualization.blogspot.com/2017/02/linux-85-java.html)</sup>。
+hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示锁标状态。`Mark Word`是Java实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。Java对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁，~~锁状态的变化只能是从低到高，不能从高到低，即只存在锁升级，不存在锁降级~~<sup>[[HotSpot VM重量级锁降级机制的实现原理]](https://zhuanlan.zhihu.com/p/28505703)</sup>。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为Java同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁<sup>[[java重量锁，轻量锁，偏向锁]](https://focusvirtualization.blogspot.com/2017/02/linux-85-java.html)</sup>。
 
 各种锁状态的变化过程如下：
 
@@ -1525,11 +1604,11 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
   （2）通过自旋执行`void ATTR ObjectMonitor::EnterI (TRAPS) `方法等待锁的释放进入方法中。该方法的逻辑是
 
          a.当前线程被封装成ObjectWaiter对象node，状态设置成ObjectWaiter::TS_CXQ；
-    
+        
          b.在for循环中，通过CAS把node节点push到`_cxq`列表中，同一时刻可能有多个线程把自己的node节点push到`_cxq`列表中；
-    
+        
          c.node节点push到`_cxq`列表之后，通过自旋尝试获取锁，如果还是没有获取到锁，则通过park将当前线程挂起，等待被唤醒；
-    
+        
          d.当该线程被唤醒时，会从挂起的点继续执行，通过`ObjectMonitor::TryLock`尝试获取锁。
 
   其本质就是通过CAS设置monitor的_owner字段为当前线程，如果CAS成功，则表示该线程获取了锁，跳出自旋操作，执行同步代码，否则继续被挂起；
@@ -1598,21 +1677,65 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
 参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)，[JVM源码分析之synchronized实现](https://www.jianshu.com/p/c5058b6fe8e5)
 
-#### 9.锁的升级和降级@2018-08-07
+#### 9.锁的升级和降级
+
+锁降级在`ReentrantReadWriteLock`中的意思是从写锁降级为读锁，但是`ReentrantReadWriteLock`不能从读锁升级为写锁。
+
+锁降级在JVM中是指重量级锁降级为轻量级锁或者偏向锁。
+
+锁升级在JVM中是指偏向锁升级为轻量级锁，轻量级锁升级为重量级锁。
 
 #### 10.多种方式实现生产者和消费者模式
 
+* wait/notify
+
+* ReentrantLock/Condition
+
+* BlockingQueue
+
+* Semaphore
+
+* PipedInputStream/PipedOutputStream
+
+  该方法不是基于线程同步完成，因此只能满足于一个生产者和一个消费者。原理是先创建一个管道输入流和管道输出流，然后将输入流和输出流进行连接，用生产者线程往管道输出流中写入数据，消费者在管道输入流中读取数据，这样就可以实现了不同线程间的相互通讯，但是这种方式在生产者和生产者、消费者和消费者之间不能保证同步，也就是说在一个生产者和一个消费者的情况下是可以生产者和消费者之间交替运行的，多个生成者和多个消费者者之间则不行
+
+参考：[Java实现生产者和消费者的5种方式](https://juejin.im/entry/596343686fb9a06bbd6f888c)
+
 # 五、Servlet
 
-#### 1.HttpServlet生命周期@2018-08-08
+#### 1.Servlet生命周期与过滤器
 
-#### 2.Servlet工作原理
+Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：
 
-#### 3.Session和Cookie的区别@2018-08-09
+- Servlet 通过调用 **init ()** 方法进行初始化；
 
-#### 4.Servlet3.0的异步请求
+  init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。因此，它是用于一次性初始化。
 
-#### 5.Tomcat架构@2018-08-10
+- Servlet 调用 **service()** 方法来处理客户端的请求；
+
+  service() 方法是执行实际任务的主要方法。Servlet 容器（即 Web 服务器）调用 service() 方法来处理来自客户端（浏览器）的请求，并把格式化的响应写回给客户端。
+
+  每次服务器接收到一个 Servlet 请求时，服务器会产生一个新的线程并调用服务。service() 方法检查 HTTP 请求类型（GET、POST、PUT、DELETE 等），并在适当的时候调用 doGet、doPost、doPut，doDelete 等方法。
+
+- Servlet 通过调用 **destroy()** 方法终止（结束）；
+
+- 最后，Servlet 是由 JVM 的垃圾回收器进行垃圾回收的。
+
+Servlet中的过滤器Filter是实现了javax.servlet.Filter接口的服务器端程序，只要你在web.xml 文件配置好要拦截的客户端请求，它都会帮你拦截到请求。Filter可认为是Servlet的一种“变种”，它主要用于对用户请求进行预处理，也可以对HttpServletResponse进行后处理，是个典型的处理链。它与Servlet的区别在于：它不能直接向用户生成响应。完整的流程是：Filter对用户请求进行预处理，接着将请求交给Servlet进行处理并生成响应，最后Filter再对服务器响应进行后处理。
+
+参考：[Servlet 生命周期](http://www.runoob.com/servlet/servlet-life-cycle.html)，[Servlet,Filter,Listener,Interceptor的作用和区别](https://my.oschina.net/hapier/blog/699193)
+
+#### 2.Session和Cookie的区别
+
+Session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群、数据库、文件中；
+
+Cookie是客户端保存用户信息的一种机制，用来记录用户的一些信息，也是实现Session的一种方式；
+
+参考：[看完就彻底懂了session和cookie](https://www.jianshu.com/p/25802021be63)
+
+#### 3.Servlet3.0的异步请求
+
+#### 4.Tomcat架构
 
 # 六、jvm 
 
