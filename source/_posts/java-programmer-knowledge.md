@@ -420,7 +420,7 @@ public Object invoke(Object obj, Object[] args)
 }
 ```
 
-`generateMethod`会生成一个`GeneratedMethodAccessorXXX`实例，它的`invoke`方法就是样例代码中的`o.hashCode()`，直接调用对象的方法，这种生成方法是Java字节码拼接技术，用来在运行时生成Java类。[javassist](http://www.javassist.org/)和[cglib](https://github.com/cglib/cglib)都是基于字节码拼接技术，在`Spring`中就是使用`cglib`来动态的生成代理类，实现`AOP`功能。`GeneratedMethodAccessorXXX`的类加载器是一个`DelegatingClassLoader`类加载器，新建一个类加载器是为了性能考虑，在某些情况下可以卸载这些生成的类。`invoke0`方法是本地方法，由C实现，方法定义在[NativeAccessors.c](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/sun/reflect/NativeAccessors.c)如下：
+`generateMethod`会生成一个`GeneratedMethodAccessorXXX`实例，它的`invoke`方法就是样例代码中的`o.hashCode()`，直接调用对象的方法，这种生成方法是Java字节码拼接技术，用来在运行时生成Java类。[javassist](http://www.javassist.org/)和[cglib](https://github.com/cglib/cglib)都是基于字节码拼接技术，在`Spring`中就是使用`cglib`来动态的生成代理类，实现`AOP`功能。`GeneratedMethodAccessorXXX`的类加载器是一个`DelegatingClassLoader`类加载器，使用新的类加载器是为了性能考虑，在某些情况下可以卸载这些生成的类。`invoke0`方法是本地方法，由C实现，方法定义在[NativeAccessors.c](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/sun/reflect/NativeAccessors.c)如下：
 
 ```c
 JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0
@@ -1466,11 +1466,137 @@ void syncCodeBlock() {
 hash:25 —>| age:4 biased_lock:1 lock:2
 ```
 
-hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示锁标记。`Mark Word`是Java实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。Java对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁，锁状态的变化只能是从低到高，不能从高到低，即只存在锁升级，不存在锁降级。`ObjectMonitor`的3个重要字段为`_count`（记录获取锁的数量，因为Java同步锁机制支持重入，每次重入，该计数器都要加1），`_WaitSet`（调用`Object.wait()`时线程被放入该集合中）和`_EntryList`（等待该监视器释放的线程）。
+hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示锁标状态。`Mark Word`是Java实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。Java对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁，~~锁状态的变化只能是从低到高，不能从高到低，即只存在锁升级，不存在锁降级~~<sup>[HotSpot VM重量级锁降级机制的实现原理](https://zhuanlan.zhihu.com/p/28505703)</sup>。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为Java同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁<sup>[java重量锁，轻量锁，偏向锁](https://focusvirtualization.blogspot.com/2017/02/linux-85-java.html)</sup>。
 
+各种锁状态的变化过程如下：
 
+* 偏向锁
 
-参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)
+  引入偏向锁是为了在无多线程竞争的情况下尽量减少不必要的轻量级锁执行路径，因为轻量级锁的获取及释放依赖多次CAS原子指令，而偏向锁只需要在置换ThreadID的时候依赖一次CAS原子指令（由于一旦出现多线程竞争的情况就必须撤销偏向锁，所以偏向锁的撤销操作的性能损耗必须小于节省下来的CAS原子指令的性能消耗）。
+
+  获取偏向锁的过程如下：
+
+  （1）访问Mark Word中偏向锁的标识是否设置成1，锁标志位是否为01——确认为可偏向状态；
+
+  （2）如果为可偏向状态，则测试线程ID是否指向当前线程，如果是，进入步骤（5），否则进入步骤（3）；
+
+  （3）如果线程ID并未指向当前线程，则通过CAS操作竞争锁。如果竞争成功，则将Mark Word中线程ID设置为当前线程ID，然后执行（5）；如果竞争失败，执行（4）；
+
+  （4）如果CAS获取偏向锁失败，则表示有竞争。当到达全局安全点（safepoint）时获得偏向锁的线程被挂起，偏向锁升级为轻量级锁，然后被阻塞在安全点的线程继续往下执行同步代码；
+
+  （5）执行同步代码。
+
+  偏向锁的释放：
+
+  偏向锁只有遇到其他线程尝试竞争偏向锁时，持有偏向锁的线程才会释放锁，线程不会主动去释放偏向锁。偏向锁的撤销，需要等待全局安全点（在这个时间点上没有字节码正在执行），它会首先暂停拥有偏向锁的线程，判断锁对象是否处于被锁定状态，撤销偏向锁后恢复到未锁定（标志位为“01”）或轻量级锁（标志位为“00”）的状态。
+
+* 轻量级锁
+
+  “轻量级”是相对于使用操作系统互斥量来实现的传统锁而言的（重量级锁锁），轻量级锁并不是用来代替重量级锁的，它的本意是在没有多线程竞争的前提下，减少传统的重量级锁使用产生的性能消耗。轻量级锁所适应的场景是线程交替执行同步块的情况，如果存在同一时间访问同一锁的情况，就会导致轻量级锁膨胀为重量级锁。
+
+  轻量级锁的加锁过程如下：
+
+  （1）在代码进入同步块的时候，如果同步对象锁状态为无锁状态（锁标志位为“01”状态，是否为偏向锁为“0”），虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的`Mark Word`的拷贝，称之为 `Displaced Mark Word`；
+
+  （2）拷贝对象头中的`Mark Word`复制到锁记录中；
+
+  （3）拷贝成功后，虚拟机将使用CAS操作尝试将对象的`Mark Word`更新为指向Lock Record的指针，并将Lock record里的owner指针指向object mark word。如果更新成功，则执行步骤（4），否则执行步骤（5）；
+
+  （4）如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象`Mark Word`的锁标志位设置为“00”，即表示此对象处于轻量级锁定状态；
+
+  （5）如果这个更新操作失败了，虚拟机首先会检查对象的`Mark Word`是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行。否则说明多个线程竞争锁，轻量级锁就要膨胀为重量级锁，锁标志的状态值变为“10”，`Mark Word`中存储的就是指向重量级锁（互斥量）的指针，后面等待锁的线程也要进入阻塞状态。 而当前线程便尝试使用自旋来获取锁，自旋就是为了不让线程阻塞，而采用循环去获取锁的过程。
+
+  轻量级锁的释放过程如下：
+
+  （1）通过CAS操作尝试把线程中复制的Displaced Mark Word对象替换当前的`Mark Word`。
+
+  （2）如果替换成功，整个同步过程就完成了。
+
+  （3）如果替换失败，说明有其他线程尝试过获取该锁（此时锁已膨胀），那就要在释放锁的同时，唤醒被挂起的线程。
+
+* 重量级锁
+
+  重量级锁的实现在[ObjectMonitor.cpp](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.cpp)中完成，获取锁的方法为`void ATTR ObjectMonitor::enter(TRAPS) `，释放锁的方法为`void ATTR ObjectMonitor::exit(bool not_suspended, TRAPS) `。
+
+  获取锁的过程如下：
+
+  （1）设置`ObjectMonitor`的`_owner`字段为当前线程，如果设置失败时需要检查是否重入，设置成功时则表示获取锁成功；
+
+  （2）通过自旋执行`void ATTR ObjectMonitor::EnterI (TRAPS) `方法等待锁的释放进入方法中。该方法的逻辑是
+
+         a.当前线程被封装成ObjectWaiter对象node，状态设置成ObjectWaiter::TS_CXQ；
+    
+         b.在for循环中，通过CAS把node节点push到`_cxq`列表中，同一时刻可能有多个线程把自己的node节点push到`_cxq`列表中；
+    
+         c.node节点push到`_cxq`列表之后，通过自旋尝试获取锁，如果还是没有获取到锁，则通过park将当前线程挂起，等待被唤醒；
+    
+         d.当该线程被唤醒时，会从挂起的点继续执行，通过`ObjectMonitor::TryLock`尝试获取锁。
+
+  其本质就是通过CAS设置monitor的_owner字段为当前线程，如果CAS成功，则表示该线程获取了锁，跳出自旋操作，执行同步代码，否则继续被挂起；
+
+  当某个持有锁的线程执行完同步代码块时，会进行锁的释放，给其它线程机会执行同步代码，在HotSpot中，通过退出monitor的方式实现锁的释放，并通知被阻塞的线程，具体实现位于`ObjectMonitor::exit`方法中。
+
+  释放锁的过程如下：
+
+  （1）如果是重量级锁的释放，monitor中的_owner指向当前线程，即THREAD == _owner；
+
+  （2）根据不同的策略（由QMode指定），从cxq或EntryList中获取头节点，通过`ObjectMonitor::ExitEpilog`方法唤醒该节点封装的线程，唤醒操作最终由unpark完成；
+
+  （3）被唤醒的线程，继续执行monitor的竞争；
+
+为了减少重量级锁的操作，引进了偏向锁和轻量级锁。在某些场景下还可以对获取锁的过程做进一步优化，如下：
+
+* 适应性自旋
+
+  当线程在获取轻量级锁的过程中执行CAS操作失败时，是要通过自旋来获取重量级锁的。自旋的意思循环检查是否可以获取重量级做。JVM内部根据运行时信息觉得自旋的次数，即循环次数。适应性自旋，简单来说就是线程如果自旋成功了，则下次自旋的次数会更多，如果自旋失败了，则自旋的次数就会减少。
+
+* 锁粗化
+
+  锁粗化的就是将多次连接在一起的加锁、解锁操作合并为一次，将多个连续的锁扩展成一个范围更大的锁。例如：
+
+  ```java
+  public class StringBufferTest {
+      StringBuffer stringBuffer = new StringBuffer();
+  
+      public void append(){
+          stringBuffer.append("a");
+          stringBuffer.append("b");
+          stringBuffer.append("c");
+      }
+  }
+  ```
+
+  这里每次调用stringBuffer.append方法都需要加锁和解锁，如果虚拟机检测到有一系列连串的对同一个对象加锁和解锁操作，就会将其合并成一次范围更大的加锁和解锁操作，即在第一次append方法时进行加锁，最后一次append方法结束后进行解锁。
+
+* 锁消除
+
+  锁消除即删除不必要的加锁操作。根据代码逃逸技术，如果判断到一段代码中，堆上的数据不会逃逸出当前线程，那么可以认为这段代码是线程安全的，不必要加锁。例如：
+
+  ```java
+  public class SynchronizedTest02 {
+      public static void main(String[] args) {
+          SynchronizedTest02 test02 = new SynchronizedTest02();
+          //启动预热
+          for (int i = 0; i < 10000; i++) {
+              i++;
+          }
+          long start = System.currentTimeMillis();
+          for (int i = 0; i < 100000000; i++) {
+              test02.append("abc", "def");
+          }
+          System.out.println("Time=" + (System.currentTimeMillis() - start));
+      }
+  
+      public void append(String str1, String str2) {
+          StringBuffer sb = new StringBuffer();
+          sb.append(str1).append(str2);
+      }
+  }
+  ```
+
+  虽然StringBuffer的append是一个同步方法，但是这段程序中的StringBuffer属于一个局部变量，并且不会从该方法中逃逸出去，所以其实这过程是线程安全的，可以将锁消除。
+
+参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)，[JVM源码分析之synchronized实现](https://www.jianshu.com/p/c5058b6fe8e5)
 
 #### 9.锁的升级和降级@2018-08-07
 
@@ -1496,13 +1622,13 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
 #### 3.引用计数器和GC root 
 
-#### 4.垃圾收集方法@2018-08-12 
+#### 4.垃圾收集@2018-08-12 
 
 参考：[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)
 
 #### 5.内存泄漏 
 
-#### 6.JVM关闭
+#### 6.JVM关闭钩子
 
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
@@ -1621,6 +1747,8 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 参考：[JAVA实现空间索引编码（GeoHash）](https://blog.csdn.net/xiaojimanman/article/details/50358506)
 
 #### 6.选举算法
+
+#### 7.流量控制算法
 
 
 
