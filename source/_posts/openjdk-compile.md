@@ -389,3 +389,21 @@ share/vm/runtime/thread.cpp第3306行是create_vm方法，在该方法内打下�
 点击Local Windows Debbugger开始调试
 ### 12.参考
 http://www.jianshu.com/p/e85f93cc74cb
+
+# 二、`mac`下`openjdk`编译与`hotspot`调试过程
+
+### 1.准备
+
+查看README-builds.html文件，需要安装Xcode
+
+参考：[在Mac上编译OpenJDK](https://www.jianshu.com/p/9e3545ec864f)
+
+### 2.编译
+
+```sh
+make sanity
+make all
+```
+
+参考：[第一章 Mac os下编译openJDK 7](https://blog.csdn.net/j754379117/article/details/53695426)
+
