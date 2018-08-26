@@ -1620,6 +1620,10 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
 参考：[JAVA实现空间索引编码（GeoHash）](https://blog.csdn.net/xiaojimanman/article/details/50358506)
 
+#### 6.选举算法
+
+
+
 # 十五、架构
 
 #### 1.分布式锁的实现方式
