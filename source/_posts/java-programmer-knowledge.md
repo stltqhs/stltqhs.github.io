@@ -276,9 +276,165 @@ Java序列化允许将Java对象保存为一组字节，之后可以读取这组
 
 反射机制是程序可以在运行时获取类型或者实例的字段和方法，然后进行操作。通过反射的方式可以获取对象字段的值，也可以使用`sun.misc.Unsafe`来快速读取对象的字段值。
 
+以通反射方法调用`Object.hashCode`方法为例，叙述反射的原理，样例代码如下：
 
+```java
+Object o = new Object();
+Class clazz = o.getClass();
+Method hashCode = clazz.getMethod("hashCode", null);
+System.out.println(hashCode.invoke(o, null));
+```
 
-参考：[深入解析Java反射（1） - 基础](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)
+要通过反射获取对象的方法或者字段，首先需要获取Class对象。在静态编码情况下，可以确定Class对象，比如样例代码第二行，可以直接写成`Class clazz = Object.class`，当在运行情况下，可以通过调用对象的`getClass`方法获取对象的Class对象。`getClass`方法在`Object`类中声明，方法签名如下：
+
+```java
+public final native Class<?> getClass();
+```
+
+`getClass`方法是本地方法，由C++来实现，C++方法定义在[Object.c](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/java/lang/Object.c)文件中，方法定义如下：
+
+```c++
+JNIEXPORT jclass JNICALL
+Java_java_lang_Object_getClass(JNIEnv *env, jobject this)
+{
+    if (this == NULL) {
+        JNU_ThrowNullPointerException(env, NULL);
+        return 0;
+    } else {
+        return (*env)->GetObjectClass(env, this);
+    }
+}
+```
+
+`GetObjectClass`方法的核心代码如下：
+
+```c++
+klassOop k = JNIHandles::resolve_non_null(obj)->klass();
+jclass ret =
+  (jclass) JNIHandles::make_local(env, Klass::cast(k)->java_mirror());
+```
+
+指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java对象使用C++中的[klassOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/klassOop.hpp)来表示，`klassOop`就是指向`klassOopDesc`类型的指针。在JVM中，Java对象在内存中的布局分为三块：header，klass_field，KLASS。`JNIHandles::resolve_non_null(obj)->klass()`就是要获取对象的`KLASS`，`KLASS`是指向方法区中的类实例对象，类实例对象就是`Class`对象。所以`o.getClass()`方法的原理就是`o`对象存在指向类实例对象的引用，通过该引用可以获取`o`对象的`Class`对象。
+
+获得了`Class`对象，就可以通过`getMethod`获得`Method`方法引用。`getMethod`的调用链为`Class.getMethod`->`Class.getMethod0`->`Class.privateGetMethodRecursive`->`Class.privateGetDeclaredMethods`->`Class.searchMethods`。在`privateGetDeclaredMethods`方法中使用了一个重要的字段，`private volatile transient SoftReference<ReflectionData<T>> reflectionData`，`ReflectionData`是`Class`的内部类，定义如下：
+
+```java
+private static class ReflectionData<T> {
+    volatile Field[] declaredFields;
+    volatile Field[] publicFields;
+    volatile Method[] declaredMethods;
+    volatile Method[] publicMethods;
+    volatile Constructor<T>[] declaredConstructors;
+    volatile Constructor<T>[] publicConstructors;
+    // Intermediate results for getFields and getMethods
+    volatile Field[] declaredPublicFields;
+    volatile Method[] declaredPublicMethods;
+    volatile Class<?>[] interfaces;
+
+    // Value of classRedefinedCount when we created this ReflectionData instance
+    final int redefinedCount;
+
+    ReflectionData(int redefinedCount) {
+        this.redefinedCount = redefinedCount;
+    }
+}
+```
+
+首先，`reflectionData`字段是软引用，而`reflectionData`指向的`ReflectionData`实例对象在内存使用苛刻时就会被GC回收。因此，在获取类对象的方法或者字段时，都需要判断`reflectionData`执行的对象是否为`null`，如果为`null`，表示被回收，需要重新创建，然后通过`Atomic.casReflectionData(this, oldReflectionData, new SoftReference<>(rd))`（CAS操作）设置`reflectionData`字段。其次，`privateGetDeclaredMethods`会判断`ReflectionData`对象的`declaredPublicMethods`或者`declaredMethods`字段是否为`null`，如果为`null`，表示还未获取类对象的方法，需要调用`getDeclaredMethods0`方法获取类对象的方法，并设置到`ReflectionData`对象的`declaredPublicMethods`或者`declaredMethods`字段。
+
+通过`privateGetDeclaredMethods`方法可以获取到类实例的方法表，接下来通过`searchMethods`搜索需要获取的方法，该方法定义如下：
+
+```java
+private static Method searchMethods(Method[] methods,
+                                    String name,
+                                    Class<?>[] parameterTypes)
+{
+    Method res = null;
+    String internedName = name.intern();
+    for (int i = 0; i < methods.length; i++) {
+        Method m = methods[i];
+        if (m.getName() == internedName
+            && arrayContentsEq(parameterTypes, m.getParameterTypes())
+            && (res == null
+                || res.getReturnType().isAssignableFrom(m.getReturnType())))
+            res = m;
+    }
+
+    return (res == null ? res : getReflectionFactory().copyMethod(res));
+}
+```
+
+`searchMethods`方法首先迭代方法表，如果期望的方法被找到，需要将方法复制一个新对象，然后返回给样例代码中的`hashcode`变量。复制的方法`copy`定义在`Method.java`中。由此可见，每次通过调用`getMethod`方法返回的Method对象其实都是一个新的对象，如果调用频繁最好缓存起来。
+
+获取到`Method`对象后，接下来就是调用`invoke`方法，与`invoke`方法相关的字段和方法如下：
+
+```java
+private Method              root;
+private volatile MethodAccessor methodAccessor;
+@CallerSensitive
+public Object invoke(Object obj, Object... args)
+    throws IllegalAccessException, IllegalArgumentException,
+       InvocationTargetException
+{
+    if (!override) {
+        if (!Reflection.quickCheckMemberAccess(clazz, modifiers)) {
+            Class<?> caller = Reflection.getCallerClass();
+            checkAccess(caller, clazz, obj, modifiers);
+        }
+    }
+    MethodAccessor ma = methodAccessor;             // read volatile
+    if (ma == null) {
+        ma = acquireMethodAccessor();
+    }
+    return ma.invoke(obj, args);
+}
+```
+
+`root`字段指向`ReflectionData`对象中的方法表的某个`Method`实例（因为获得的`Method`对象是从`ReflectionData`复制而来，所以`root`保留了被复制的对象或者说原对象）。`Method.invoke`方法就是调用`methodAccessor`的`invoke`方法，`methodAccessor`这个属性如果`root`本身已经有了，那就直接用root的`methodAccessor`赋值过来，否则的话就创建一个。`MethodAccessor`本身就是一个接口，其主要有三种实现
+
+- DelegatingMethodAccessorImpl
+
+- NativeMethodAccessorImpl
+
+- GeneratedMethodAccessorXXX
+
+其中`DelegatingMethodAccessorImpl`是最终注入给`Method`的`methodAccessor`的，也就是某个`Method`的所有的`invoke`方法都会调用到这个`DelegatingMethodAccessorImpl.invoke`，正如其名一样的，是做代理的，也就是真正的实现可以是`NativeMethodAccessorImpl`和`GeneratedMethodAccessorXXX`两种。如果是`NativeMethodAccessorImpl`，那顾名思义，该实现主要是native实现的，而`GeneratedMethodAccessorXXX`是为每个需要反射调用的`Method`动态生成的类，后的XXX是一个不断递增的数字。并且所有的方法反射都是先走`NativeMethodAccessorImpl`，默认调了15次之后，才生成一个`GeneratedMethodAccessorXXX`类，生成好之后就会走这个生成的类的`invoke`方法。`NativeMethodAccessorImpl`的`invoke`方法定义如下：
+
+```java
+public Object invoke(Object obj, Object[] args)
+    throws IllegalArgumentException, InvocationTargetException
+{
+    if (++numInvocations > ReflectionFactory.inflationThreshold()) {
+        MethodAccessorImpl acc = (MethodAccessorImpl)
+            new MethodAccessorGenerator().
+                generateMethod(method.getDeclaringClass(),
+                               method.getName(),
+                               method.getParameterTypes(),
+                               method.getReturnType(),
+                               method.getExceptionTypes(),
+                               method.getModifiers());
+        parent.setDelegate(acc);
+    }
+
+    return invoke0(method, obj, args);
+}
+```
+
+`generateMethod`会生成一个`GeneratedMethodAccessorXXX`实例，它的`invoke`方法就是样例代码中的`o.hashCode()`，直接调用对象的方法，这种生成方法是Java字节码拼接技术，用来在运行时生成Java类。[javassist](http://www.javassist.org/)和[cglib](https://github.com/cglib/cglib)都是基于字节码拼接技术，在`Spring`中就是使用`cglib`来动态的生成代理类，实现`AOP`功能。`GeneratedMethodAccessorXXX`的类加载器是一个`DelegatingClassLoader`类加载器，新建一个类加载器是为了性能考虑，在某些情况下可以卸载这些生成的类。`invoke0`方法是本地方法，由C实现，方法定义在[NativeAccessors.c](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/sun/reflect/NativeAccessors.c)如下：
+
+```c
+JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0
+(JNIEnv *env, jclass unused, jobject m, jobject obj, jobjectArray args)
+{
+    return JVM_InvokeMethod(env, m, obj, args);
+}
+```
+
+实际方法调用交给JVM执行即可。
+
+当执行命令`java JavaApplication`时，JVM内部也是通过反射获取`JavaApplication`的`main`方法的`Method`对象，然后调用`Method.invoke`方法执行`main`方法的代码。
+
+参考：[深入解析Java反射（1） - 基础](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)，[从一起GC血案谈到反射原理](https://mp.weixin.qq.com/s/5H6UHcP6kvR2X5hTj_SBjA)
 
 #### 9.Statement和PreparedStatement的区别，如何防止SQL注入
 
@@ -384,7 +540,7 @@ CallableStatement | 存储过程查询
 
 #### 12.运行时方法绑定的实现原理（虚方法调用）
 
-
+参考：[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/Introduction-to-HotSpot)
 
 #### 13.异常处理机制（try/catch实现原理）
 
@@ -1292,7 +1448,29 @@ private int count;
 
 #### 8.synchronized原理 
 
-参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)
+Java同步机制使用`synchronized`关键字实现。`synchronized`有两种用法，第一种是修饰方法，即同步方法块，第二种是同步代码块，同步代码块和同步方法块被称为临界区。
+
+```java
+synchronized void syncMethodBlock() {} // 同步方法块
+void syncCodeBlock() {
+    synchronized(this) { // 同步代码块
+    }
+}
+```
+
+对于同步代码块，当源代码编译成字节码时，会存在`monitorenter`和`monitorexit`两个字节指令，所表示的意思就是进入临界区和退出临界区。而同步方法块没有这两个指令，由JVM内部判断方法修饰符是否存在`ACC_SYNCHRONIZED`标志，如果存在，JVM内部处理进入临界区和退出临界区的逻辑。
+
+在JVM中，Java对象在内存中的布局分为三块：对象头，实例数据和对齐填充数据（字节对齐在计算机中经常使用，它的作用有解决不同处机器架构内存访问的问题、提高内存访问速度）。指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java对象使用C++中的[klassOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/klassOop.hpp)来表示，该类定义了一个变量`volatile markOop  _mark`，而`markOop`是一个指向[markOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/markOop.hpp)类型的指针，`markOopDesc`就是上述所说的对象头，称为`Mark Word`。在32位JVM中，`markOopDesc`所表示的字节是32位，布局如下：
+
+```text
+hash:25 —>| age:4 biased_lock:1 lock:2
+```
+
+hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示锁标记。`Mark Word`是Java实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。Java对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁，锁状态的变化只能是从低到高，不能从高到低，即只存在锁升级，不存在锁降级。`ObjectMonitor`的3个重要字段为`_count`（记录获取锁的数量，因为Java同步锁机制支持重入，每次重入，该计数器都要加1），`_WaitSet`（调用`Object.wait()`时线程被放入该集合中）和`_EntryList`（等待该监视器释放的线程）。
+
+
+
+参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)
 
 #### 9.锁的升级和降级@2018-08-07
 
