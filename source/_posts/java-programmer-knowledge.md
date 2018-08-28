@@ -1737,7 +1737,7 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 
 * Servlet3.0的异步请求
 
-  [Servlet3.0规范](http://download.oracle.com/otn-pub/jcp/servlet-3.0-fr-oth-JSpec/servlet-3_0-final-spec.pdf?AuthParam=1535295644_2a1916a1ba6dc83fc114e98f80b21f78)2.3.3.3节的“Asynchronous processing”讲述了异步处理，当启用异步处理时，响应数据可以由其他线程创建，而当前线程可以立即交换给Servlet容器处理其他请求。当要启用异步处理时，首先需要生命HttpServlet支持异步处理，然后才能调用`request.startAsync`方法获得`AsyncContext`，它包含`request`和`response`。调用`startAsync`方法后，程序能保证在退出`service`方法时，不回完成本次请求，即不响应任何数据给客户端。需要在之后调用`AsyncContext.complete`方法来完成本次请求，写客户端写入数据。
+  [Servlet3.0规范](http://download.oracle.com/otn-pub/jcp/servlet-3.0-fr-oth-JSpec/servlet-3_0-final-spec.pdf?AuthParam=1535295644_2a1916a1ba6dc83fc114e98f80b21f78)2.3.3.3节的“Asynchronous processing”讲述了异步处理，当启用异步处理时，响应数据可以由其他线程创建，而当前线程可以立即交还给Servlet容器处理其他请求。当要启用异步处理时，首先需要声明HttpServlet支持异步处理，然后才能调用`request.startAsync`方法获得`AsyncContext`，它包含`request`和`response`。调用`startAsync`方法后，程序能保证在退出`service`方法时，不会完成本次请求，即不响应任何数据给客户端。需要在之后调用`AsyncContext.complete`方法来完成本次请求，向客户端写入数据。
 
 * Servlet3.1的NIO
 
