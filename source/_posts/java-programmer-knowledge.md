@@ -689,7 +689,7 @@ from  to  target type
 * target 需要跳转的行
 * type 异常类型
 
-异常表内容的第一行表示如果在第0行和第8行（行号指字节码的行，不是源代码的行）抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理，则线程结束。
+异常表内容的第一行表示如果在第0行和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理，则线程结束。
 
 参考：[The secret life of Java exceptions and JVM internals: Level up your Java knowledge](https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)
 
