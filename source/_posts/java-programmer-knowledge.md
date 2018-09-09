@@ -19,6 +19,10 @@ tags: java
 - [Statement和PreparedStatement的区别，如何防止SQL注入](#9-Statement和PreparedStatement的区别，如何防止SQL注入)
 - [Java命令](#10-Java命令)
 - [NoClassDefFoundError和ClassNotFoundException](#11-NoClassDefFoundError和ClassNotFoundException)
+- [方法动态绑定原理](#12-方法动态绑定原理)
+- [异常处理原理](#13-异常处理原理)
+- [泛型原理](#14-泛型原理)
+- [线程栈](#15-线程栈)
 
 ### [容器类](#二、容器类)
 
@@ -133,6 +137,28 @@ assert condition : expression // 第二种方式
 
 
 当`condition`为`false`时会抛出`AssertionError`错误，`expression`作为`AssertionError`构造函数的参数用来构造`AssertionError`对象。
+
+断言也可以作为一种设计模式，在很多开源框架中都存在使用此类方法来提高代码可读性和安全性，比如Spring中的代码：
+
+```java
+public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	Assert.notNull(beanFactory, "BeanFactory must not be null");
+	this.beanFactory = beanFactory;
+	if (this.resourceFactory == null) {
+		this.resourceFactory = beanFactory;
+	}
+}
+```
+
+`Assert.notNull`是一个方法，方法的实现方式为：
+
+```java
+public static void notNull(Object object, String message) {
+	if (object == null) {
+		throw new IllegalArgumentException(message);
+	}
+}
+```
 
 
 
