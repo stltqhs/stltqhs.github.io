@@ -405,5 +405,48 @@ make sanity
 make all
 ```
 
-参考：[第一章 Mac os下编译openJDK 7](https://blog.csdn.net/j754379117/article/details/53695426)
+错误：
+
+1.openjdk/hotspot/src/share/vm/runtime/virtualspace.cpp:527:14: error: ordered comparison between pointer and zero ('char *' and 'int')
+
+修改文件openjdk/hotspot/src/share/vm/runtime/virtualspace.cpp第527行和第546行
+
+```c
+if (long(base()) > 0) {
+```
+
+2.JVM崩溃：[libjvm.dylib+0x3f9c6d]  PerfDataManager::destroy()+0xab
+
+修改destroy方法，如下：
+
+```c++
+void PerfDataManager::destroy() {
+
+  if (_all == NULL)
+    // destroy already called, or initialization never happened
+    return;
+
+  for (int index = 0; index < _all->length(); index++) {
+    // 注释下面2行
+    //PerfData* p = _all->at(index);
+    //delete p;
+  }
+
+  delete(_all);
+  delete(_sampled);
+  delete(_constants);
+
+  _all = NULL;
+  _sampled = NULL;
+  _constants = NULL;
+}
+```
+
+参考：[第一章 Mac os下编译openJDK 7](https://blog.csdn.net/j754379117/article/details/53695426)，[Mac 10.12.4 编译 openJDK7 记录](https://www.jianshu.com/p/5107fc72558f)
+
+### 3.调试
+
+使用xcode调试hotspot。
+
+参考：[mac 平台编译并调试 OpenJDK7 和 HotSpot](https://www.jianshu.com/p/e53e7964db03)
 

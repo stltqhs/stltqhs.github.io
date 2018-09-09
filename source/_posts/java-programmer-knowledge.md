@@ -1,5 +1,5 @@
 ---
-title: Java工程师知识必备
+title: Java后台开发知识栈
 date: 2018-07-12 21:16:30
 tags: java
 ---
@@ -203,8 +203,6 @@ assert condition : expression // 第二种方式
   }
   ```
 
-  
-
 * 拓宽注解应用场景
 
   Java8添加了`ElementType.TYPE_USER`和`ElementType.TYPE_PARAMETER`用来描述注解的使用场景。
@@ -244,8 +242,6 @@ orElse()    | `orElse()`与`orElseGet()`类似，区别是`orElse()`参数为一
   System.out.println( "Result:" + engine.eval( "function f() { return 1; }; f() + 1;" ) );
   ```
 
-  
-
 * Base64
 
   添加了`java.util.Base64`，支持`Base64`功能。
@@ -284,7 +280,7 @@ Java序列化允许将Java对象保存为一组字节，之后可以读取这组
 
 反射机制是程序可以在运行时获取类型或者实例的字段和方法，然后进行操作。通过反射的方式可以获取对象字段的值，也可以使用`sun.misc.Unsafe`来快速读取对象的字段值。
 
-以通反射方法调用`Object.hashCode`方法为例，叙述反射的原理，样例代码如下：
+以反射方法调用`Object.hashCode`方法为例，叙述反射的原理，样例代码如下：
 
 ```java
 Object o = new Object();
@@ -322,7 +318,17 @@ jclass ret =
   (jclass) JNIHandles::make_local(env, Klass::cast(k)->java_mirror());
 ```
 
-指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java对象使用C++中的[klassOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/klassOop.hpp)来表示，`klassOop`就是指向`klassOopDesc`类型的指针。在JVM中，Java对象在内存中的布局分为三块：header，klass_field，KLASS。`JNIHandles::resolve_non_null(obj)->klass()`就是要获取对象的`KLASS`，`KLASS`是指向方法区中的类实例对象，类实例对象就是`Class`对象。所以`o.getClass()`方法的原理就是`o`对象存在指向类实例对象的引用，通过该引用可以获取`o`对象的`Class`对象。
+指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java实例对象使用C++中的[oopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/oop.hpp)来表示，`oop`就是指向`oopDesc`类型的指针。在JVM中，Java对象的头部有下列两个字段组成：
+
+```c++
+volatile markOop  _mark;
+  union _metadata {
+    wideKlassOop    _klass;
+    narrowOop       _compressed_klass;
+  } _metadata;
+```
+
+`_metadata`就是指向实例对象的`java.lang.Class`的对象，对应C++中的`klassOop`。`JNIHandles::resolve_non_null(obj)->klass()`就是要获取`_metadata`的`klassOop`对象，它指向方法区中的类实例对象，类实例对象就是`Class`对象。所以`o.getClass()`方法的原理就是`o`对象存在指向类实例对象的引用，通过该引用可以获取`o`对象的`Class`对象。
 
 获得了`Class`对象，就可以通过`getMethod`获得`Method`方法引用。`getMethod`的调用链为`Class.getMethod`->`Class.getMethod0`->`Class.privateGetMethodRecursive`->`Class.privateGetDeclaredMethods`->`Class.searchMethods`。在`privateGetDeclaredMethods`方法中使用了一个重要的字段，`private volatile transient SoftReference<ReflectionData<T>> reflectionData`，`ReflectionData`是`Class`的内部类，定义如下：
 
@@ -546,13 +552,168 @@ CallableStatement | 存储过程查询
 
   参考：[NoClassDefFoundError和ClassNotFoundException的不同](https://www.jianshu.com/p/93d0db07d2e3)
 
-#### 12.运行时方法绑定的实现原理（虚方法调用）
+#### 12.方法动态绑定原理
 
-参考：[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/Introduction-to-HotSpot)
+在Java中， `final`，`static`，`private`和构造方法与类的绑定关系是在编译期确定了的，所以我们称之为“先期绑定”或者“静态绑定”，对于实例“静态绑定”的方法，采用`invokespecial`指令调用。对于其他实例方法，则需要在运行时根据对象类型再行决议，我们称之为“后期绑定”或“动态绑定”，采用`invokevirtual`指令调用方法。
 
-#### 13.异常处理机制（try/catch实现原理）
+以下列代码为例，叙述方法动态绑定原理：
+
+```java
+public class VtableExample {
+    static class Father {
+        protected int i = 1;
+        public Father() {
+            print();
+        }
+        public void print() {
+            System.out.println("i=" + i);
+        }
+    }
+    
+    static class Son extends Father {
+        protected int i = 2;
+        public Son() {
+            
+        }
+        public void print() {
+            System.out.println("i=" + i);
+        }
+    }
+    
+    public static void main(String[] args) {
+        Father fa = new Son();
+        fa.print();
+    }
+}
+```
+
+上述代码的输出结果为
+
+```text
+i=0
+i=2
+```
+
+Java方法的动态绑定原理源自C++的虚方法调用，使用一张虚方法表`vtable`来控制方法调用，所不同的是C++在编译时就创建了类的虚方法表，而Java在运行时加载类才创建虚方法表。
+
+当第一次加载类时，JVM会调用[classFileParser.cpp::parseClassFile()](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/classfile/classFileParser.cpp)函数对类的字节码解析，调用`parseMethods()`函数解析类的所有方法，之后再调用`klassVtable::compute_vtable_size_and_num_mirandas()`函数计算当前类的`vtable`大小。计算`vtable`大小的过程为首先获取父类的`vtable`大小，再循环当前类的方法，调用`needs_new_vtable_entry`方法判断方法是否需要加入到`vtable`（如果方法被声明为`public`或者`protected`且不是`static`或者`final`时，称此方法为虚方法，此时该方法返回`true`），如果返回true，则`vtable`大小加1。当类解析完成后，就需要调用[InstanceKlass::allocate_instance_klass()](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlassKlass.cpp)方法分配内存，存储类信息，这些信息就包括`vtable`大小。当类信息创建完成后就可以准备方法调用了。在执行真正的方法调用前，需要调用[instanceKlass::link_class](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlass.cpp)进行方法链接，此时将会初始化虚方法表。初始化虚方法表的方法在`instanceKlass::link_class_impl`中执行，代码如下：
+
+```c++
+// Initialize the vtable and interface table after
+// methods have been rewritten since rewrite may
+// fabricate new methodOops.
+// also does loader constraint checking
+if (!this_oop()->is_shared()) {
+  ResourceMark rm(THREAD);
+  this_oop->vtable()->initialize_vtable(true, CHECK_false);
+  this_oop->itable()->initialize_itable(true, CHECK_false);
+}
+```
+
+在[initialize_vtable](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/klassVtable.cpp)方法中，先复制父类的虚方法表到当前类的虚方法表。然后在`update_inherited_vtable`方法中将子类重写的方法入口地址通过`klassVtable::put_method_at(Method* m, int index)`方法写回到虚方法表中，以替换父类方法地址。如果不是重写父类的虚方法，需要在虚方法表中插入一个新元素。
+
+当执行`invokevirtual`调用虚方法时，由[LinkResolver::resolve_invoke](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/interpreter/linkResolver.cpp)完成解析任务，该方法定义如下：
+
+```c++
+void LinkResolver::resolve_invoke(CallInfo& result, Handle recv, constantPoolHandle pool, int index, Bytecodes::Code byte, TRAPS) {
+  switch (byte) {
+    case Bytecodes::_invokestatic   : resolve_invokestatic   (result,       pool, index, CHECK); break;
+    case Bytecodes::_invokespecial  : resolve_invokespecial  (result,       pool, index, CHECK); break;
+    case Bytecodes::_invokevirtual  : resolve_invokevirtual  (result, recv, pool, index, CHECK); break;
+    case Bytecodes::_invokehandle   : resolve_invokehandle   (result,       pool, index, CHECK); break;
+    case Bytecodes::_invokedynamic  : resolve_invokedynamic  (result,       pool, index, CHECK); break;
+    case Bytecodes::_invokeinterface: resolve_invokeinterface(result, recv, pool, index, CHECK); break;
+  }
+  return;
+}
+```
+
+在样例代码中，当执行`new Son()`时，先创建`Father`的的虚方法表，假设`print`方法在虚方法表位置为`n`，父类初始化完成后，开始初始化子类`Son`，然后创建`Son`的虚方法表。创建`Son`的虚方法表时，先将父类的虚方法表复制到子类的虚方法表中，此时子类虚方法表位置为`n`的方法是`Father.print`。当执行`update_inherited_vtable`方法时会将子类的`print`方法入口写入到虚方法表位置为`n`的地方，此时虚方法表位置为`n`的方法是`Son.print`。所有类信息构造完成后，开始执行`Son`的构造函数，它首先调用`Father`的构造函数，在此函数中，会调用`print`方法，实际上是`invokevirtual print`指令。通过`instanceKlass::uncached_lookup_method`方法在`Father`类中查询`print`方法，可以找到该方法，该方法使用[methodOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/methodOop.cpp)表示，即`methodOop`指针，指向`Father.print`，它记录了通过`klassVtable::put_method_at(Method* m, int index)`放入虚方法表的位置`n`。然后在`LinkResolver::runtime_resolve_virtual_method`方法中通过位置`n`在`Son`的虚方法表中找到真正要执行的方法，即`Son.print`。最后调用`Son.print`方法。
+
+参考：[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/Introduction-to-HotSpot)，[從虛擬機角度看Java多態->（重寫override）的實現原理](https://hk.saowen.com/a/1e9e6f8665515e390f8338884a78aba61a91d1efb7ffcdf9d11aad3524c5083e)
+
+#### 13.异常处理原理
+
+#### 14. 泛型原理
+
+泛型可以对类和接口的类型参数化，使用比较多的是容器类，比如`List<String>`就是将`List`的元素参数化为`String`。使用泛型的作用有：
+
+* 编译器强类型检查
+* 去掉强制类型转换的代码
+* 支持泛型算法的实现
+
+类型参数的命名习惯如下：
+
+- E - Element (used extensively by the Java Collections Framework)
+- K - Key
+- N - Number
+- T - Type
+- V - Value
+- S,U,V etc. - 2nd, 3rd, 4th types
 
 
+
+泛型示例代码如下：
+
+```java
+public class Generic<T> {
+    private T t;
+    public static void main(String[] args) {
+        Generic<String> g = new Generic<String>();
+        g.t = "Hello";
+    }
+}
+```
+
+编译上述代码，然后反编译后得到如下信息：
+
+```text
+public class Generic<T extends java.lang.Object> extends java.lang.Object
+  minor version: 0
+  major version: 52
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #6.#20         // java/lang/Object."<init>":()V
+   #2 = Class              #21            // Generic
+   #3 = Methodref          #2.#20         // Generic."<init>":()V
+   #4 = String             #22            // Hello
+   #5 = Fieldref           #2.#23         // Generic.t:Ljava/lang/Object;
+   #6 = Class              #24            // java/lang/Object
+   ...
+{
+  public Generic();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 1: 0
+
+  public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=2, args_size=1
+         0: new           #2                  // class Generic
+         3: dup
+         4: invokespecial #3                  // Method "<init>":()V
+         7: astore_1
+         8: aload_1
+         9: ldc           #4                  // String Hello
+        11: putfield      #5                  // Field t:Ljava/lang/Object;
+        14: return
+}
+
+```
+
+从反编译代码中可以看到，字段`t`的类型是`Object`，而代码`Generic<String> g = new Generic<String>();`的泛型信息被擦除，变为`Generic g = new Generic();`，此时已经看不到泛型信息。对于非局部变量，即类、字段和方法（包括参数和返回值）不会擦除泛型信息，因此可以通过反射来获取泛型信息。上述代码`Generic<T>`变编译后，泛型信息是`Generic<T extends java.lang.Object>`，而变量`g`由于泛型类型被擦除，无法通过反射获取其泛型类型。可以通过`new Generic<String>(){}`构造一个子类，此时可以通过反射获取泛型信息。这种方式使用的比较多的是在json解析中，当要解析一串json文本为带有泛型的类型时使用如fastjson的用法`JSONObject.parseObject(json, new TypeReference<List<Person>>(){})`。
+
+参考：[java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题](https://blog.csdn.net/lonelyroamer/article/details/7868820)，[Generics](https://docs.oracle.com/javase/tutorial/java/generics/index.html)
+
+#### 15.线程栈
 
 
 # 二、容器类 
@@ -913,7 +1074,6 @@ enum {
 
   线程`run()`方法或者主线程`main()`方法结束或者抛出未捕获的异常时；
 
-  
 
 某些资料或者书籍会将Waiting、Timed_Waiting以及Blocked合并为一个状态，称为Blocked，即阻塞。
 
@@ -955,7 +1115,6 @@ enum {
   }
   ```
 
-  
 
 参考：[difference between wait and sleep](https://stackoverflow.com/questions/1036754/difference-between-wait-and-sleep)
 
@@ -1539,7 +1698,9 @@ void syncCodeBlock() {
 
 对于同步代码块，当源代码编译成字节码时，会存在`monitorenter`和`monitorexit`两个字节指令，所表示的意思就是进入临界区和退出临界区。而同步方法块没有这两个指令，由JVM内部判断方法修饰符是否存在`ACC_SYNCHRONIZED`标志，如果存在，JVM内部处理进入临界区和退出临界区的逻辑。
 
-在JVM中，Java对象在内存中的布局分为三块：对象头，实例数据和对齐填充数据（字节对齐在计算机中经常使用，它的作用有解决不同处机器架构内存访问的问题、提高内存访问速度）。指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java对象使用C++中的[klassOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/klassOop.hpp)来表示，该类定义了一个变量`volatile markOop  _mark`，而`markOop`是一个指向[markOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/markOop.hpp)类型的指针，`markOopDesc`就是上述所说的对象头，称为`Mark Word`。在32位JVM中，`markOopDesc`所表示的字节是32位，布局如下：
+
+
+在JVM中，Java对象在内存中的布局分为三块：对象头，实例数据和对齐填充数据（字节对齐在计算机中经常使用，它的作用有解决不同处机器架构内存访问的问题、提高内存访问速度）。指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java对象使用C++中的[oopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/oop.hpp)来表示，该类定义了一个变量`volatile markOop  _mark`，而`markOop`是一个指向[markOopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/markOop.hpp)类型的指针，`markOopDesc`就是上述所说的对象头，称为`Mark Word`。在32位JVM中，`markOopDesc`所表示的字节是32位，布局如下：
 
 ```text
 hash:25 —>| age:4 biased_lock:1 lock:2
@@ -1781,6 +1942,8 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 
 #### 6.mysql有哪些锁@2018-08-16 
 
+参考：[Understanding Innodb locks and deadlocks](https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/understandinginnodblocksanddeadlocks.pdf)
+
 #### 7.mysql实现B+树的原理 
 
 #### 8.数据一致性@2018-08-17
@@ -1854,6 +2017,8 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 # 十三、网络 
 
 #### 1.TCP和UDP的区别@2018-08-27 
+
+参考：https://my.oschina.net/fzyz999/blog/704510
 
 #### 2.TCP三次握手 
 
