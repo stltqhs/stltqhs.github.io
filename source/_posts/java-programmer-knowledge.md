@@ -634,6 +634,65 @@ void LinkResolver::resolve_invoke(CallInfo& result, Handle recv, constantPoolHan
 
 #### 13.异常处理原理
 
+当使用`javac`编译java源码时，会为方法内的`try/catch/finally`语句块生成一个异常表（`exception_table`），异常表指定了当出现异常时代码需要跳转到何处执行。
+
+以如下代码为例：
+
+```java
+public static void main(String[] args) throws Exception {
+      try {
+          throw new Exception();
+      } catch (Exception e) {
+          System.out.print("Caught!");
+      } finally {
+          System.out.print("Finally!");
+      }
+  }
+```
+
+当使用`javac`编译时，会生成如下字节码(`javap`)：
+
+```text
+     0: new           #17                 // class java/lang/Exception
+     3: dup
+     4: invokespecial #19                 // Method java/lang/Exception."<init>":()V
+     7: athrow
+     8: astore_1
+     9: getstatic     #20                 // Field java/lang/System.out:Ljava/io/PrintStream;
+    12: ldc           #26                 // String Caught!
+    14: invokevirtual #28                 // Method java/io/PrintStream.print:(Ljava/lang/String;)V
+    17: getstatic     #20                 // Field java/lang/System.out:Ljava/io/PrintStream;
+    20: ldc           #34                 // String Finally!
+    22: invokevirtual #28                 // Method java/io/PrintStream.print:(Ljava/lang/String;)V
+    25: goto          39
+    28: astore_2
+    29: getstatic     #20                 // Field java/lang/System.out:Ljava/io/PrintStream;
+    32: ldc           #34                 // String Finally!
+    34: invokevirtual #28                 // Method java/io/PrintStream.print:(Ljava/lang/String;)V
+    37: aload_2
+    38: athrow
+    39: return
+```
+
+异常表内容为：
+
+```text
+from  to  target type
+0     8     8   Class java/lang/Exception
+0    17    28   any
+```
+
+异常表的内容由四部分组成：
+
+* from 抛出异常的开始行
+* to 抛出异常的结束行
+* target 需要跳转的行
+* type 异常类型
+
+异常表内容的第一行表示如果在第0行和第8行（行号指字节码的行，不是源代码的行）抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理，则线程结束。
+
+参考：[The secret life of Java exceptions and JVM internals: Level up your Java knowledge](https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)
+
 #### 14. 泛型原理
 
 泛型可以对类和接口的类型参数化，使用比较多的是容器类，比如`List<String>`就是将`List`的元素参数化为`String`。使用泛型的作用有：
