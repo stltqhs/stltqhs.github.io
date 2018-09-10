@@ -715,7 +715,7 @@ from  to  target type
 * target 需要跳转的行
 * type 异常类型
 
-异常表内容的第一行表示如果在第0行和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理，则线程结束。
+异常表内容的第一行表示如果在第0行（此处的行指程序地址，比如第3行是指程序地址为3的指令，即`dup`）和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理，则线程结束。
 
 参考：[The secret life of Java exceptions and JVM internals: Level up your Java knowledge](https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)
 
@@ -799,6 +799,8 @@ Constant pool:
 参考：[java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题](https://blog.csdn.net/lonelyroamer/article/details/7868820)，[Generics](https://docs.oracle.com/javase/tutorial/java/generics/index.html)
 
 #### 15.线程栈
+
+参考：[JVM Internals](http://blog.jamesdbloom.com/)
 
 
 # 二、容器类 
