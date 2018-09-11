@@ -1443,9 +1443,9 @@ public class FinalFieldExample {
 }
 ```
 
+由于指令重排序的原因，对于[“双重检查加锁“（double check lock）](https://blog.csdn.net/jiankunking/article/details/73012648)也是不安全的操作。
 
-
-参考：[深入理解Java内存模型（一）——基础](http://www.infoq.com/cn/articles/java-memory-model-1)，[深入理解Java内存模型（二）——重排序](http://www.infoq.com/cn/articles/java-memory-model-2)，[深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)，[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)，[深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)，[深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)
+参考：[深入理解Java内存模型（一）——基础](http://www.infoq.com/cn/articles/java-memory-model-1)，[深入理解Java内存模型（二）——重排序](http://www.infoq.com/cn/articles/java-memory-model-2)，[深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)，[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)，[深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)，[深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)，[Java并发编程实战](https://book.douban.com/subject/10484692/)
 
 #### 2.volatile作用 
 
@@ -1995,9 +1995,13 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 
 #### 4.Tomcat架构
 
+参考：[Tomcat 系统架构与设计模式，第 1 部分 工作原理](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/index.html)，[Tomcat 系统架构与设计模式，第 2 部分 设计模式分析](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat2/)，[深入剖析Tomcat](https://book.douban.com/subject/10426640/)
+
 # 六、jvm 
 
 #### 1.类加载机制和双亲委派模型 
+
+参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)
 
 #### 2.JVM内存模型和运行时数据区@2018-08-11 
 
@@ -2014,6 +2018,8 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
 #### 7.调优方法@2018-08-13 
+
+参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)
 
 # 七、mysql 
 
