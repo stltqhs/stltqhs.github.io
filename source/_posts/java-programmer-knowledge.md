@@ -1,5 +1,5 @@
 ---
-title: Java后台开发知识栈
+title: Java后台开发大全
 date: 2018-07-12 21:16:30
 tags: java
 ---
@@ -2095,27 +2095,27 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 # 六、jvm 
 
-#### 1.类加载机制和双亲委派模型 
+#### 1.类加载机制和双亲委派模型
 
 参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)
 
-#### 2.JVM内存模型和运行时数据区@2018-08-11 
+#### 2.JVM内存模型和运行时数据区@2018-08-11
 
-#### 3.引用计数器和GC root 
+#### 3.引用计数器和GC root
 
-#### 4.垃圾收集@2018-08-12 
+#### 4.垃圾收集@2018-08-12
 
 参考：[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)
 
-#### 5.内存泄漏 
+#### 5.内存泄漏
 
 #### 6.JVM关闭钩子
 
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
-#### 7.调优方法@2018-08-13 
+#### 7.调优方法@2018-08-13
 
-参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)
+参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)
 
 # 七、mysql 
 
