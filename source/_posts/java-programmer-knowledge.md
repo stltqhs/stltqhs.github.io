@@ -2113,27 +2113,33 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
-#### 7.调优方法@2018-08-13
+#### 7.Java Agent
+
+[HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)
+
+参考：[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
+
+#### 8.调优方法@2018-08-13
 
 参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)
 
 # 七、mysql 
 
-#### 1.事务隔离级别 
+#### 1.事务隔离级别
 
-#### 2.三范式@2018-08-14 
+#### 2.三范式@2018-08-14
 
-#### 3.mysql有哪些索引，区别是什么 
+#### 3.mysql有哪些索引，区别是什么
 
-#### 4.悲观锁和乐观锁@2018-08-15 
+#### 4.悲观锁和乐观锁@2018-08-15
 
-#### 5.分布式原理 
+#### 5.分布式原理
 
-#### 6.mysql有哪些锁@2018-08-16 
+#### 6.mysql有哪些锁@2018-08-16
 
 参考：[Understanding Innodb locks and deadlocks](https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/understandinginnodblocksanddeadlocks.pdf)
 
-#### 7.mysql实现B+树的原理 
+#### 7.mysql实现B+树的原理
 
 #### 8.数据一致性@2018-08-17
 
@@ -2147,23 +2153,27 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 #### 13.SQL优化
 
+
+
 # 八、redis 
 
-#### 1.哨兵模式和主从数据同步@2018-08-20 
+#### 1.哨兵模式和主从数据同步@2018-08-20
 
 参考：[Redis 深度历险：核心原理与应用实践](https://juejin.im/book/5afc2e5f6fb9a07a9b362527/section)，[[深入学习Redis（1）：Redis内存模型](https://www.cnblogs.com/kismetv/p/8654978.html)](https://www.cnblogs.com/kismetv/p/8654978.html)
 
-#### 2.集群原理 
+#### 2.集群原理
 
-#### 3.redis与memcached区别@2018-08-21 
+#### 3.redis与memcached区别@2018-08-21
 
-#### 4.过期策略 
+#### 4.过期策略
 
-#### 5.如何保证一致性@2018-08-22 
+#### 5.如何保证一致性@2018-08-22
 
-#### 6.缓存热点与击穿 
+#### 6.缓存热点与击穿
 
-#### 7.redis内存淘汰机制@2018-08-23 
+#### 7.redis内存淘汰机制@2018-08-23
+
+
 
 # 九、mybatis 
 
@@ -2172,6 +2182,8 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 #### 2.mybatis与hibernate优缺点@2018-08-24
 
 #### 3.mybatis工作流程
+
+
 
 # 十、Spring
 
@@ -2189,11 +2201,15 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 #### 7.Spring声明性事务管理实现方式
 
+
+
 # 十一、MessageQueue 
 
 #### 1.重复消费问题@2018-08-25 
 
 #### 2.顺序问题
+
+
 
 # 十二、设计模式 
 
@@ -2204,6 +2220,8 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 #### 2.常用设计模式
 
 参考：[Software design pattern](https://en.wikipedia.org/wiki/Software_design_pattern)
+
+
 
 # 十三、网络 
 
@@ -2216,6 +2234,8 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 #### 3.IO多路复用@2018-08-28 
 
 #### 4.NIO 
+
+
 
 # 十四、算法和数据结构 
 
@@ -2248,3 +2268,11 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 #### 2.流量控制@2018-09-03
 
 #### 3.全文搜索引擎@2018-09-04
+
+
+
+# 十六、操作系统
+
+#### 1.内存映射
+
+参考：[认真分析mmap：是什么 为什么 怎么用](https://www.cnblogs.com/huxiao-tee/p/4660352.html)
