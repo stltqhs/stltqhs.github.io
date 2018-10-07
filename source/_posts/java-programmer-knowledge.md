@@ -57,12 +57,17 @@ tags: java
 - [锁的升级和降级](#9-锁的升级和降级)
 - [多种方式实现生产者和消费者](#10-多种方式实现生产者和消费者)
 
-### [Servlet](#5-Servlet)
+### [Servlet](#五、Servlet)
 
 * [Servlet生命周期与过滤器](#1-Servlet生命周期与过滤器)
 * [Session和Cookie的区别](#2-Session和Cookie的区别)
 * [Servlet的异步请求](#3-Servlet的异步请求)
 * [Tomcat架构](#4-Tomcat架构)
+
+### [JVM](#六、JVM)
+
+- [类加载机制和双亲委派模型](#1-类加载机制和双亲委派模型)
+- [Java内存模型和运行时数据区](#2-Java内存模型和运行时数据区)
 
 # 一、基础 
 
@@ -2093,7 +2098,7 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 参考：[Tomcat 系统架构与设计模式，第 1 部分 工作原理](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/index.html)，[Tomcat 系统架构与设计模式，第 2 部分 设计模式分析](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat2/)，[深入剖析Tomcat](https://book.douban.com/subject/10426640/)，[Tomcat源码debug环境](https://www.jianshu.com/p/d05ef74694f7)
 
-# 六、jvm 
+# 六、JVM
 
 #### 1.类加载机制和双亲委派模型
 
@@ -2215,27 +2220,25 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)
 
-#### 3.引用计数器和GC root
+#### 3.垃圾收集
 
-#### 4.垃圾收集@2018-08-12
+（引用计数器+内存泄漏）
 
 参考：[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)
 
-#### 5.内存泄漏
-
-#### 6.JVM关闭钩子
+#### 4.JVM关闭钩子
 
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
-#### 7.Java Agent
+#### 5.Java Agent
 
 [HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)
 
 参考：[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
 
-#### 8.Hotswap
+#### 6.Hotswap
 
-#### 9.调优方法@2018-08-13
+#### 7.调优方法@2018-08-13
 
 参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)
 
