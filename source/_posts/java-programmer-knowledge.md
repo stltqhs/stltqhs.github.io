@@ -2182,7 +2182,38 @@ protected synchronized Class<?> loadClass(String name,boolean resolve)throws Cla
 
 参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[【深入Java虚拟机】之四：类加载机制](https://blog.csdn.net/ns_code/article/details/17881581)，[【深入理解JVM】：类加载器与双亲委派模型](https://blog.csdn.net/u011080472/article/details/51332866)
 
-#### 2.JVM内存模型和运行时数据区@2018-08-11
+#### 2.Java内存模型和运行时数据区
+
+Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存或工作内存（local memory），本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，并不真实存在，它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化。JMM如下图所示：
+
+![Java内存模型](/images/jmm.jpg "Java内存模型")
+
+运行时数据区包括：**程序计数器**、**方法区**、**堆**、**虚拟机栈**、**本地方法栈**。
+
+* 程序计数器
+
+程序计数器（Program Counter Register）是一块较小的内存空间，它的作用可以看做是当前线程所执行的字节码行号指示器。
+
+* 方法区
+
+方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用`-XX:MaxPermSize`调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。**运行时常量池**（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。
+
+* 堆
+
+Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定，Java堆可以处于物理上不连续的内存空间中，只要逻辑上是连续的即可，就像我们的磁盘空间一样。在实现时，既可以实现成固定大小的，也可以是可扩展的，不过当前主流的虚拟机都是按照可扩展来实现的。可 通过`-Xmx`和`-Xms`控制Heap大小，如果在堆中没有内存完成实例分配，并且堆也无法再扩展时，将会抛出OutOfMemoryError异常。
+* 虚拟机栈
+
+虚拟机栈描述的是Java方法执行的内存模型：每个方法被执行的时候都会同时创建一个栈帧 （Stack Frame）用于存储局部变量表、操作栈、动态链接、方法出口等信息。每一个方法被调用直至执行完成的过程，就对应着一个栈帧在虚拟机栈中从入栈到出栈的过程。如果线程请求的栈深度大于虚拟机所允许的深度，将抛出`StackOverflowError`异常；如果虚拟机栈可以动态扩展，当扩展时无法申请到足够的内存时会抛出OutOfMemoryError异常。可通过`-Xss`调整虚拟机栈大小。
+
+* 本地方法栈
+
+本地方法栈（Native Method Stacks）与虚拟机栈所发挥的作用非常类似，区别在于虚拟机栈为虚拟机执行Java方法服务，而本地方法栈则是为虚拟机使用到的Native方法服务。
+
+
+
+**直接内存**不是虚拟机运行时数据区的一部分，在Java1.4引入的NIO中新增了`DirectByteBuffer`对象作为这块内存的引用。该部分的内存大小不受Java堆大小限制，而是受操作系统内存限制。
+
+参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)
 
 #### 3.引用计数器和GC root
 
