@@ -2097,7 +2097,90 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 #### 1.类加载机制和双亲委派模型
 
-参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)
+类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括**加载**、**验证**、**准备**、**解析**、**初始化**、**使用**、**卸载**七个阶段，其中类加载过程包括**加载**、**验证**、**准备**、**解析**、**初始化**五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。
+
+* 加载
+
+加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构；3、在Java堆中生成一个代表这个类的java.lang.Class对象，作为对方法区中这些数据的访问入口。加载阶段是可控性最强的阶段，开发人员可自定义类加载器实现类加载过程，也可以使用系统提供的类加载器。
+
+* 验证
+
+验证的目的是为了确保Class文件中的字节流包含的信息符合当前虚拟机规范要求，而且不会危害虚拟机自身的安全。验证阶段大致包括：**文件格式验证**、**元数据验证**、**字节码验证**、**符号应用验证**。为了提高虚拟机性能，在确保所有的类是安全的情况下，可以使用`-Xverify:none`来关闭验证功能。
+
+* 准备
+
+准备阶段是正式为类变量分配内存并设置类变量初始值的阶段，这些内存都将在方法区中分配。为类变量分配内存时，会将内存清零，所以，对于`public static int value = 3`中的变量`value`，在准备阶段的值是0。如果类字段的字段属性表中存在ConstantValue属性，即同时被final和static修饰（对于同时被static和final修饰的常量，必须在声明的时候就为其显式地赋值，否则编译时不通过），那么在准备阶段变量value就会被初始化为ConstValue属性所指定的值。解析阶段包括四种类型的解析，分别是**类或接口解析**、**字段解析**、**类方法解析**、**接口方法解析**。
+
+* 解析
+
+解析阶段是虚拟机将常量池中的符号引用转化为直接引用的过程。所谓符号引用，是指以一组符号来描述所引用的目标，符号可以是任何形式的字面量，只要使用时能无歧义地定位到目标即可，符号引用与虚拟机实现的内存布局无关，引用的目标并不一定已经加载到了内存中。而直接引用是指直接引用可以是直接指向目标的指针、相对偏移量或是一个能间接定位到目标的句柄，直接引用是与虚拟机实现的内存布局相关的，同一个符号引用在不同虚拟机实例上翻译出来的直接引用一般不会相同，如果有了直接引用，那说明引用的目标必定已经存在于内存之中了。
+
+* 初始化
+
+初始化阶段是执行类构造器`<clinit>()`方法的过程。`<clinit>（）`方法是由编译器自动收集类中的所有类变量的赋值动作和静态语句块中的语句合并产生的，编译器收集的顺序是由语句在源文件中出现的顺序所决定的，静态语句块中只能访问到定义在静态语句块之前的变量，定义在它之后的变量，在前面的静态语句中可以赋值，但是不能访问。
+
+
+
+---
+
+
+
+类加载器包括：
+
+* 启动（Bootstrap）类加载器
+
+负责将 Java_Home/lib下面的类库加载到内存中（比如rt.jar）。由于引导类加载器涉及到虚拟机本地实现细节，开发者无法直接获取到启动类加载器的引用，所以不允许直接通过引用进行操作。该加载器由C++代码实现。
+
+* 标准扩展（Extension）类加载器
+
+是由 Oracle 的 ExtClassLoader（sun.misc.Launcher$ExtClassLoader）实现的。它负责将Java_Home /lib/ext或者由系统变量 java.ext.dir指定位置中的类库加载到内存中。开发者可以直接使用标准扩展类加载器
+
+* 应用程序（Application）类加载器
+
+是由 Oracle 的 AppClassLoader（sun.misc.Launcher$AppClassLoader）实现的。它负责将系统类路径（CLASSPATH）中指定的类库加载到内存中。开发者可以直接使用系统类加载器。由于这个类加载器是ClassLoader中的getSystemClassLoader()方法的返回值，因此一般称为**系统（System）加载器**。
+
+* 自定义类加载器
+
+开发人员自定义的类加载器。
+
+
+
+这些类加载器组成一个层级关系，称为**双亲委派模型**，将类加载器的职责分开。而且这种层级关系一般通过组合关系来实现，而不是通过继承。层级关系如下图：
+
+![双亲委派模型](https://upload-images.jianshu.io/upload_images/4491294-8edc15f60a58bd0b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/468/format/webp "双亲委派模型")
+
+**双亲委派模型**的过程是首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。使用双亲委派模型的好处在于Java类随着它的类加载器一起具备了一种带有优先级的层次关系。**双亲委派模型**的实现代码是`java.lang.ClassLoader`的`loadClass()`方法，如下：
+
+```java
+protected synchronized Class<?> loadClass(String name,boolean resolve)throws ClassNotFoundException{
+    //check the class has been loaded or not
+    Class c = findLoadedClass(name);
+    if(c == null){
+        try{
+            if(parent != null){
+                c = parent.loadClass(name,false);
+            }else{
+                c = findBootstrapClassOrNull(name);
+            }
+        }catch(ClassNotFoundException e){
+            //if throws the exception ,the father can not complete the load
+        }
+        if(c == null){
+            c = findClass(name);
+        }
+    }
+    if(resolve){
+        resolveClass(c);
+    }
+    return c;
+}
+```
+
+自定义类加载器时只需要重写`findClass()`方法即可。
+
+线程上下文类加载器（Thread Context Class Loader）可以通过`java.lang.Thread`类的`setContextClassLoader()`方法进行设置，如果创建线程时还未设置，它将会从父线程中继承一个；如果在应用程序的全局范围内都没有设置过，那么这个类加载器默认就是应用程序类加载器。这种行为实际上是打破了**双亲委派模型**的层次结构。
+
+参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[【深入Java虚拟机】之四：类加载机制](https://blog.csdn.net/ns_code/article/details/17881581)，[【深入理解JVM】：类加载器与双亲委派模型](https://blog.csdn.net/u011080472/article/details/51332866)
 
 #### 2.JVM内存模型和运行时数据区@2018-08-11
 
@@ -2119,7 +2202,9 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 参考：[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
 
-#### 8.调优方法@2018-08-13
+#### 8.Hotswap
+
+#### 9.调优方法@2018-08-13
 
 参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)
 
