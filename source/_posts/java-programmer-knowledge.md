@@ -2202,7 +2202,7 @@ Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存�
 
 * 方法区
 
-方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用`-XX:MaxPermSize`调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。**运行时常量池**（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。
+方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用`-XX:MaxPermSize`调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。**运行时常量池**（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。在Java8中，方法区已被移除，引进了Metaspace（本地堆内存）来存放类信息，字符串常量池移至堆区。
 
 * 堆
 
@@ -2219,7 +2219,7 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 **直接内存**不是虚拟机运行时数据区的一部分，在Java1.4引入的NIO中新增了`DirectByteBuffer`对象作为这块内存的引用。该部分的内存大小不受Java堆大小限制，而是受操作系统内存限制。
 
-参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)
+参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)，[深入探究 JVM | 探秘 Metaspace](https://www.sczyh30.com/posts/Java/jvm-metaspace/)
 
 #### 3.垃圾收集
 
@@ -2235,15 +2235,15 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 垃圾收集算法包括四类，分别是**标记-清除算法**、**复制算法**、**标记-整理算法**、**分代收集算法**。
 
-* 标记-清除算法
+* 标记-清除算法（Mark-Sweep）
 
 该算法是最基本的收集算法，它分为“标记”和“清除”两个阶段：首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象。它的主要缺点有两个：一个是效率问题，标记和清除过程的效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致当程序在以后的运行过程中需要分配较大对象时无法找到足够的联系内存而不能不提前触发另一次垃圾收集动作。
 
-* 复制算法
+* 复制算法（Copying）
 
 该算法可解决“标记-清除算法”的效率问题，它将可用内存分成两块，当其中一块用完了，就将还存活的对象复制到另一块上面，然后再把已经用过的内存空间一次性清理掉。该算法的优点是垃圾回收速度快，不会有空间碎片问题，缺点是缩小了可用内存。新生代中JVM将内存分为较大的Eden空间和两块较小的Survivor空间，工作过程是先标记Eden空间中的可用对象，将这些对象复制到其中一个Survivor空间，然后将Eden空间清除，新对象可以继续分配在Eden空间中，当Eden空间不可用时，再次进行标记，然后将可用对象复制到另一个Survivor空间中，如此反复。
 
-* 标记-整理算法
+* 标记-整理算法（Mark-Compact）
 
 该算法解决“标记-清除算法”的空间碎片问题，第一步使用“标记-清除算法”，第二步将可用对象向前移动。
 
@@ -2251,7 +2251,7 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 根据对象存活周期不同将内存划分为几块，一般是将Java堆划分为新生代和老年代，其中，新生代使用复制算法，老年代使用标记整理算法。
 
-JVM垃圾收集器分为串行和并行两类，新生代可用的垃圾收集器有Serial、ParNew、Parallel Scavenge，老年代可用的垃圾收集器有CMS、Serial Old、Parallel Old。
+JVM垃圾收集器分为串行和并行两类，新生代可用的垃圾收集器有**Serial**、**ParNew**、**Parallel Scavenge**，老年代可用的垃圾收集器有**CMS**、**Serial Old**、**Parallel Old**。
 
 * Serial收集器
 
@@ -2279,11 +2279,11 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 
 * G1收集器
 
-G1收集器的设计目标是取代CMS收集器，不会产生很多内存碎片，Stop The World(STW)更可控，G1在停顿时间上添加了预测机制，用户可以指定期望停顿时间。G1收集器将堆划分为多个内存区域，每一块区域都可以作为Eden或者Survivor或者Tenured或者是大对象区域。内存区域大小可以通过参数`-XX:G1HeapRegionSize`设定，取值范围从1M到32M，且是2的指数。
+**G1收集器**的设计目标是取代CMS收集器，不会产生很多内存碎片，Stop The World(STW)更可控，G1在停顿时间上添加了预测机制，用户可以指定期望停顿时间，使用复制算法实现。G1收集器将堆划分为多个内存区域（Region），每一块区域都可以作为Eden或者Survivor或者Tenured或者是大对象区域。内存区域大小可以通过参数`-XX:G1HeapRegionSize`设定，取值范围从1M到32M，且是2的指数。一次收集其中一部分，这样的方式又叫做增量收集(incremental collection)，分代收集也可以看成一种特殊的增量收集。
 
 内存泄漏是指无用对象（不再使用的对象）持续占有内存或无用对象的内存得不到及时释放，从而造成内存空间的浪费称为内存泄漏。长生命周期的对象持有短生命周期对象的引用就很可能发生内存泄漏，尽管短生命周期对象已经不再需要，但是**因为长生命周期持有它的引用而导致不能被回收，这就是Java中内存泄漏的发生场景**。
 
-参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)，[Java内存泄漏分析和解决](https://www.jianshu.com/p/54b5da7c6816)，[Java Hotspot G1 GC的一些关键技术](https://tech.meituan.com/g1.html)
+参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)，[Java内存泄漏分析和解决](https://www.jianshu.com/p/54b5da7c6816)，[Garbage First G1收集器 理解和原理分析](https://liuzhengyang.github.io/2017/06/07/garbage-first-collector/)
 
 #### 4.JVM关闭钩子
 
