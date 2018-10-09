@@ -2287,6 +2287,16 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 
 #### 4.JVM关闭钩子
 
+首先JVM的关闭方式可以分为三种：
+
+* 正常关闭：当最后一个非守护线程结束或者调用了System.exit或者通过其他特定平台的方法关闭（发送SIGINT，SIGTERM信号等）
+
+* 强制关闭：通过调用Runtime.halt方法或者是在操作系统中直接kill(发送SIGKILL信号)掉JVM进程
+
+* 异常关闭：运行中遇到RuntimeException异常等。
+
+JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删除临时文件、停止日志服务以及内存数据写到磁盘等，为此JVM提供了关闭钩子（shutdown hooks）来做这些事情。关闭钩子本质上是一个线程（也称为Hook线程），用来监听JVM的关闭。通过使用`Runtime`的`addShutdownHook(Thread hook)`可以向JVM注册一个关闭钩子。Hook线程在JVM **正常关闭**才会执行，在强制关闭时不会执行。对于一个JVM中注册的多个关闭钩子它们将会并发执行，所以JVM并不能保证它的执行顺行。当所有的Hook线程执行完毕后，如果此时runFinalizersOnExit为true，那么JVM将先运行终结器，然后停止。
+
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
 #### 5.Java Agent
