@@ -2301,9 +2301,44 @@ JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删
 
 #### 5.Java Agent
 
-[HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)
+javaagent的主要功能如下：
 
-参考：[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
+- 可以在加载class文件之前做拦截，对字节码做修改
+- 可以在运行期对已加载类的字节码做变更，但是这种情况下会有很多的限制，后面会详细说
+- 还有其他一些小众的功能
+  - 获取所有已经加载过的类
+  - 获取所有已经初始化过的类（执行过clinit方法，是上面的一个子集）
+  - 获取某个对象的大小
+  - 将某个jar加入到bootstrap classpath里作为高优先级被bootstrapClassloader加载
+  - 将某个jar加入到classpath里供AppClassloard去加载
+  - 设置某些native方法的前缀，主要在查找native方法的时候做规则匹配
+
+[JVMTI](http://docs.oracle.com/javase/7/docs/platform/jvmti/jvmti.html)全称JVM Tool Interface，是JVM暴露出来的一些供用户扩展的接口集合。JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口（如果有的话），这些接口可以供开发者扩展自己的逻辑。JVMTIAgent其实就是一个动态库，利用JVMTI暴露出来的一些接口来干一些我们想做、但是正常情况下又做不到的事情。，不过为了和普通的动态库进行区分，它一般会实现如下的一个或者多个函数：
+
+```cpp
+JNIEXPORT jint JNICALL
+Agent_OnLoad(JavaVM *vm, char *options, void *reserved);
+
+JNIEXPORT jint JNICALL
+Agent_OnAttach(JavaVM* vm, char* options, void* reserved);
+
+JNIEXPORT void JNICALL
+Agent_OnUnload(JavaVM *vm); 
+```
+
+- Agent_OnLoad函数，如果agent是在启动时加载的，也就是在vm参数里通过-agentlib来指定的，那在启动过程中就会去执行这个agent里的Agent_OnLoad函数。
+
+- Agent_OnAttach函数，如果agent不是在启动时加载的，而是我们先attach到目标进程上，然后给对应的目标进程发送load命令来加载，则在加载过程中会调用Agent_OnAttach函数。
+
+- Agent_OnUnload函数，在agent卸载时调用，不过貌似基本上很少实现它。
+
+JVMTIAgent在开发过程中经常会使用到，比如调试功能（使用`-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:61349`来设置），它会查找一个动态库（Linux系统下为`libjdwp.so`）并加载（调用`Agent_OnLoad`方法）。
+
+instrument实现了JVMTIAgent（动态库为`libinstrument.so`），它称为javaagent，别名JPLISAgent(Java Programming Language Instrumentation Services Agent)。instrument的使用方式是通过在启动命令上添加`-javaagent:xxx.jar`的方式加载一个被称为agent的jar包，jar包的META-INF/MANIFEST.MF中应当声明Premain-Class或Main-Class。启动时JVM会寻找这个类中的`public static void premain(String agentArgs, Instrumentation instrumentation)`, `Instrumentation`对象中可以添加自己的类修改逻辑进行字节码修改。另外当通过attach到一个运行中的JVM的方式时，可以调用`agentmain()`方法来获取`Instrumentation`对象进行类的重定义。
+
+使用javagent实现的一些知名的库有[Btrace](https://github.com/btraceio/btrace)，[HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)。
+
+参考：[javaagent](https://liuzhengyang.github.io/2017/03/15/javaagent/)，[如何在生产环境使用Btrace进行调试](https://www.jianshu.com/p/dbb3a8b5c92f)，[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
 
 #### 6.Hotswap
 
