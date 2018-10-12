@@ -2432,7 +2432,7 @@ Context每次reload后，`WebappLoader`都会创建一个新的`ClassLoader`，�
 
 对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。
 
-参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)
+参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)
 
 # 七、mysql 
 
