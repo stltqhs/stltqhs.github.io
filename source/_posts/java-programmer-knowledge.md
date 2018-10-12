@@ -69,6 +69,10 @@ tags: java
 - [类加载机制和双亲委派模型](#1-类加载机制和双亲委派模型)
 - [Java内存模型和运行时数据区](#2-Java内存模型和运行时数据区)
 - [垃圾收集](#3-垃圾收集)
+- [JVM关闭钩子](#4-JVM关闭钩子)
+- [Java Agent](#5-Java-Agent)
+- [Hotswap](#6-Hotswap)
+- [调优方法](#7-调优方法)
 
 # 一、基础 
 
@@ -2342,9 +2346,93 @@ instrument实现了JVMTIAgent（动态库为`libinstrument.so`），它称为jav
 
 #### 6.Hotswap
 
-#### 7.调优方法@2018-08-13
+热部署（Hotswap）是在不重启 Java 虚拟机的前提下，能自动侦测到 class 文件的变化，更新运行时 class 的行为。目前的 Java 虚拟机只能实现方法体的修改热部署（只有在Debug模式下才能使用），对于整个类的结构修改，仍然需要重启虚拟机，对类重新加载才能完成更新操作。默认的虚拟机行为只会在启动时加载类，如果后期有一个类需要更新的话，单纯替换编译的 class 文件，Java 虚拟机是不会更新正在运行的 class。为了实现热部署，可以使用自定义的 classloader 来加载需要监听的 class，这样就能控制类加载的时机，从而实现热部署。由于同一个类加载器无法同时加载两个相同名称的类，不论类的结构如何发生变化，生成的类名不会变，而 classloader 只能在虚拟机停止前销毁已经加载的类，这样 classloader 就无法加载更新后的类了。解决的办法是让每次加载的类都保存成一个带有版本信息的 class，比如加载 Test.class 时，保存在内存中的类是 Test_v1.class，当类发生改变时，重新加载的类名是 Test_v2.class，使用该方法后，实例化对象的方式都需要使用反射，不能使用`new`关键字。
 
-参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)
+Tomcat支持热部署，通过配置Context的`realodable`为`true`告知Tomcat某个Context支持重新加载被修改的类，这里以Tomcat的Context的reload功能为例说明Tomcat的热部署的实现方式。Tomcat的Context标准实现类是`org.apache.catalina.core.StandardContext`，在`org.apache.catalina.loader.WebappLoader`的`backgroundProcess()`方法会周期性地检查是否存在被修改的类，该方法定义如下：
+
+```java
+public void backgroundProcess() {
+    if (reloadable && modified()) {
+        try {
+            Thread.currentThread().setContextClassLoader
+                (WebappLoader.class.getClassLoader());
+            if (context != null) {
+                context.reload();
+            }
+        } finally {
+            if (context != null && context.getLoader() != null) {
+                Thread.currentThread().setContextClassLoader
+                    (context.getLoader().getClassLoader());
+            }
+        }
+    }
+}
+```
+
+该方法会继续调用`StandardContext.reload()`方法。
+
+`StandardContext.reload()`方法定义如下：
+
+```java
+public synchronized void reload() {
+    // Validate our current component state
+    if (!getState().isAvailable())
+        throw new IllegalStateException
+            (sm.getString("standardContext.notStarted", getName()));
+    if(log.isInfoEnabled())
+        log.info(sm.getString("standardContext.reloadingStarted",
+                getName()));
+    // Stop accepting requests temporarily.
+    setPaused(true);
+    try {
+        stop();
+    } catch (LifecycleException e) {
+        log.error(
+            sm.getString("standardContext.stoppingContext", getName()), e);
+    }
+    try {
+        start();
+    } catch (LifecycleException e) {
+        log.error(
+            sm.getString("standardContext.startingContext", getName()), e);
+    }
+    setPaused(false);
+    if(log.isInfoEnabled())
+        log.info(sm.getString("standardContext.reloadingCompleted",
+                getName()));
+}
+```
+
+它先调用`stop()`方法，然后再调用`start()`方法。`StandardContext.start()`之后的调用链会是`StandardContext.startInternal()`，`WebappLoader.start()`，`WebappLoader.startInternal()`。`WebappLoader`封装了`ClassLoader`，`StandardContext`将要使用到的类加载器就是`WebppLoader.classLoader`，它在`WebappLoader.startInternal()`方法内调用`createClassLoader()`方法实例化一个`ClassLoader`，代码如下：
+
+```java
+private WebappClassLoader createClassLoader()
+    throws Exception {
+
+    Class<?> clazz = Class.forName(loaderClass);
+    WebappClassLoader classLoader = null;
+
+    if (parentClassLoader == null) {
+        parentClassLoader = context.getParentClassLoader();
+    }
+    Class<?>[] argTypes = { ClassLoader.class };
+    Object[] args = { parentClassLoader };
+    Constructor<?> constr = clazz.getConstructor(argTypes);
+    classLoader = (WebappClassLoader) constr.newInstance(args);
+
+    return classLoader;
+}
+```
+
+Context每次reload后，`WebappLoader`都会创建一个新的`ClassLoader`，这个`ClassLoader`会重新加载Servlet相关组件的类，完成热部署的效果。
+
+参考：[深入探索 Java 热部署](https://www.ibm.com/developerworks/cn/java/j-lo-hotdeploy/index.html)，[Tomcat 热部署实现方式源码分析总结](https://my.oschina.net/heroShane/blog/198492)，[Tomcat源码debug环境](https://www.jianshu.com/p/d05ef74694f7)
+
+#### 7.调优方法
+
+对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。
+
+参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)
 
 # 七、mysql 
 
