@@ -6,10 +6,10 @@ tags: java
 
 
 
-#### 有哪些原则
+# 有哪些原则
 
 参考：[Head First 设计模式（中文版）](https://book.douban.com/subject/2243615/)
 
-#### 常用设计模式
+# 常用设计模式
 
 参考：[Software design pattern](https://en.wikipedia.org/wiki/Software_design_pattern)

@@ -4,7 +4,7 @@ date: 2018-10-13 08:15:09
 tags: java
 ---
 
-#### Servlet生命周期与过滤器
+# Servlet生命周期与过滤器
 
 Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：
 
@@ -26,7 +26,7 @@ Servlet中的过滤器Filter是实现了javax.servlet.Filter接口的服务器�
 
 参考：[Servlet 生命周期](http://www.runoob.com/servlet/servlet-life-cycle.html)，[Servlet,Filter,Listener,Interceptor的作用和区别](https://my.oschina.net/hapier/blog/699193)
 
-#### Session和Cookie的区别
+# Session和Cookie的区别
 
 Session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群、数据库、文件中；
 
@@ -34,7 +34,7 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 
 参考：[看完就彻底懂了session和cookie](https://www.jianshu.com/p/25802021be63)
 
-#### Servlet的异步请求
+# Servlet的异步请求
 
 - Servlet3.0的异步请求
 
@@ -46,7 +46,7 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 
 参考：[使用异步Servlet改进应用性能](http://www.infoq.com/cn/news/2013/11/use-asynchronous-servlet-improve)，[servlet3异步原理与实践](https://www.jianshu.com/p/c23ca9d26f64)
 
-#### Tomcat架构
+# Tomcat架构
 
 Tomcat的Servlet容器是用来处理请求servlet资源，并为web客户端填充response对象的模块。在Tomcat中，共有四种类型的容器，分别是：Engine、Host、Context和Wrapper。servlet容器是[org.apache.catalina.Container](https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Container.java)接口的实例。Container接口及其相关类的UML类图如下：
 

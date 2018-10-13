@@ -4,7 +4,7 @@ date: 2018-10-13 08:14:57
 tags: java
 ---
 
-#### happens-before原则 
+# happens-before原则 
 
 在共享内存的多处理器体系结构中，每个处理器都拥有自己的缓存，并且定期地与主内存进行协调。此时就存在处理器P1修改变量A时，在同步变量A到主内存之前，处理器P2读取变量A将是一个旧值。此类问题只能由程序来控制这种**内存不一致**的问题。
 
@@ -70,7 +70,7 @@ public class FinalFieldExample {
 
 参考：[深入理解Java内存模型（一）——基础](http://www.infoq.com/cn/articles/java-memory-model-1)，[深入理解Java内存模型（二）——重排序](http://www.infoq.com/cn/articles/java-memory-model-2)，[深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)，[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)，[深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)，[深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)，[Java并发编程实战](https://book.douban.com/subject/10484692/)
 
-#### volatile作用 
+# volatile作用 
 
 volatile有两个作用，一个是将long和double类型的读取和写入操作原子化（由于long和double是64位，JVM内部会将long和double的操作分为两个32位的操作，而且不是原子操作），另一个是控制变量线程间的可见性（**volatile变量规则**规定对volatile变量的写入操作必须在对该变量的读取操作之前执行）。
 
@@ -80,7 +80,7 @@ volatile有两个作用，一个是将long和double类型的读取和写入操�
 
 参考：[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)
 
-#### CAS 
+# CAS 
 
 CAS是“Compare And Swap”的简称，中文含义是“比较并交换”。CAS操作基于CPU提供的原子操作指令实现。
 
@@ -145,7 +145,7 @@ ABA问题可能会导致灾难性的后果，因此在某些场景需要使用�
 
 参考：[深入浅出CAS](https://www.jianshu.com/p/fb6e91b013cc)，[比较并交换](https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2)，[JAVA中CAS-ABA的问题解决方案AtomicStampedReference](https://juejin.im/entry/5a7288645188255a8817fe26)
 
-#### LockSupport原理
+# LockSupport原理
 
 LockSupport提供了`park`和`unpark`方法用于阻塞线程和解除线程阻塞，调用`park`方法时还可以传一个`Blocker`参数，指明线程阻塞的对象，可以用于线程调试。使用`jstack`来dump线程栈信息时看到`parking to wait for  <0x0000000708f32990>`，0x0000000708f32990这个地址的对象就是`Blocker`，如下所示：
 
@@ -188,7 +188,7 @@ void Parker::unpark();
 
 参考： [浅谈Java并发编程系列（八）—— LockSupport原理剖析](https://segmentfault.com/a/1190000008420938)，[Java的LockSupport.park()实现分析](https://blog.csdn.net/hengyunabc/article/details/28126139)
 
-#### AQS原理 
+# AQS原理 
 
 AQS是`AbstractQueuedSynchronizer`类的简称，它是`java.concurrent.util`包里各种独占锁或者共享锁（包括`ReentrantLock`和`Semaphore`等）实现的基础。
 
@@ -236,7 +236,7 @@ protected final void setState(int newState);
 
 参考：[AQS 和 高级同步器](http://novoland.github.io/%E5%B9%B6%E5%8F%91/2014/07/26/AQS%20%E5%92%8C%20%E9%AB%98%E7%BA%A7%E5%90%8C%E6%AD%A5%E5%99%A8.html)
 
-#### ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理 
+# ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理 
 
 **1).ReentrantLock**
 
@@ -318,7 +318,7 @@ private int count;
 
 参考：[Java并发之ReentrantLock详解](https://blog.csdn.net/lipeng_bigdata/article/details/52154637)，[什么时候使用CountDownLatch](http://www.importnew.com/15731.html)，[JAVA多线程--信号量(Semaphore)](https://my.oschina.net/cloudcoder/blog/362974)，[深入浅出java CyclicBarrier](https://www.jianshu.com/p/424374d71b67)，[Java多线程（十）之ReentrantReadWriteLock深入分析](https://my.oschina.net/adan1/blog/158107)
 
-#### BlockingQueue原理
+# BlockingQueue原理
 
 BlockingQueue接口有两个重要方法，分别是取元素`take`和加入元素`put`。以ArrayBlockingQueue为例，`put`方法如下：
 
@@ -391,7 +391,7 @@ private E dequeue() {
 
 参考：[Java并发编程-阻塞队列(BlockingQueue)的实现原理](https://blog.csdn.net/chenchaofuck1/article/details/51660119)
 
-#### synchronized原理 
+# synchronized原理 
 
 Java同步机制使用`synchronized`关键字实现。`synchronized`有两种用法，第一种是修饰方法，即同步方法块，第二种是同步代码块，同步代码块和同步方法块被称为临界区。
 
@@ -547,7 +547,7 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
 参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)，[JVM源码分析之synchronized实现](https://www.jianshu.com/p/c5058b6fe8e5)
 
-#### 锁的升级和降级
+# 锁的升级和降级
 
 锁降级在`ReentrantReadWriteLock`中的意思是从写锁降级为读锁，但是`ReentrantReadWriteLock`不能从读锁升级为写锁。
 
@@ -555,7 +555,7 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
 锁升级在JVM中是指偏向锁升级为轻量级锁，轻量级锁升级为重量级锁。
 
-#### 多种方式实现生产者和消费者模式
+# 多种方式实现生产者和消费者模式
 
 - wait/notify
 

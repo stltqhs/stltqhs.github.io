@@ -4,7 +4,7 @@ date: 2018-10-13 08:14:38
 tags: java
 ---
 
-#### HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式 
+# HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式 
 
 - HashMap
 
@@ -76,7 +76,7 @@ tags: java
 
   参考：[Map 综述（四）：彻头彻尾理解 HashTable](https://blog.csdn.net/justloveyou_/article/details/72862373)
 
-#### ArrayList和LinkedList实现方式以及SubList实现方式 
+# ArrayList和LinkedList实现方式以及SubList实现方式 
 
 - ArrayList
 
@@ -122,7 +122,7 @@ tags: java
 
   参考：[Java 集合系列06之 Vector详细介绍(源码解析)和使用示例](https://www.cnblogs.com/skywang12345/p/3308833.html)
 
-#### HashSet实现方式 
+# HashSet实现方式 
 
 HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, PRESENT)`来实现的，map就是HashMap类型，PRESENT为一个Object类型，用来作为HashMap的值对象。
 
@@ -130,7 +130,7 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
 参考：[HashSet 的实现原理](http://wiki.jikexueyuan.com/project/java-collection/hashset.html)
 
-#### Set,Queue,List,Map,Stack 
+# Set,Queue,List,Map,Stack 
 
 - Set
 
@@ -156,7 +156,7 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
   LIFO队列
 
-#### ConcurrentHashMap的实现方式 
+# ConcurrentHashMap的实现方式 
 
 ConcurrentHashMap使用`锁分段`的方式来实现高效的HashMap，使用`不变性`和`volatile`来减少加锁操作，提高线程并发。
 
@@ -186,7 +186,7 @@ ConcurrentHashMap数据结构如下图：
 
 参考：[探索 ConcurrentHashMap 高并发性的实现机制](https://www.ibm.com/developerworks/cn/java/java-lo-concurrenthashmap/index.html)，[Map 综述（三）：彻头彻尾理解 ConcurrentHashMap](https://blog.csdn.net/justloveyou_/article/details/72783008)
 
-#### Collections.synchronizedMap实现方式 
+# Collections.synchronizedMap实现方式 
 
 使用`装饰模式`封装相关方法，且方法为同步方法。相关代码如下：
 
@@ -226,7 +226,7 @@ private static class SynchronizedMap<K,V>
 
 参考：[Wrapper Implementations](https://docs.oracle.com/javase/tutorial/collections/implementations/wrapper.html)
 
-#### hashCode()和equals()方法的作用 
+# hashCode()和equals()方法的作用 
 
 hashCode和equals方法在Object类中定义，其中hashCode方法为native方法，equals方法定义如下：
 
@@ -260,7 +260,7 @@ hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时has
 
 参考：[Java hashCode() 和 equals()的若干问题解答](https://www.cnblogs.com/skywang12345/p/3324958.html)，[Java提高篇——equals()与hashCode()方法详解](https://www.cnblogs.com/Qian123/p/5703507.html)
 
-#### Arrays.sort()和Collections.sort()的实现方式
+# Arrays.sort()和Collections.sort()的实现方式
 
 `Arrays.sort(int[])`排序算法使用`DualPivotQuicksort.sort`方法，称为“双轴快速排序“，该方法会根据数组长度和数值的连续性来使用不同的排序算法。如果数组长度大于等于286且连续性好的话，就用归并排序，如果大于等于286且连续性不好的话就用双轴快速排序。如果长度小于286且大于等于47的话就用双轴快速排序，如果长度小于47的话就用插入排序。
 

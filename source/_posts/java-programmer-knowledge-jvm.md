@@ -4,7 +4,7 @@ date: 2018-10-13 08:15:16
 tags: java
 ---
 
-#### 类加载机制和双亲委派模型
+# 类加载机制和双亲委派模型
 
 类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括**加载**、**验证**、**准备**、**解析**、**初始化**、**使用**、**卸载**七个阶段，其中类加载过程包括**加载**、**验证**、**准备**、**解析**、**初始化**五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。
 
@@ -91,7 +91,7 @@ protected synchronized Class<?> loadClass(String name,boolean resolve)throws Cla
 
 参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[【深入Java虚拟机】之四：类加载机制](https://blog.csdn.net/ns_code/article/details/17881581)，[【深入理解JVM】：类加载器与双亲委派模型](https://blog.csdn.net/u011080472/article/details/51332866)
 
-#### Java内存模型和运行时数据区
+# Java内存模型和运行时数据区
 
 Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存或工作内存（local memory），本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，并不真实存在，它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化。JMM如下图所示：
 
@@ -125,7 +125,7 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)，[深入探究 JVM | 探秘 Metaspace](https://www.sczyh30.com/posts/Java/jvm-metaspace/)
 
-#### 垃圾收集
+# 垃圾收集
 
 判断对象是否存活的算法有两种，一种是**引用计数器算法**，另一种是**根搜索算法**。
 
@@ -189,7 +189,7 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 
 参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)，[Java内存泄漏分析和解决](https://www.jianshu.com/p/54b5da7c6816)，[Garbage First G1收集器 理解和原理分析](https://liuzhengyang.github.io/2017/06/07/garbage-first-collector/)
 
-#### JVM关闭钩子
+# JVM关闭钩子
 
 首先JVM的关闭方式可以分为三种：
 
@@ -201,7 +201,7 @@ JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删
 
 参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
-#### Java Agent
+# Java Agent
 
 javaagent的主要功能如下：
 
@@ -240,7 +240,7 @@ instrument实现了JVMTIAgent（动态库为`libinstrument.so`），它称为jav
 
 参考：[javaagent](https://liuzhengyang.github.io/2017/03/15/javaagent/)，[如何在生产环境使用Btrace进行调试](https://www.jianshu.com/p/dbb3a8b5c92f)，[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
 
-#### Hotswap
+# Hotswap
 
 热部署（Hotswap）是在不重启 Java 虚拟机的前提下，能自动侦测到 class 文件的变化，更新运行时 class 的行为。目前的 Java 虚拟机只能实现方法体的修改热部署（只有在Debug模式下才能使用），对于整个类的结构修改，仍然需要重启虚拟机，对类重新加载才能完成更新操作。默认的虚拟机行为只会在启动时加载类，如果后期有一个类需要更新的话，单纯替换编译的 class 文件，Java 虚拟机是不会更新正在运行的 class。为了实现热部署，可以使用自定义的 classloader 来加载需要监听的 class，这样就能控制类加载的时机，从而实现热部署。由于同一个类加载器无法同时加载两个相同名称的类，不论类的结构如何发生变化，生成的类名不会变，而 classloader 只能在虚拟机停止前销毁已经加载的类，这样 classloader 就无法加载更新后的类了。解决的办法是让每次加载的类都保存成一个带有版本信息的 class，比如加载 Test.class 时，保存在内存中的类是 Test_v1.class，当类发生改变时，重新加载的类名是 Test_v2.class，使用该方法后，实例化对象的方式都需要使用反射，不能使用`new`关键字。
 
@@ -324,7 +324,7 @@ Context每次reload后，`WebappLoader`都会创建一个新的`ClassLoader`，�
 
 参考：[深入探索 Java 热部署](https://www.ibm.com/developerworks/cn/java/j-lo-hotdeploy/index.html)，[Tomcat 热部署实现方式源码分析总结](https://my.oschina.net/heroShane/blog/198492)，[Tomcat源码debug环境](https://www.jianshu.com/p/d05ef74694f7)
 
-#### 调优方法
+# 调优方法
 
 对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。
 

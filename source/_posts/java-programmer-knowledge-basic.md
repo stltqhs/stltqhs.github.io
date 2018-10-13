@@ -4,7 +4,7 @@ date: 2018-10-13 08:14:22
 tags: java
 ---
 
-#### Throwable，Error，Exception，RuntimeException
+# Throwable，Error，Exception，RuntimeException
 
 - `Error`和`Exception`都是`Throwable`接口的子类
 - Java分为“受检查异常”（或`Checked Exception`，这类异常编译器会检查，如果对这类异常既没有`try...catch`也没`throws`时编译不通过）和“未检查异常”（或`Unchecked Exception`，这类异常编译器不检查），`RuntimeException`及其子类都是“未检查异常”，如`NullPointException`，其他为“受检查异常”，如`IOException`。
@@ -14,7 +14,7 @@ tags: java
 
 参考：[谈一谈Java中的Error和Exception](https://blog.csdn.net/goodlixueyong/article/details/47122487)
 
-#### 对象克隆 
+# 对象克隆 
 
 `Object.clone()`方法是`native`方法，如果类没有实现`Cloneable`接口时将抛出`CloneNotSupportedException`，即便是子类重写了`clone()`，`clone()`方法签名如下：
 
@@ -40,7 +40,7 @@ protected native Object clone() throws CloneNotSupportedException;
 
 参考：[详解Java中的clone方法 -- 原型模式](https://blog.csdn.net/zhangjg_blog/article/details/18369201)，[Java对象克隆（Clone）及Cloneable接口、Serializable接口的深入探讨](https://blog.csdn.net/kenthong/article/details/5758884)
 
-#### 强引用与弱引用 
+# 强引用与弱引用 
 
 在`java.lang.ref`包中存在三种类型的引用类，分别是`SoftReference`（软引用），`WeakReference`（弱引用），`PhantomReference`（虚引用），Java的引用类型除了这三个，还有一个就是强引用，它们的级别由高到低分别为强引用、软引用、弱引用、虚引用，引用类型可以控制JVM回收对象的时机。
 
@@ -61,7 +61,7 @@ protected native Object clone() throws CloneNotSupportedException;
 
 参考：[Java四种引用---强、软、弱、虚的知识点总结](https://blog.csdn.net/l540675759/article/details/73733763)
 
-#### 断言 
+# 断言 
 
 断言用于程序调试，Java使用`assert`关键字来支持断言操作，且使用`java`命令运行时必须加上`-ea`参数才会执行断言语句。断言有两种表达方式，如下：
 
@@ -100,7 +100,7 @@ public static void notNull(Object object, String message) {
 
 
 
-#### 静态初始化和实例初始化 
+# 静态初始化和实例初始化 
 
 - 静态初始化
 
@@ -116,7 +116,7 @@ public static void notNull(Object object, String message) {
 
 参考：[深入理解Java对象的创建过程：类的初始化与实例化](https://blog.csdn.net/justloveyou_/article/details/72466416)，[JVM类生命周期概述：加载时机与加载过程](https://blog.csdn.net/justloveyou_/article/details/72466105)
 
-#### Java8新特性
+# Java8新特性
 
 - Lambda表达式和函数式接口
 
@@ -223,7 +223,7 @@ public static void notNull(Object object, String message) {
 
 参考：[Java 8的新特性—终极版](https://www.jianshu.com/p/5b800057f2d8)
 
-#### Java序列化与反序列化
+# Java序列化与反序列化
 
 Java序列化允许将Java对象保存为一组字节，之后可以读取这组字节组建一个新的对象（该操作为反序列化），对象序列化不会关注类中的静态变量，被`transient`修饰的变量不会被序列化存储。在RMI和RPC中经常使用到Java序列化和反序列化。
 
@@ -239,7 +239,7 @@ Java序列化允许将Java对象保存为一组字节，之后可以读取这组
 
 参考：[深入分析Java的序列化与反序列化](http://www.hollischuang.com/archives/1140)，[java序列化和反序列化](https://www.jianshu.com/p/5a85011de960)
 
-#### 反射
+# 反射
 
 反射机制是程序可以在运行时获取类型或者实例的字段和方法，然后进行操作。通过反射的方式可以获取对象字段的值，也可以使用`sun.misc.Unsafe`来快速读取对象的字段值。
 
@@ -411,7 +411,7 @@ JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0
 
 参考：[深入解析Java反射（1） - 基础](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)，[从一起GC血案谈到反射原理](https://mp.weixin.qq.com/s/5H6UHcP6kvR2X5hTj_SBjA)
 
-#### Statement和PreparedStatement的区别，如何防止SQL注入
+# Statement和PreparedStatement的区别，如何防止SQL注入
 
 JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedStatement`、`CallableStatement`，描述如下表：
 
@@ -423,7 +423,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
 参考：[JDBC为什么要使用PreparedStatement而不是Statement](http://www.importnew.com/5006.html)
 
-#### Java命令
+# Java命令
 
 - java
 
@@ -501,7 +501,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
 参考：[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)
 
-#### NoClassDefFoundError和ClassNotFoundException
+# NoClassDefFoundError和ClassNotFoundException
 
 `NoClassDefFoundError`和`ClassNotFoundException`都是由于在`CLASSPATH`下找不到对应的类而引起的，通常是缺少对应的jar包或者jar包冲突导致，具体如下：
 
@@ -513,7 +513,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
   参考：[NoClassDefFoundError和ClassNotFoundException的不同](https://www.jianshu.com/p/93d0db07d2e3)
 
-#### 方法动态绑定原理
+# 方法动态绑定原理
 
 在Java中， `final`，`static`，`private`和构造方法与类的绑定关系是在编译期确定了的，所以我们称之为“先期绑定”或者“静态绑定”，对于实例“静态绑定”的方法，采用`invokespecial`指令调用。对于其他实例方法，则需要在运行时根据对象类型再行决议，我们称之为“后期绑定”或“动态绑定”，采用`invokevirtual`指令调用方法。
 
@@ -593,7 +593,7 @@ void LinkResolver::resolve_invoke(CallInfo& result, Handle recv, constantPoolHan
 
 参考：[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/Introduction-to-HotSpot)，[從虛擬機角度看Java多態->（重寫override）的實現原理](https://hk.saowen.com/a/1e9e6f8665515e390f8338884a78aba61a91d1efb7ffcdf9d11aad3524c5083e)
 
-#### 异常处理原理
+# 异常处理原理
 
 当使用`javac`编译java源码时，会为方法内的`try/catch/finally`语句块生成一个异常表（`exception_table`），异常表指定了当出现异常时代码需要跳转到何处执行。
 
@@ -654,7 +654,7 @@ from  to  target type
 
 参考：[The secret life of Java exceptions and JVM internals: Level up your Java knowledge](https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)
 
-#### 泛型原理
+# 泛型原理
 
 泛型可以对类和接口的类型参数化，使用比较多的是容器类，比如`List<String>`就是将`List`的元素参数化为`String`。使用泛型的作用有：
 
@@ -733,6 +733,6 @@ Constant pool:
 
 参考：[java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题](https://blog.csdn.net/lonelyroamer/article/details/7868820)，[Generics](https://docs.oracle.com/javase/tutorial/java/generics/index.html)
 
-#### 线程栈
+# 线程栈
 
 参考：[JVM Internals](http://blog.jamesdbloom.com/)

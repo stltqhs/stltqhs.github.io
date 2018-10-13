@@ -4,16 +4,7 @@ date: 2018-10-13 08:14:49
 tags: java
 ---
 
-- [线程生命周期](#1-线程生命周期)
-- [wait()、sleep()、notify()区别](#2-wait-、sleep-、notify-区别)
-- [ThreadPoolExecutor原理](#3-ThreadPoolExecutor原理)
-- [ThreadLocal实现方式](#4-ThreadLocal实现方式)
-- [中断机制](#5-中断机制)
-- [活跃性](#6-活跃性)
-
-
-
-#### 线程生命周期 
+# 线程生命周期 
 
   `Thread.threadStatus`变量记录了线程状态，包括是否处于等待监视锁，是否处于等待`Object.wait()`，可选的值如下：
 
@@ -94,7 +85,7 @@ enum {
 
 参考：[Java多线程学习(三)---线程的生命周期](https://www.cnblogs.com/sunddenly/p/4106562.html)，[一张图让你看懂JAVA线程间的状态转换](https://my.oschina.net/mingdongcheng/blog/139263)，[对Java线程概念的理解](https://blog.csdn.net/fuzhongmin05/article/details/71425191)，[visualvm thread states](https://stackoverflow.com/questions/27406200/visualvm-thread-states)
 
-#### 2.wait()、sleep()、notify()区别 
+# 2.wait()、sleep()、notify()区别 
 
 - wait
 
@@ -126,7 +117,7 @@ enum {
 
 参考：[difference between wait and sleep](https://stackoverflow.com/questions/1036754/difference-between-wait-and-sleep)
 
-#### ThreadPoolExecutor原理 
+# ThreadPoolExecutor原理 
 
 线程的创建和销毁是一个重量级操作，涉及到操作系统底层调用和资源分配问题。操作系统可创建的线程数量有内存限制，即当线程越多消耗的内存越大，且操作系统线程调度的开销也越多。依靠线程池技术可以有效解决这些问题。
 
@@ -228,7 +219,7 @@ private final class Worker
 
 参考：[线程池的实现原理](https://blog.csdn.net/wzq6578702/article/details/68926320)
 
-#### ThreadLocal实现方式 
+# ThreadLocal实现方式 
 
 在多线程环境中，如果多个线程并发操作同一个共享变量，由于Java内存模型的原因，存在脏读、丢失更新等内存数据不一致的情况，解决该问题的方式是使用互斥锁。但是使用互斥锁时会降低线程执行的效率，因此在某些情况下可以不使用共享变量，而是使用局部变量。对于方法级别的局部变量，不存在`race condition`（竟态条件），因为该变量只能被该线程访问，但是会造成对象创建过多，导致垃圾回收效率慢。如果可以将变量与某个线程绑定，该变量同样只能被该线程访问，不存在`race condition`，而且对象创建的数量也不会太多，这样线程的执行的效率将会大大提高。
 
@@ -254,7 +245,7 @@ static class Entry extends WeakReference<ThreadLocal> {
 
 参考：[Java进阶（七）正确理解Thread Local的原理与适用场景](http://www.jasongj.com/java/threadlocal/)
 
-#### 中断机制 
+# 中断机制 
 
 Java中断机制是一种协作方式，仅仅是通知一个线程可以中断执行，但是线程本身也可以忽略中断信息什么也不做。从设计上来说，一个线程不应该由其他线程来强制中断或停止，而是应该由线程自己自行停止。所以使用中断机制来替代`Thread.stop()`, `Thread.suspend()`, `Thread.resume()`。
 
@@ -280,7 +271,7 @@ try {
 
 参考：[详细分析Java中断机制](http://www.infoq.com/cn/articles/java-interrupt-mechanism)
 
-#### 活跃性
+# 活跃性
 
 - 死锁
 
