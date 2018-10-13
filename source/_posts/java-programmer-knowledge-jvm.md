@@ -1,0 +1,331 @@
+---
+title: Java后端开发 - JVM
+date: 2018-10-13 08:15:16
+tags: java
+---
+
+#### 类加载机制和双亲委派模型
+
+类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括**加载**、**验证**、**准备**、**解析**、**初始化**、**使用**、**卸载**七个阶段，其中类加载过程包括**加载**、**验证**、**准备**、**解析**、**初始化**五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。
+
+- 加载
+
+加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构；3、在Java堆中生成一个代表这个类的java.lang.Class对象，作为对方法区中这些数据的访问入口。加载阶段是可控性最强的阶段，开发人员可自定义类加载器实现类加载过程，也可以使用系统提供的类加载器。
+
+- 验证
+
+验证的目的是为了确保Class文件中的字节流包含的信息符合当前虚拟机规范要求，而且不会危害虚拟机自身的安全。验证阶段大致包括：**文件格式验证**、**元数据验证**、**字节码验证**、**符号应用验证**。为了提高虚拟机性能，在确保所有的类是安全的情况下，可以使用`-Xverify:none`来关闭验证功能。
+
+- 准备
+
+准备阶段是正式为类变量分配内存并设置类变量初始值的阶段，这些内存都将在方法区中分配。为类变量分配内存时，会将内存清零，所以，对于`public static int value = 3`中的变量`value`，在准备阶段的值是0。如果类字段的字段属性表中存在ConstantValue属性，即同时被final和static修饰（对于同时被static和final修饰的常量，必须在声明的时候就为其显式地赋值，否则编译时不通过），那么在准备阶段变量value就会被初始化为ConstValue属性所指定的值。解析阶段包括四种类型的解析，分别是**类或接口解析**、**字段解析**、**类方法解析**、**接口方法解析**。
+
+- 解析
+
+解析阶段是虚拟机将常量池中的符号引用转化为直接引用的过程。所谓符号引用，是指以一组符号来描述所引用的目标，符号可以是任何形式的字面量，只要使用时能无歧义地定位到目标即可，符号引用与虚拟机实现的内存布局无关，引用的目标并不一定已经加载到了内存中。而直接引用是指直接引用可以是直接指向目标的指针、相对偏移量或是一个能间接定位到目标的句柄，直接引用是与虚拟机实现的内存布局相关的，同一个符号引用在不同虚拟机实例上翻译出来的直接引用一般不会相同，如果有了直接引用，那说明引用的目标必定已经存在于内存之中了。
+
+- 初始化
+
+初始化阶段是执行类构造器`<clinit>()`方法的过程。`<clinit>（）`方法是由编译器自动收集类中的所有类变量的赋值动作和静态语句块中的语句合并产生的，编译器收集的顺序是由语句在源文件中出现的顺序所决定的，静态语句块中只能访问到定义在静态语句块之前的变量，定义在它之后的变量，在前面的静态语句中可以赋值，但是不能访问。
+
+
+
+------
+
+
+
+类加载器包括：
+
+- 启动（Bootstrap）类加载器
+
+负责将 Java_Home/lib下面的类库加载到内存中（比如rt.jar）。由于引导类加载器涉及到虚拟机本地实现细节，开发者无法直接获取到启动类加载器的引用，所以不允许直接通过引用进行操作。该加载器由C++代码实现。
+
+- 标准扩展（Extension）类加载器
+
+是由 Oracle 的 ExtClassLoader（sun.misc.Launcher$ExtClassLoader）实现的。它负责将Java_Home /lib/ext或者由系统变量 java.ext.dir指定位置中的类库加载到内存中。开发者可以直接使用标准扩展类加载器
+
+- 应用程序（Application）类加载器
+
+是由 Oracle 的 AppClassLoader（sun.misc.Launcher$AppClassLoader）实现的。它负责将系统类路径（CLASSPATH）中指定的类库加载到内存中。开发者可以直接使用系统类加载器。由于这个类加载器是ClassLoader中的getSystemClassLoader()方法的返回值，因此一般称为**系统（System）加载器**。
+
+- 自定义类加载器
+
+开发人员自定义的类加载器。
+
+
+
+这些类加载器组成一个层级关系，称为**双亲委派模型**，将类加载器的职责分开。而且这种层级关系一般通过组合关系来实现，而不是通过继承。层级关系如下图：
+
+![双亲委派模型](https://upload-images.jianshu.io/upload_images/4491294-8edc15f60a58bd0b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/468/format/webp "双亲委派模型")
+
+**双亲委派模型**的过程是首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。使用双亲委派模型的好处在于Java类随着它的类加载器一起具备了一种带有优先级的层次关系。**双亲委派模型**的实现代码是`java.lang.ClassLoader`的`loadClass()`方法，如下：
+
+```java
+protected synchronized Class<?> loadClass(String name,boolean resolve)throws ClassNotFoundException{
+    //check the class has been loaded or not
+    Class c = findLoadedClass(name);
+    if(c == null){
+        try{
+            if(parent != null){
+                c = parent.loadClass(name,false);
+            }else{
+                c = findBootstrapClassOrNull(name);
+            }
+        }catch(ClassNotFoundException e){
+            //if throws the exception ,the father can not complete the load
+        }
+        if(c == null){
+            c = findClass(name);
+        }
+    }
+    if(resolve){
+        resolveClass(c);
+    }
+    return c;
+}
+```
+
+自定义类加载器时只需要重写`findClass()`方法即可。
+
+线程上下文类加载器（Thread Context Class Loader）可以通过`java.lang.Thread`类的`setContextClassLoader()`方法进行设置，如果创建线程时还未设置，它将会从父线程中继承一个；如果在应用程序的全局范围内都没有设置过，那么这个类加载器默认就是应用程序类加载器。这种行为实际上是打破了**双亲委派模型**的层次结构。
+
+参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[【深入Java虚拟机】之四：类加载机制](https://blog.csdn.net/ns_code/article/details/17881581)，[【深入理解JVM】：类加载器与双亲委派模型](https://blog.csdn.net/u011080472/article/details/51332866)
+
+#### Java内存模型和运行时数据区
+
+Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存或工作内存（local memory），本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，并不真实存在，它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化。JMM如下图所示：
+
+![Java内存模型]( "Java内存模型")
+
+运行时数据区包括：**程序计数器**、**方法区**、**堆**、**虚拟机栈**、**本地方法栈**。
+
+- 程序计数器
+
+程序计数器（Program Counter Register）是一块较小的内存空间，它的作用可以看做是当前线程所执行的字节码行号指示器。
+
+- 方法区
+
+方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用`-XX:MaxPermSize`调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。**运行时常量池**（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。在Java8中，方法区已被移除，引进了Metaspace（本地堆内存）来存放类信息，字符串常量池移至堆区。
+
+- 堆
+
+Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定，Java堆可以处于物理上不连续的内存空间中，只要逻辑上是连续的即可，就像我们的磁盘空间一样。在实现时，既可以实现成固定大小的，也可以是可扩展的，不过当前主流的虚拟机都是按照可扩展来实现的。可 通过`-Xmx`和`-Xms`控制Heap大小，如果在堆中没有内存完成实例分配，并且堆也无法再扩展时，将会抛出OutOfMemoryError异常。
+
+- 虚拟机栈
+
+虚拟机栈描述的是Java方法执行的内存模型：每个方法被执行的时候都会同时创建一个栈帧 （Stack Frame）用于存储局部变量表、操作栈、动态链接、方法出口等信息。每一个方法被调用直至执行完成的过程，就对应着一个栈帧在虚拟机栈中从入栈到出栈的过程。如果线程请求的栈深度大于虚拟机所允许的深度，将抛出`StackOverflowError`异常；如果虚拟机栈可以动态扩展，当扩展时无法申请到足够的内存时会抛出OutOfMemoryError异常。可通过`-Xss`调整虚拟机栈大小。
+
+- 本地方法栈
+
+本地方法栈（Native Method Stacks）与虚拟机栈所发挥的作用非常类似，区别在于虚拟机栈为虚拟机执行Java方法服务，而本地方法栈则是为虚拟机使用到的Native方法服务。
+
+
+
+**直接内存**不是虚拟机运行时数据区的一部分，在Java1.4引入的NIO中新增了`DirectByteBuffer`对象作为这块内存的引用。该部分的内存大小不受Java堆大小限制，而是受操作系统内存限制。
+
+参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)，[深入探究 JVM | 探秘 Metaspace](https://www.sczyh30.com/posts/Java/jvm-metaspace/)
+
+#### 垃圾收集
+
+判断对象是否存活的算法有两种，一种是**引用计数器算法**，另一种是**根搜索算法**。
+
+引用计数器算法的基本思路是给对象添加一个引用计数器，每当有一个地方引用它时，计数器的值就加1；当引用失效时，计数器的值减1；任何时刻计数器为0的对象就是不可能再被使用。引用计数器算法实现简单、效率高（微软的COM即Componet Object Model就是使用该算法），但存在一个缺点，对于对象之间的相互循环引用的问题无法解决，所以JVM并未使用该算法。
+
+根搜索算法（RC Roots Tracing）的基本思路就是通过一系列的名为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称为引用链（Reference Chain），当一个对象到“GC Roots”没有任何引用链相连（用图论的话来说就是从“GC Roots”到这个对象不可达）时，则证明此对象是不可用的。在Java语言里，可作为“GC Roots”的对象包括：虚拟机栈（栈帧中的本地变量表）中的引用的对象、方法区中的类静态属性引用的对象、方法区中的常量引用对象、本地方法栈中JNI引用的对象。
+
+在根搜索算法中不可达的对象不会立即清除，至少需要经过两次标记过程：如果对象在进行根搜索后发现没有与GC Roots相连接的引用链，那它将会被第一次标记并且进行一次筛选，筛选的条件是此对象是否有必要执行`finalize()`方法。当对象没有覆盖`finalize()`方法或者`finalize()`方法已经被虚拟机调用过，虚拟机将这两种情况都视为“没有必要执行”。如果这个对象被判断为有必要执行`finalize()`方法，那么这个对象将会被放置在一个名为`F-queue`的队列之中，并在稍后由虚拟机自动建立的、低优先级的`Finalizer`线程去执行（即调用对象的`finalize()`方法）。`finalize()`方法是对象逃脱死亡命运的最后一次机会，稍后GC将对`F-queue`中的对象进行第二次小规模的标记，如果对象在`finalize()`方法中重新与引用链上的任何一个对象建立关联，此时它将被移除“即将回收”的集合；如果对象此时并未与引用链上的任何对象建立关联，则此对象将会被回收。
+
+方法区的垃圾收集主要回收两部分内容：废弃常量和无用的类。类需要满足三个条件才能算是“无用的类”：该类所有的实例都已经回收，也就是Java堆中不存在该类的任何实例；加载该类的ClassLoader已经被回收；该类对应的`java.lang.Class`对象没有任何地方被引用，无法在任何地方通过反射返回该类的方法。
+
+垃圾收集算法包括四类，分别是**标记-清除算法**、**复制算法**、**标记-整理算法**、**分代收集算法**。
+
+- 标记-清除算法（Mark-Sweep）
+
+该算法是最基本的收集算法，它分为“标记”和“清除”两个阶段：首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象。它的主要缺点有两个：一个是效率问题，标记和清除过程的效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致当程序在以后的运行过程中需要分配较大对象时无法找到足够的联系内存而不能不提前触发另一次垃圾收集动作。
+
+- 复制算法（Copying）
+
+该算法可解决“标记-清除算法”的效率问题，它将可用内存分成两块，当其中一块用完了，就将还存活的对象复制到另一块上面，然后再把已经用过的内存空间一次性清理掉。该算法的优点是垃圾回收速度快，不会有空间碎片问题，缺点是缩小了可用内存。新生代中JVM将内存分为较大的Eden空间和两块较小的Survivor空间，工作过程是先标记Eden空间中的可用对象，将这些对象复制到其中一个Survivor空间，然后将Eden空间清除，新对象可以继续分配在Eden空间中，当Eden空间不可用时，再次进行标记，然后将可用对象复制到另一个Survivor空间中，如此反复。
+
+- 标记-整理算法（Mark-Compact）
+
+该算法解决“标记-清除算法”的空间碎片问题，第一步使用“标记-清除算法”，第二步将可用对象向前移动。
+
+- 分代收集算法
+
+根据对象存活周期不同将内存划分为几块，一般是将Java堆划分为新生代和老年代，其中，新生代使用复制算法，老年代使用标记整理算法。
+
+JVM垃圾收集器分为串行和并行两类，新生代可用的垃圾收集器有**Serial**、**ParNew**、**Parallel Scavenge**，老年代可用的垃圾收集器有**CMS**、**Serial Old**、**Parallel Old**。
+
+- Serial收集器
+
+它是一个单线程垃圾收集器，且在进行垃圾收集时，必须暂停其他所有的工作线程（称为“Stop the world”），直到它收集结束。
+
+- ParNew收集器
+
+它是Serial收集器的多线程版本，可以与CMS收集器配合使用。
+
+- Parallel Scavenge收集器
+
+该收集器可控制吞吐量（`吞吐量=运行用户代码时间/(运行用户代码时间+垃圾收集时间`)，减少垃圾收集时间就可以提高运行用户代码时间。可使用`-XX:MaxGCPauseMillis`控制最大垃圾收集停顿时间，`-XX:GCTimeRatio`可直接设置吞吐量大小。
+
+- Serial Old收集器
+
+它是Serial收集器的老年代版本，也是一个单线程垃圾收集器，可以与Parallel Scavenge配合使用。使用“标记-整理”算法实现。
+
+- Parallel Old收集器
+
+它是Parallel Scavenge收集器的老年代版本。使用“标记-整理”算法实现。
+
+- CMS收集器
+
+CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器，使用“标记-清除”算法实现。它的运作过程分为4个阶段：初始标记、并发标记、重新标记、并发清除。其中初始标记和重新标记需要“Stop the world”，并发标记和并发清除可以与用户线程并发执行。耗时最长的也是并发标记和并发清除，而这两个阶段可以与用户线程一起执行，减少了停顿时间。CMS收集器有3个缺点：对CPU资源敏感（并发阶段会占用一部分线程导致应用线程变慢，总吞吐量会降低）、无法处理浮动垃圾（并发清理阶段用户线程还在运行，此时会产生新的垃圾）、存在空间碎片（由于“标记-清除算法“）。
+
+- G1收集器
+
+**G1收集器**的设计目标是取代CMS收集器，不会产生很多内存碎片，Stop The World(STW)更可控，G1在停顿时间上添加了预测机制，用户可以指定期望停顿时间，使用复制算法实现。G1收集器将堆划分为多个内存区域（Region），每一块区域都可以作为Eden或者Survivor或者Tenured或者是大对象区域。内存区域大小可以通过参数`-XX:G1HeapRegionSize`设定，取值范围从1M到32M，且是2的指数。一次收集其中一部分，这样的方式又叫做增量收集(incremental collection)，分代收集也可以看成一种特殊的增量收集。
+
+内存泄漏是指无用对象（不再使用的对象）持续占有内存或无用对象的内存得不到及时释放，从而造成内存空间的浪费称为内存泄漏。长生命周期的对象持有短生命周期对象的引用就很可能发生内存泄漏，尽管短生命周期对象已经不再需要，但是**因为长生命周期持有它的引用而导致不能被回收，这就是Java中内存泄漏的发生场景**。
+
+参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)，[Java内存泄漏分析和解决](https://www.jianshu.com/p/54b5da7c6816)，[Garbage First G1收集器 理解和原理分析](https://liuzhengyang.github.io/2017/06/07/garbage-first-collector/)
+
+#### JVM关闭钩子
+
+首先JVM的关闭方式可以分为三种：
+
+- 正常关闭：当最后一个非守护线程结束或者调用了System.exit或者通过其他特定平台的方法关闭（发送SIGINT，SIGTERM信号等）
+- 强制关闭：通过调用Runtime.halt方法或者是在操作系统中直接kill(发送SIGKILL信号)掉JVM进程
+- 异常关闭：运行中遇到RuntimeException异常等。
+
+JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删除临时文件、停止日志服务以及内存数据写到磁盘等，为此JVM提供了关闭钩子（shutdown hooks）来做这些事情。关闭钩子本质上是一个线程（也称为Hook线程），用来监听JVM的关闭。通过使用`Runtime`的`addShutdownHook(Thread hook)`可以向JVM注册一个关闭钩子。Hook线程在JVM **正常关闭**才会执行，在强制关闭时不会执行。对于一个JVM中注册的多个关闭钩子它们将会并发执行，所以JVM并不能保证它的执行顺行。当所有的Hook线程执行完毕后，如果此时runFinalizersOnExit为true，那么JVM将先运行终结器，然后停止。
+
+参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
+
+#### Java Agent
+
+javaagent的主要功能如下：
+
+- 可以在加载class文件之前做拦截，对字节码做修改
+- 可以在运行期对已加载类的字节码做变更，但是这种情况下会有很多的限制，后面会详细说
+- 还有其他一些小众的功能
+  - 获取所有已经加载过的类
+  - 获取所有已经初始化过的类（执行过clinit方法，是上面的一个子集）
+  - 获取某个对象的大小
+  - 将某个jar加入到bootstrap classpath里作为高优先级被bootstrapClassloader加载
+  - 将某个jar加入到classpath里供AppClassloard去加载
+  - 设置某些native方法的前缀，主要在查找native方法的时候做规则匹配
+
+[JVMTI](http://docs.oracle.com/javase/7/docs/platform/jvmti/jvmti.html)全称JVM Tool Interface，是JVM暴露出来的一些供用户扩展的接口集合。JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口（如果有的话），这些接口可以供开发者扩展自己的逻辑。JVMTIAgent其实就是一个动态库，利用JVMTI暴露出来的一些接口来干一些我们想做、但是正常情况下又做不到的事情。，不过为了和普通的动态库进行区分，它一般会实现如下的一个或者多个函数：
+
+```cpp
+JNIEXPORT jint JNICALL
+Agent_OnLoad(JavaVM *vm, char *options, void *reserved);
+
+JNIEXPORT jint JNICALL
+Agent_OnAttach(JavaVM* vm, char* options, void* reserved);
+
+JNIEXPORT void JNICALL
+Agent_OnUnload(JavaVM *vm); 
+```
+
+- Agent_OnLoad函数，如果agent是在启动时加载的，也就是在vm参数里通过-agentlib来指定的，那在启动过程中就会去执行这个agent里的Agent_OnLoad函数。
+- Agent_OnAttach函数，如果agent不是在启动时加载的，而是我们先attach到目标进程上，然后给对应的目标进程发送load命令来加载，则在加载过程中会调用Agent_OnAttach函数。
+- Agent_OnUnload函数，在agent卸载时调用，不过貌似基本上很少实现它。
+
+JVMTIAgent在开发过程中经常会使用到，比如调试功能（使用`-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:61349`来设置），它会查找一个动态库（Linux系统下为`libjdwp.so`）并加载（调用`Agent_OnLoad`方法）。
+
+instrument实现了JVMTIAgent（动态库为`libinstrument.so`），它称为javaagent，别名JPLISAgent(Java Programming Language Instrumentation Services Agent)。instrument的使用方式是通过在启动命令上添加`-javaagent:xxx.jar`的方式加载一个被称为agent的jar包，jar包的META-INF/MANIFEST.MF中应当声明Premain-Class或Main-Class。启动时JVM会寻找这个类中的`public static void premain(String agentArgs, Instrumentation instrumentation)`, `Instrumentation`对象中可以添加自己的类修改逻辑进行字节码修改。另外当通过attach到一个运行中的JVM的方式时，可以调用`agentmain()`方法来获取`Instrumentation`对象进行类的重定义。
+
+使用javagent实现的一些知名的库有[Btrace](https://github.com/btraceio/btrace)，[HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)。
+
+参考：[javaagent](https://liuzhengyang.github.io/2017/03/15/javaagent/)，[如何在生产环境使用Btrace进行调试](https://www.jianshu.com/p/dbb3a8b5c92f)，[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
+
+#### Hotswap
+
+热部署（Hotswap）是在不重启 Java 虚拟机的前提下，能自动侦测到 class 文件的变化，更新运行时 class 的行为。目前的 Java 虚拟机只能实现方法体的修改热部署（只有在Debug模式下才能使用），对于整个类的结构修改，仍然需要重启虚拟机，对类重新加载才能完成更新操作。默认的虚拟机行为只会在启动时加载类，如果后期有一个类需要更新的话，单纯替换编译的 class 文件，Java 虚拟机是不会更新正在运行的 class。为了实现热部署，可以使用自定义的 classloader 来加载需要监听的 class，这样就能控制类加载的时机，从而实现热部署。由于同一个类加载器无法同时加载两个相同名称的类，不论类的结构如何发生变化，生成的类名不会变，而 classloader 只能在虚拟机停止前销毁已经加载的类，这样 classloader 就无法加载更新后的类了。解决的办法是让每次加载的类都保存成一个带有版本信息的 class，比如加载 Test.class 时，保存在内存中的类是 Test_v1.class，当类发生改变时，重新加载的类名是 Test_v2.class，使用该方法后，实例化对象的方式都需要使用反射，不能使用`new`关键字。
+
+Tomcat支持热部署，通过配置Context的`realodable`为`true`告知Tomcat某个Context支持重新加载被修改的类，这里以Tomcat的Context的reload功能为例说明Tomcat的热部署的实现方式。Tomcat的Context标准实现类是`org.apache.catalina.core.StandardContext`，在`org.apache.catalina.loader.WebappLoader`的`backgroundProcess()`方法会周期性地检查是否存在被修改的类，该方法定义如下：
+
+```java
+public void backgroundProcess() {
+    if (reloadable && modified()) {
+        try {
+            Thread.currentThread().setContextClassLoader
+                (WebappLoader.class.getClassLoader());
+            if (context != null) {
+                context.reload();
+            }
+        } finally {
+            if (context != null && context.getLoader() != null) {
+                Thread.currentThread().setContextClassLoader
+                    (context.getLoader().getClassLoader());
+            }
+        }
+    }
+}
+```
+
+该方法会继续调用`StandardContext.reload()`方法。
+
+`StandardContext.reload()`方法定义如下：
+
+```java
+public synchronized void reload() {
+    // Validate our current component state
+    if (!getState().isAvailable())
+        throw new IllegalStateException
+            (sm.getString("standardContext.notStarted", getName()));
+    if(log.isInfoEnabled())
+        log.info(sm.getString("standardContext.reloadingStarted",
+                getName()));
+    // Stop accepting requests temporarily.
+    setPaused(true);
+    try {
+        stop();
+    } catch (LifecycleException e) {
+        log.error(
+            sm.getString("standardContext.stoppingContext", getName()), e);
+    }
+    try {
+        start();
+    } catch (LifecycleException e) {
+        log.error(
+            sm.getString("standardContext.startingContext", getName()), e);
+    }
+    setPaused(false);
+    if(log.isInfoEnabled())
+        log.info(sm.getString("standardContext.reloadingCompleted",
+                getName()));
+}
+```
+
+它先调用`stop()`方法，然后再调用`start()`方法。`StandardContext.start()`之后的调用链会是`StandardContext.startInternal()`，`WebappLoader.start()`，`WebappLoader.startInternal()`。`WebappLoader`封装了`ClassLoader`，`StandardContext`将要使用到的类加载器就是`WebppLoader.classLoader`，它在`WebappLoader.startInternal()`方法内调用`createClassLoader()`方法实例化一个`ClassLoader`，代码如下：
+
+```java
+private WebappClassLoader createClassLoader()
+    throws Exception {
+
+    Class<?> clazz = Class.forName(loaderClass);
+    WebappClassLoader classLoader = null;
+
+    if (parentClassLoader == null) {
+        parentClassLoader = context.getParentClassLoader();
+    }
+    Class<?>[] argTypes = { ClassLoader.class };
+    Object[] args = { parentClassLoader };
+    Constructor<?> constr = clazz.getConstructor(argTypes);
+    classLoader = (WebappClassLoader) constr.newInstance(args);
+
+    return classLoader;
+}
+```
+
+Context每次reload后，`WebappLoader`都会创建一个新的`ClassLoader`，这个`ClassLoader`会重新加载Servlet相关组件的类，完成热部署的效果。
+
+参考：[深入探索 Java 热部署](https://www.ibm.com/developerworks/cn/java/j-lo-hotdeploy/index.html)，[Tomcat 热部署实现方式源码分析总结](https://my.oschina.net/heroShane/blog/198492)，[Tomcat源码debug环境](https://www.jianshu.com/p/d05ef74694f7)
+
+#### 调优方法
+
+对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。
+
+参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)

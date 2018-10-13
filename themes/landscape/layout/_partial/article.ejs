@@ -18,7 +18,9 @@
             <a href="<%- url_for(post.path) %>#more"><%= theme.excerpt_link %></a>
           </p>
         <% } %>
-      <% } else { %>
+      <% } else { if (post.toc !== false) {%>
+        <%- partial('post/toc') %>
+      <% } %>
         <%- post.content %>
       <% } %>
     </div>
