@@ -352,7 +352,7 @@ CMS垃圾收集器是最复杂（除了替换CMS的G1垃圾收集器）的垃圾
 174.445: [GC 174.446: [ParNew: 66408K->66408K(66416K), 0.0000618 secs]174.446: [CMS(concurrent mode failure):161928K->162118K(175104K), 4.0975124 secs] 228336K->162118K(241520K)]
 ```
 
-其中关键字`concurrent mode failure`表示并发模式失效。可以使用`-XX:+UseCMSInitiatingOccupancyOnly`告知Hotspot VM总是使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为启动CMS周期的老年代空间占用阈值。如果不使用`-XX:+UseCMSInitiatingOccupancyOnly`，Hotspot VM仅在第一个CMS周期里使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为占用比率，之后的周期中又转向自适应地启动CMS周期。`-XX:CMSInitiatingOccupancyFraction`设置的一个通用原则是老年代占用百分比应该至少是活跃数据大小的1.5倍，活跃数据大小是应用程序运行于稳定态时，长期存活的对象在Java堆中占用的空间大小，也就是Full GC后Java堆中老年代和年轻代（《Java性能优化权威指南》说是永久代，应该是书中的错误，因为Java堆使用`-Xms`或者`-Xmx`设置，而永久代使用`-XX:MaxPermSize`设置，且永久代也不属于Java堆）。CMS收集器与ParNew收集器是结合使用，以如下垃圾收集日志为例，说明CMS收集器的工作方式：
+其中关键字`concurrent mode failure`表示并发模式失效。可以使用`-XX:+UseCMSInitiatingOccupancyOnly`告知Hotspot VM总是使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为启动CMS周期的老年代空间占用阈值。如果不使用`-XX:+UseCMSInitiatingOccupancyOnly`，Hotspot VM仅在第一个CMS周期里使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为占用比率，之后的周期中又转向自适应地启动CMS周期。`-XX:CMSInitiatingOccupancyFraction`设置的一个通用原则是老年代占用百分比应该至少是活跃数据大小的1.5倍，活跃数据大小是应用程序运行于稳定态时，长期存活的对象在Java堆中占用的空间大小，也就是Full GC后Java堆中老年代和年轻代（《Java性能优化权威指南》说是永久代，应该是书中的错误，因为Java堆使用`-Xms`或者`-Xmx`设置，而永久代使用`-XX:MaxPermSize`设置，且永久代也不属于Java堆）。CMS周期中有两个阶段是Stop-The-World，处于这两个阶段的应用程序会被阻塞，这两个阶段分别是初始标记阶段和重新标记阶段。虽然初始标记阶段是单线程的，却极少占用很长的时间，通常情况下远小于其他的垃圾收集停顿时间。重新标记阶段是多线程的，通过`-XX:ParallelGCThreads=<n>`可以控制重新标记阶段使用的线程数。使用`-XX:+CMSScavengeBeforeRemark`强制Hotspot VM在进入CMS重新标记阶段之前先进行一次Minor GC，Minor GC可以减少引用老年代空间的新生代对象数目，将重新标记阶段的工作量减到最少。CMS收集器与ParNew收集器是结合使用，以如下垃圾收集日志为例，说明CMS收集器的工作方式：
 
 ```text
 [GC [ParNew: 64576K->960K(64576K), 0.0377639 secs] 140122K->78078K(261184K), 0.0379598 secs]
@@ -371,28 +371,51 @@ CMS垃圾收集器是最复杂（除了替换CMS的G1垃圾收集器）的垃圾
 [GC [ParNew: 64576K->960K(64576K), 0.0359806 secs] 69311K->7154K(261184K), 0.0362064 secs]
 ```
 
-CMS收集器的垃圾收集周期以`CMS-initial-mark`开始，到`CMS-concurrent-reset`。在上面的日志中，`CMS-initial-mark`开始时老年代占用80168K，最后一次ParNew Minor GC显示堆占用81128K，可以确定数据都在老年代，年轻代的数据基本被回收。当`CMS-concurrent-reset`结束时的第一次ParNew Minor GC显示堆占用4171K，说明运行一次CMS老年代垃圾收集回收了非常多的对象，内存释放了将近74M（(81128 - 4171) / 1024）。
+CMS收集器的垃圾收集周期以`CMS-initial-mark`开始，到`CMS-concurrent-reset`结束。在上面的日志中，`CMS-initial-mark`开始时老年代占用80168K，最后一次ParNew Minor GC显示堆占用81128K，可以确定数据都在老年代，年轻代的数据基本被回收。当`CMS-concurrent-reset`结束时的第一次ParNew Minor GC显示堆占用4171K，说明运行一次CMS老年代垃圾收集回收了非常多的对象，内存释放了将近74M（(81128 - 4171) / 1024）。
 
-对象提升到老年代的速度太快
+对Parallel Old收集器进行吞吐量性能调优的目标是尽可能避免发生Full GC，或者更理想的情况下在稳定态时永远不发生Full GC。Parallel Old收集器使用`-XX:+UseParallelOldGC`和`-XX:+UseParallelGC`选项开启，它提供的吞吐量性能是Hotspot VM诸多垃圾收集器中最好的。Parallel Old收集器默认使用自适应大小调整Eden和Survivor空间，可以使用`-XX:-UseAdaptiveSizePolicy`禁用自适应大小调整。使用`-XX:+PrintAdaptiveSizePolicy`可以打印自适应大小调整的日志，日志内容如下：
 
-经过一次垃圾收集堆使用率未降低
-
-GC线程CPU使用率过高
-
-垃圾收集的次数太多
-
-应用无响应或者进入假死状态
-
-内存泄漏
-
-```sh
-$ jmap -histo:live 348
+```text
+2010-12-16T21:44:11.444-0600:
+	[GCAdaptiveSizePolicy::compute_survivor_space_size_and_thresh:
+		survived: 224408984
+		promoted: 10904856
+		overflow: false
+		[PSYongGen: 6515579K->219149K(9437184K)]
+	8946490K->2660709K(13631488K), 0.0725945 secs]
+	[Times : user=0.56 sys=0.00, real=0.07 secs]
 ```
 
+`survived`标签的右边是“To”Survivor空间中存活对象的大小，`promoted`标签右边是由新生代提升至老年代空间的对象大小。`overflow`标签右边的文字表明是否有survivor空间的对象溢出到了老年代空间。如果Survivor空间占用没有通过`-XX:TargetSurvivorRation=<percent>`设定，目标Survivor空间则使用默认值50%，表示如果Survivor空间占用超过该设定值时，对象在未到达他们的最大年龄之前就会被提升至老年代。
 
+通过分代垃圾收集原理和各垃圾收集器的特点，可以解决如下问题：
 
-系统态CPU使用率大于用户态CPU使用率
+* 对象提升到老年代的速度太快
 
-并行性优化
+通过`-XX:+PrintTenuringDistribution`选项观察到对象在未达到最大年龄时就进入老年代，对象提前进入老年代的原因是年轻代垃圾收集时Survivor空间不够，此时需要增加Survivor空间（还需要增加堆空间，保持Eden空间不变）。
 
-参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)，[Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning](https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html)，[Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
+* 经过一次垃圾收集堆使用率未降低
+
+触发垃圾收集的原因是年轻代或者老年代没有足够的空间容纳新分配的对象，当执行一次垃圾收集时堆使用率未降低说明并未回收任何对象。存在两种情况，第一种是年轻代全部进入老年代，此时堆空间使用率未降低；第二种是在对象晋升不明显的情况下，堆空间使用率依然未降低，这表示对象是长期存活的，此时需要检查是否存在**内存泄漏**。内存泄漏可以使用jmap命令检查存活对象，分析这些对象为何长期存活。比如使用`jmap -histo:live 348`查看348进程存活的对象，该命令输出时会按照对象类型对应的实例数量降序排序。如果发现内存泄漏则优化程序，如果不是内存泄漏，则可以增加堆空间，减少垃圾收集次数。
+
+* GC线程CPU使用率过高
+
+造成此类情况一般时垃圾收集频繁发生且垃圾回收数量低，可以根据“经过一次垃圾收集堆使用率未降低”来解决。
+
+* 垃圾收集的次数太多
+
+触发垃圾收集的原因是年轻代或者老年代没有足够的空间容纳新分配的对象，此时可以增加堆内存。
+
+* 应用无响应或者进入假死状态
+
+使用`jstack`观察应用程序进程的线程信息，查看现场执行情况，检查是否存在IO等待和锁等待，优化应用程序。
+
+* 系统态CPU执行时间（或使用率）大于用户态CPU执行时间（或使用率）
+
+当应用程序调用系统函数时，此时操作系统从用户态进入内核态，在内核态运行的时间就是系统态CPU执行时间。由于系统调用的开销比较大，而应用系统很难避免系统调用，此时就需要优化应用系统。对于Java应用程序，发生系统调用此时比较多的是监视锁功能，JVM的优化是使用首先使用轻量级锁，如果锁竞争激烈，转入重量级锁，使用重量级锁就是使用操作系统函数完成。除此外，还有锁消除等优化。文件操作也会调用系统函数，对文件操作时应当使用缓存（在`java.io`包下以`Buffer`开发头类名），包括读取和写入，缓存大小应该是操作系统内存页的整数倍，在LInux系统中，内存页可以使用命令`pagesize`或者`getconf PAGESIZE`获得。
+
+* 并行性优化
+
+现代CPU都是多核多线程架构，应用程序可以使用该特点尽可能地使用更多的CPU资源。比如在一个大集合排序中，可以将集合划分多个区域，使用多个CPU资源（就是使用多线程）排序，然后使用归并排序算法完成整个大集合的排序。
+
+参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)，[做JAVA开发的同学一定遇到过的爆表问题，看这里解决](https://juejin.im/post/5bbf18a2f265da0adb30f3b5)，[Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning](https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html)，[Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
