@@ -48,7 +48,7 @@ tags: java
 
 
 
-  `accessOrder`可以用来控制是按照插入顺序还是访问顺序迭代元素，默认是插入顺序，当`accessOrder`为`true`时表示按照访问顺序迭代元素，此时`Entry.recordAcess()`的操作就是将元素添加到双向链表的尾部，表示该元素刚刚被访问过。在`addEntry`方法中添加一个新元素时，会调用`removeEldestEntry(header.after)`来判断是否进行删除长时间未被访问的记录，如果是则调用`removeEntryForKey(header.after.key)`删除长时间未被访问的记录。不过`removeEldestEntry()`默认返回`false`，该方法可以被重写，用来实现简单的`LRU`算法。
+  `accessOrder`可以用来控制是按照插入顺序还是访问顺序迭代元素，默认是插入顺序，当`accessOrder`为`true`时表示按照访问顺序迭代元素，此时`Entry.recordAcess()`的操作就是将元素添加到双向链表的尾部，表示该元素刚刚被访问过。在`addEntry`方法中添加一个新元素时，会调用`removeEldestEntry(header.after)`来判断是否进行删除长时间未被访问的记录，如果是长时间未被访问则调用`removeEntryForKey(header.after.key)`删除这些记录。不过`removeEldestEntry()`默认返回`false`，该方法可以被重写，用来实现简单的`LRU`算法。
 
 
 
@@ -80,7 +80,7 @@ tags: java
 
 - ArrayList
 
-  ArrayList是一个动态数组实现的线性表，其容量可以自动增长，新容量为`(原始容量*3)/2 + 1`。`elementData`是用来存在添加的元素，`size`记录元素个数。ArrayList查找元素使用`indexOf(E)`，原理就是遍历所有元素，效率低下。由于其为数组，可以使用索引快速访问（实现了`RandomAccess`接口）。当删除元素时，需要将后面的元素全部向前移动，效率低下。ArrayList不是线程安全的。
+  ArrayList是一个动态数组实现的线性表，其容量可以自动增长，新容量为`(原始容量*3)/2 + 1`。`elementData`是用来存放新增的元素，`size`记录元素个数。ArrayList查找元素使用`indexOf(E)`，原理是遍历所有元素，所以效率比较低。由于其为数组，可以使用索引快速访问（实现了`RandomAccess`接口）。当删除元素时，需要将后面的元素全部向前移动，效率比较低。ArrayList不是线程安全的。
 
 
 
@@ -96,7 +96,7 @@ tags: java
 
 - LinkedList
 
-  LinkedList是一个双向链表实现的线性表。使用索引访问时需要从header开始查找索引位置，效率低下。插入元素时只需要修改元素`next`和`previous`指针即可，不需要移动元素，效率高。
+  LinkedList是一个双向链表实现的线性表。使用索引访问时需要从header开始查找索引位置，效率比较低。插入元素时只需要修改元素`next`和`previous`指针即可，不需要移动元素，效率高。
 
 
 
@@ -124,7 +124,7 @@ tags: java
 
 # HashSet实现方式 
 
-HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, PRESENT)`来实现的，map就是HashMap类型，PRESENT为一个Object类型，用来作为HashMap的值对象。
+HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, PRESENT)`实现，map是HashMap类型，PRESENT为一个Object类型，用来作为HashMap的值对象。
 
 
 

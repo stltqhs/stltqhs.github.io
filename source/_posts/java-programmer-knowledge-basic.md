@@ -7,7 +7,7 @@ tags: java
 # Throwable，Error，Exception，RuntimeException
 
 - `Error`和`Exception`都是`Throwable`接口的子类
-- Java分为“受检查异常”（或`Checked Exception`，这类异常编译器会检查，如果对这类异常既没有`try...catch`也没`throws`时编译不通过）和“未检查异常”（或`Unchecked Exception`，这类异常编译器不检查），`RuntimeException`及其子类都是“未检查异常”，如`NullPointException`，其他为“受检查异常”，如`IOException`。
+- Java分为“受检查异常”（或`Checked Exception`，这类异常编译器会检查，如果对这类异常既没有`try...catch`也没`throws`时编译将不通过）和“未检查异常”（或`Unchecked Exception`，这类异常编译器不检查），`RuntimeException`及其子类都是“未检查异常”，如`NullPointException`，其他为“受检查异常”，如`IOException`。
 - `Error`一般是指与虚拟机相关的错误，程序一般无法自身恢复，比如各种内存溢出（如`OutOfMemoryError`，`StackOverflowError`，注意：断言失败是抛出`AssertionError`）；`Exception`则表示程序级别的异常，程序可以处理并恢复。
 
 
@@ -42,7 +42,7 @@ protected native Object clone() throws CloneNotSupportedException;
 
 # 强引用与弱引用 
 
-在`java.lang.ref`包中存在三种类型的引用类，分别是`SoftReference`（软引用），`WeakReference`（弱引用），`PhantomReference`（虚引用），Java的引用类型除了这三个，还有一个就是强引用，它们的级别由高到低分别为强引用、软引用、弱引用、虚引用，引用类型可以控制JVM回收对象的时机。
+在`java.lang.ref`包中存在三种类型的引用类，分别是`SoftReference`（软引用），`WeakReference`（弱引用），`PhantomReference`（虚引用），Java的引用类型除了这三个，还有一个就是强引用（即Java程序中使用等号赋值的引用），它们的级别由高到低分别为强引用、软引用、弱引用、虚引用，引用类型可以控制JVM回收对象的时机。
 
 
 
@@ -104,7 +104,7 @@ public static void notNull(Object object, String message) {
 
 - 静态初始化
 
-  静态初始化是指`<cinit>`方法的调用，该方法是编译自动生成，代码是静态语句块和静态变量（或者类变量）。JVM会保证在调用某类的`<cinit>`方法时先调用其父类的`<cinit>`方法。`<cinit>`方法只会被JVM调用一次。
+  静态初始化是指`<cinit>`方法的调用，该方法是编译器自动生成，代码是静态语句块和静态变量（或者类变量）。JVM会保证在调用某类的`<cinit>`方法时先调用其父类的`<cinit>`方法。`<cinit>`方法只会被JVM调用一次。
 
 - 实例初始化
 
@@ -130,7 +130,7 @@ public static void notNull(Object object, String message) {
 
 - 方法引用
 
-  方法引用必须与Lambda表达式结合使用，不能直接将方法引用赋值给一个变量。方法应用的类型有：
+  方法引用必须与Lambda表达式结合使用，不能直接将方法引用赋值给一个变量。方法引用的类型有：
 
 | 类型                   | 示例                                 |
 | ---------------------- | ------------------------------------ |
@@ -191,11 +191,11 @@ public static void notNull(Object object, String message) {
 
 - Date/Time API
 
-  时间可以纳秒级表示。
+  时间支持以纳秒级表示。
 
 - Nashorn Javascript引擎
 
-  添加了`jjs`来运行javascript代码文件，也可以使用Java代码运行javascript内容，如：
+  添加了`jjs`来运行javascript代码文件，也可以运行javascript字符串格式，如：
 
   ```java
   ScriptEngineManager manager = new ScriptEngineManager();
@@ -241,9 +241,9 @@ Java序列化允许将Java对象保存为一组字节，之后可以读取这组
 
 # 反射
 
-反射机制是程序可以在运行时获取类型或者实例的字段和方法，然后进行操作。通过反射的方式可以获取对象字段的值，也可以使用`sun.misc.Unsafe`来快速读取对象的字段值。
+反射机制是程序可以在运行时获取类型或者实例的字段和方法，然后进行操作。通过反射可以获取对象字段的值，也可以使用`sun.misc.Unsafe`来快速读取对象的字段值。
 
-以反射方法调用`Object.hashCode`方法为例，叙述反射的原理，样例代码如下：
+以反射调用`Object.hashCode`方法为例，叙述反射的原理，样例代码如下：
 
 ```java
 Object o = new Object();
@@ -252,7 +252,7 @@ Method hashCode = clazz.getMethod("hashCode", null);
 System.out.println(hashCode.invoke(o, null));
 ```
 
-要通过反射获取对象的方法或者字段，首先需要获取Class对象。在静态编码情况下，可以确定Class对象，比如样例代码第二行，可以直接写成`Class clazz = Object.class`，当在运行情况下，可以通过调用对象的`getClass`方法获取对象的Class对象。`getClass`方法在`Object`类中声明，方法签名如下：
+要通过反射获取对象的方法或者字段，首先需要获取Class对象。在静态编码情况下，可以确定Class对象，比如样例代码第二行，可以直接写成`Class clazz = Object.class`，当在运行时情况下，可以通过调用对象的`getClass`方法获取对象的Class对象。`getClass`方法在`Object`类中声明，方法签名如下：
 
 ```java
 public final native Class<?> getClass();
@@ -281,7 +281,7 @@ jclass ret =
   (jclass) JNIHandles::make_local(env, Klass::cast(k)->java_mirror());
 ```
 
-指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java实例对象使用C++中的[oopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/oop.hpp)来表示，`oop`就是指向`oopDesc`类型的指针。在JVM中，Java对象的头部有下列两个字段组成：
+指向对象的指针称为`Ordinary Object Pointer`(OOP)，Java实例对象使用C++中的[oopDesc](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/oop.hpp)来表示，`oop`就是指向`oopDesc`类型的指针。在JVM中，Java对象的头部由下列两个字段组成：
 
 ```c++
 volatile markOop  _mark;
@@ -341,7 +341,7 @@ private static Method searchMethods(Method[] methods,
 }
 ```
 
-`searchMethods`方法首先迭代方法表，如果期望的方法被找到，需要将方法复制一个新对象，然后返回给样例代码中的`hashcode`变量。复制的方法`copy`定义在`Method.java`中。由此可见，每次通过调用`getMethod`方法返回的Method对象其实都是一个新的对象，如果调用频繁最好缓存起来。
+`searchMethods`方法首先迭代`Method[]`方法表，如果期望的`Method`方法被找到，需要将`Method`方法复制一份，然后返回给样例代码中的`hashcode`变量。复制的实现方法`copy`定义在`Method.java`中。由此可见，每次通过调用`getMethod`方法返回的Method对象其实都是一个新的对象，如果调用频繁最好缓存起来。
 
 获取到`Method`对象后，接下来就是调用`invoke`方法，与`invoke`方法相关的字段和方法如下：
 
@@ -367,13 +367,13 @@ public Object invoke(Object obj, Object... args)
 }
 ```
 
-`root`字段指向`ReflectionData`对象中的方法表的某个`Method`实例（因为获得的`Method`对象是从`ReflectionData`复制而来，所以`root`保留了被复制的对象或者说原对象）。`Method.invoke`方法就是调用`methodAccessor`的`invoke`方法，`methodAccessor`这个属性如果`root`本身已经有了，那就直接用root的`methodAccessor`赋值过来，否则的话就创建一个。`MethodAccessor`本身就是一个接口，其主要有三种实现
+`root`字段指向`ReflectionData`对象中方法表的某个`Method`实例（因为获得的`Method`对象是从`ReflectionData`复制而来，所以`root`保留了被复制的对象或者说原对象）。`Method.invoke`方法调用`methodAccessor`的`invoke`方法。如果`root`的`methodAccessor`存在，则赋值给`methodAccessor`这个属性，否则就创建一个。`MethodAccessor`本身就是一个接口，其主要有三种实现
 
 - DelegatingMethodAccessorImpl
 - NativeMethodAccessorImpl
 - GeneratedMethodAccessorXXX
 
-其中`DelegatingMethodAccessorImpl`是最终注入给`Method`的`methodAccessor`的，也就是某个`Method`的所有的`invoke`方法都会调用到这个`DelegatingMethodAccessorImpl.invoke`，正如其名一样的，是做代理的，也就是真正的实现可以是`NativeMethodAccessorImpl`和`GeneratedMethodAccessorXXX`两种。如果是`NativeMethodAccessorImpl`，那顾名思义，该实现主要是native实现的，而`GeneratedMethodAccessorXXX`是为每个需要反射调用的`Method`动态生成的类，后的XXX是一个不断递增的数字。并且所有的方法反射都是先走`NativeMethodAccessorImpl`，默认调了15次之后，才生成一个`GeneratedMethodAccessorXXX`类，生成好之后就会走这个生成的类的`invoke`方法。`NativeMethodAccessorImpl`的`invoke`方法定义如下：
+`Method`的`methodAccessor`的对象类型就是`DelegatingMethodAccessorImpl`，也就是某个`Method`的所有的`invoke`方法都会调用到这个`DelegatingMethodAccessorImpl.invoke`，正如其名一样的，是做代理的，也就是真正的实现可以是`NativeMethodAccessorImpl`和`GeneratedMethodAccessorXXX`两种。如果是`NativeMethodAccessorImpl`，顾名思义，由本地代码C++实现，而`GeneratedMethodAccessorXXX`是为每个需要反射调用的`Method`动态生成的类，后缀XXX是一个不断递增的数值。并且所有的方法反射都是先走`NativeMethodAccessorImpl`，默认调了15次之后，才生成一个`GeneratedMethodAccessorXXX`类，生成好之后就会走这个生成的类的`invoke`方法。`NativeMethodAccessorImpl`的`invoke`方法定义如下：
 
 ```java
 public Object invoke(Object obj, Object[] args)
@@ -395,7 +395,7 @@ public Object invoke(Object obj, Object[] args)
 }
 ```
 
-`generateMethod`会生成一个`GeneratedMethodAccessorXXX`实例，它的`invoke`方法就是样例代码中的`o.hashCode()`，直接调用对象的方法，这种生成方法是Java字节码拼接技术，用来在运行时生成Java类。[javassist](http://www.javassist.org/)和[cglib](https://github.com/cglib/cglib)都是基于字节码拼接技术，在`Spring`中就是使用`cglib`来动态的生成代理类，实现`AOP`功能。`GeneratedMethodAccessorXXX`的类加载器是一个`DelegatingClassLoader`类加载器，使用新的类加载器是为了性能考虑，在某些情况下可以卸载这些生成的类。`invoke0`方法是本地方法，由C实现，方法定义在[NativeAccessors.c](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/sun/reflect/NativeAccessors.c)如下：
+`generateMethod`会生成一个`GeneratedMethodAccessorXXX`实例，它的`invoke`方法就是调用样例代码中的`o.hashCode()`。通过字节码直接调用对象的方法，称为Java字节码拼接技术，用来在运行时生成Java类。[javassist](http://www.javassist.org/)和[cglib](https://github.com/cglib/cglib)都是基于字节码拼接技术实现，在`Spring`中就是使用`cglib`来动态的生成代理类，实现`AOP`功能。`GeneratedMethodAccessorXXX`的类加载器是一个`DelegatingClassLoader`类加载器，使用新的类加载器是为了性能考虑，在某些情况下可以卸载这些生成的类。`invoke0`方法是本地方法，由C实现，方法定义在[NativeAccessors.c](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/sun/reflect/NativeAccessors.c)如下：
 
 ```c
 JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0
@@ -439,7 +439,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
 - jdb
 
-  java调试器工具，作用和用法与gnu的gdb类型；
+  java调试器工具，作用和用法与gnu的gdb类似；
 
 - javah
 
@@ -515,7 +515,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
 # 方法动态绑定原理
 
-在Java中， `final`，`static`，`private`和构造方法与类的绑定关系是在编译期确定了的，所以我们称之为“先期绑定”或者“静态绑定”，对于实例“静态绑定”的方法，采用`invokespecial`指令调用。对于其他实例方法，则需要在运行时根据对象类型再行决议，我们称之为“后期绑定”或“动态绑定”，采用`invokevirtual`指令调用方法。
+在Java中， `final`，`static`，`private`以及构造方法与类的绑定关系是在编译期确定，称之为“前期绑定”或者“静态绑定”，对于实例“静态绑定”的方法，采用`invokespecial`指令调用。对于其他实例方法，则需要在运行时根据对象类型再行决议，我们称之为“后期绑定”或“动态绑定”，采用`invokevirtual`指令调用方法。
 
 以下列代码为例，叙述方法动态绑定原理：
 
@@ -557,7 +557,7 @@ i=2
 
 Java方法的动态绑定原理源自C++的虚方法调用，使用一张虚方法表`vtable`来控制方法调用，所不同的是C++在编译时就创建了类的虚方法表，而Java在运行时加载类才创建虚方法表。
 
-当第一次加载类时，JVM会调用[classFileParser.cpp::parseClassFile()](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/classfile/classFileParser.cpp)函数对类的字节码解析，调用`parseMethods()`函数解析类的所有方法，之后再调用`klassVtable::compute_vtable_size_and_num_mirandas()`函数计算当前类的`vtable`大小。计算`vtable`大小的过程为首先获取父类的`vtable`大小，再循环当前类的方法，调用`needs_new_vtable_entry`方法判断方法是否需要加入到`vtable`（如果方法被声明为`public`或者`protected`且不是`static`或者`final`时，称此方法为虚方法，此时该方法返回`true`），如果返回true，则`vtable`大小加1。当类解析完成后，就需要调用[InstanceKlass::allocate_instance_klass()](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlassKlass.cpp)方法分配内存，存储类信息，这些信息就包括`vtable`大小。当类信息创建完成后就可以准备方法调用了。在执行真正的方法调用前，需要调用[instanceKlass::link_class](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlass.cpp)进行方法链接，此时将会初始化虚方法表。初始化虚方法表的方法在`instanceKlass::link_class_impl`中执行，代码如下：
+当第一次加载类时，JVM会调用[classFileParser.cpp::parseClassFile()](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/classfile/classFileParser.cpp)函数对类的字节码解析，调用`parseMethods()`函数解析类的所有方法，之后再调用`klassVtable::compute_vtable_size_and_num_mirandas()`函数计算当前类的`vtable`大小。计算`vtable`大小的过程是首先获取父类的`vtable`大小，再循环当前类的方法，调用`needs_new_vtable_entry`方法判断方法是否需要加入到`vtable`（如果方法被声明为`public`或者`protected`且不是`static`或者`final`时，称此方法为虚方法，此时该方法返回`true`），如果返回true，则`vtable`大小加1。当类解析完成后，就需要调用[InstanceKlass::allocate_instance_klass()](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlassKlass.cpp)方法分配内存，存储类信息，这些信息就包括`vtable`大小。当类信息创建完成后就可以准备方法调用了。在执行真正的方法调用前，需要调用[instanceKlass::link_class](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlass.cpp)进行方法链接，此时将会初始化虚方法表。初始化虚方法表的方法在`instanceKlass::link_class_impl`中执行，代码如下：
 
 ```c++
 // Initialize the vtable and interface table after
@@ -650,7 +650,7 @@ from  to  target type
 - target 需要跳转的行
 - type 异常类型
 
-异常表内容的第一行表示如果在第0行（此处的行指程序地址，比如第3行是指程序地址为3的指令，即`dup`）和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理，则线程结束。
+异常表内容的第一行表示如果在第0行（此处的行指程序地址，比如第3行是指程序地址为3的指令，即`dup`）和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理器时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理器，则线程结束。
 
 参考：[The secret life of Java exceptions and JVM internals: Level up your Java knowledge](https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)
 
@@ -729,7 +729,7 @@ Constant pool:
 
 ```
 
-从反编译代码中可以看到，字段`t`的类型是`Object`，而代码`Generic<String> g = new Generic<String>();`的泛型信息被擦除，变为`Generic g = new Generic();`，此时已经看不到泛型信息。对于非局部变量，即类、字段和方法（包括参数和返回值）不会擦除泛型信息，因此可以通过反射来获取泛型信息。上述代码`Generic<T>`变编译后，泛型信息是`Generic<T extends java.lang.Object>`，而变量`g`由于泛型类型被擦除，无法通过反射获取其泛型类型。可以通过`new Generic<String>(){}`构造一个子类，此时可以通过反射获取泛型信息。这种方式使用的比较多的是在json解析中，当要解析一串json文本为带有泛型的类型时使用如fastjson的用法`JSONObject.parseObject(json, new TypeReference<List<Person>>(){})`。
+从反编译代码中可以看到，字段`t`的类型是`Object`，而代码`Generic<String> g = new Generic<String>();`的泛型信息被擦除，变为`Generic g = new Generic();`，此时已经看不到泛型信息。对于类型元信息，即类、字段和方法（包括参数和返回值）不会擦除泛型信息，因此可以通过反射来获取泛型信息。上述代码`Generic<T>`变编译后，泛型信息是`Generic<T extends java.lang.Object>`，而变量`g`由于泛型类型被擦除，无法通过反射获取其泛型类型。可以通过`new Generic<String>(){}`构造一个子类，此时可以通过反射获取泛型信息。这种方式使用的比较多的是在json解析中，当要解析一串json文本为带有泛型的类型时使用如fastjson的用法`JSONObject.parseObject(json, new TypeReference<List<Person>>(){})`。
 
 参考：[java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题](https://blog.csdn.net/lonelyroamer/article/details/7868820)，[Generics](https://docs.oracle.com/javase/tutorial/java/generics/index.html)
 

@@ -178,9 +178,9 @@ void Parker::park(bool isAbsolute, jlong time);
 void Parker::unpark();
 ```
 
-每个线程都有一个许可，但调用`unpark`时，许可置为1，但调用`park`时，如果许可为1，将许可置为0并返回，否则等待许可（由`unpark`释放许可）。这个过程类似于信号量，不同的是许可不能累加，最大值为1。需要特别注意的一点：**`park` 方法还可以在其他任何时间“毫无理由”地返回，因此通常必须在重新检查返回条件的循环里调用此方法**。`unpark`方法可以先于`park`调用。
+每个线程都有一个许可，当调用`unpark`时，许可置为1，当调用`park`时，如果许可为1，将许可置为0并返回，否则等待许可（由`unpark`释放许可）。这个过程类似于信号量，不同的是许可不能累加，最大值为1。需要特别注意的一点：**`park` 方法还可以在其他任何时间“毫无理由”地返回，因此通常必须在重新检查返回条件的循环里调用此方法**。`unpark`方法可以先于`park`调用。
 
-`Parker`类使用`_counter`字段表示许可，当调用`park`方法时，先尝试将`_counter`置为0（`if (Atomic::xchg(0, &_counter) > 0) return;`当`_counter`大于0时才会成功地设置为0），如果成功，`park`方法返回，如果不成功，调用`pthread_mutex_trylock`方法尝试锁住互斥变量`_mutex `。如果获取锁不成功，`park`方法返回，需要由上层代码继续调用`park`方法。如果获取锁成功，检查`_counter`是否大于0，如果大于0，将`_counter`置为0，调用`pthread_mutex_unlock`方法解除互斥锁，然后返回。如果不大于0，表示没有许可，调用`pthread_cond_wait`方法等待许可。
+`Parker`类使用`_counter`字段表示许可，当调用`park`方法时，先尝试将`_counter`置为0（`if (Atomic::xchg(0, &_counter) > 0) return;`当`_counter`大于0时才会成功地设置为0），如果设置成功，`park`方法返回，如果设置不成功，调用`pthread_mutex_trylock`方法尝试锁住互斥变量`_mutex `。如果获取锁不成功，`park`方法返回，需要由上层代码继续调用`park`方法。如果获取锁成功，检查`_counter`是否大于0，如果大于0，将`_counter`置为0，调用`pthread_mutex_unlock`方法解除互斥锁，然后返回。如果不大于0，表示没有许可，调用`pthread_cond_wait`方法等待许可。
 
 当调用`unpark`方法时，调用`pthread_mutex_lock`方法获取互斥锁，将`_counter`置为1，即添加许可。如果`_counter`之前为0，则调用`pthread_cond_signal `通知其他线程可以。最后调用`pthread_mutex_unlock`释放互斥锁，`unpark`方法返回。
 
@@ -228,11 +228,11 @@ protected final boolean compareAndSetState(int expect, int update);
 protected final void setState(int newState);
 ```
 
-当调用`tryAcquire()`返回true或者`tryAcquireShared()`返回值大于0时，线程不需要阻塞。否则需要向FIFO队列添加一个节点（包括当前线程），阻塞该线程，然后进入`acquireQueued`循环，不停的尝试获取锁。当获取锁时，需要退出`acquireQueued`，同时需要判断后续节点是否为共享模式，如果是，需要将后续线程也唤醒。
+当调用`tryAcquire()`返回true或者`tryAcquireShared()`返回值大于0时，线程不需要阻塞。否则需要向FIFO队列添加一个节点（包括当前线程），阻塞该线程，然后进入`acquireQueued`循环，不停的尝试获取锁。当获取锁成功时，需要退出`acquireQueued`，同时需要判断后续节点是否为共享模式，如果是，需要将后续线程也唤醒。
 
 当调用`tryRelease()`返回true或者`tryReleaseShared()`返回值大于0时，唤醒FIFO队列head的线程。
 
-`Condition`是AQS定义的内部类`ConditionObject`，必须与独占锁一起使用，它提供了`await`、`signal`和`signalAll`方法来弥补`Object.wait()`、`Object.notify()`和`Object.notifyAll()`的缺陷。`Condition`内部也提供了一个FIFO队列。当调用`await`方法时，释放锁，将当前线程添加到`Condition`的FIFO队列中，阻塞线程，当线程唤醒时需要判断该节点是否进入了AQS的FIFO锁等待队列，如果时，则进入acquire循环获取锁，否则线程继续阻塞。当调用`signal`时，需要将`Condition`的FIFO队列的第一个线程移动到AQS的FIFO队列中，进入锁等待队列。
+`Condition`是AQS定义的内部类`ConditionObject`，必须与独占锁一起使用，它提供了`await`、`signal`和`signalAll`方法来弥补`Object.wait()`、`Object.notify()`和`Object.notifyAll()`的缺陷。`Condition`内部也提供了一个FIFO队列。当调用`await`方法时，释放锁，将当前线程添加到`Condition`的FIFO队列中，阻塞线程，当线程唤醒时需要判断该节点是否进入了AQS的FIFO锁等待队列，如果已入队列，则进入acquire循环获取锁，否则线程继续阻塞。当调用`signal`时，需要将`Condition`的FIFO队列的第一个线程移动到AQS的FIFO队列中，进入锁等待队列。
 
 参考：[AQS 和 高级同步器](http://novoland.github.io/%E5%B9%B6%E5%8F%91/2014/07/26/AQS%20%E5%92%8C%20%E9%AB%98%E7%BA%A7%E5%90%8C%E6%AD%A5%E5%99%A8.html)
 
