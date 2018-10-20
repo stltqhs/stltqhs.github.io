@@ -88,7 +88,7 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 解锁阶段：当事务释放了一个封锁以后，事务进入解锁阶段，在该阶段只能进行解锁操作不能再进行加锁操作。
 
-在可重复读的隔离级别中，Innodb使用MVCC解决幻读，原理是：Innodb为每一行添加3个额外的字段，分别是6字节的DB_TRX_ID（记录插入或者更新该行的事务ID）；1字节的删除标记位Deleted（当执行Deleted时，将该标记置为1）；7字节的DB_ROLL_PTR（用来记录修改前的行指针），当一个事物读取某一行时，mysql内部使用[ReadView](https://github.com/stltqhs/mysql-server/blob/5.7/storage/innobase/include/read0types.h)结构记录读取行的事务号，而且读取行的DB_TRX_ID不会大于本事务的事务ID。当其他事务修改该行时，会创建新的记录用来存储更改的数据，而由于readview的关系，当前事务不会读取到修改的数据。当执行delete操作时，mysql不会立即删除该行，而是将该行标记为Deleted。对于旧的行数据，mysql内部会检查是否存在其他事务正在读取或者已经读取该行，如果没有任何事务读取该行，则该行将在*purge*线程中清除。可以使用锁的方式使得事务总是读取最新行，这种方式称为“当前读”，与之对应的就称为“快照读”。对于普通的Select查询操作都是“快照读”，而Update，Delete和Select ... lock in share mode和Select ... for update则都是“当前读”。
+在可重复读的隔离级别中，Innodb使用MVCC解决幻读，原理是：Innodb为每一行添加3个额外的字段，分别是6字节的DB_TRX_ID（记录插入或者更新该行的事务ID）；1字节的删除标记位Deleted（当执行Deleted时，将该标记置为1）；7字节的DB_ROLL_PTR（用来记录修改前的行指针），当一个事物读取某一行时，mysql内部使用[ReadView](https://github.com/stltqhs/mysql-server/blob/5.7/storage/innobase/include/read0types.h)结构记录读取行的事务号，而且读取行的DB_TRX_ID不会大于本事务的事务ID。当其他事务修改该行时，会创建新的记录用来存储更改的数据，而由于readview的关系，当前事务不会读取到修改的数据。当执行delete操作时，mysql不会立即删除该行，而是将该行标记为Deleted。对于旧的行数据，mysql内部会检查是否存在其他事务正在读取或者已经读取该行，如果没有任何事务读取该行，则该行将在*purge*线程中清除。可以使用锁的方式使得事务总是读取最新行，这种方式称为“当前读”，与之对应的就称为“快照读”。对于普通的Select查询操作都是“快照读”，而Update，Delete，Select ... lock in share mode和Select ... for update则都是“当前读”。
 
 参考：[MySQL（二）｜深入理解MySQL的四种隔离级别及加锁实现原理](https://www.jianshu.com/p/dab1c0ecbac0)，[数据库事务](https://zh.wikipedia.org/wiki/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1)，[Isolation](https://en.wikipedia.org/wiki/Isolation_%28database_systems%29)，[InnoDB Multi-Versioning](https://dev.mysql.com/doc/refman/5.6/en/innodb-multi-versioning.html)
 
