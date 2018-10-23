@@ -98,8 +98,10 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 参考：[Understanding Innodb locks and deadlocks](https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/understandinginnodblocksanddeadlocks.pdf)
 
-# mysql的存储引擎
+# 存储引擎
 
-# 优化
+# 查询优化
 
 # Nosql
+
+参考：[MongoDB – Internals & Performance](https://iuliantabara.com/2016/01/mongodb-internals-performance/)
