@@ -1,12 +1,113 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
+
+
+
+
+
+
+
+
+
+
+
 
   
-  <title>mysql-server源码阅读01 - mysql-server模块与架构 | 海东青</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
   <meta name="description" content="一、前言mysql-server是当前非常流行的开源RDBMS，在其基础上还有多个开源版本，如Percona、Maria DB等，其中以Percona最为常用，不仅包括对mysql-server的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读mysql-server源码需要参考MySQL Internals Manual，还可以阅读书籍，如Understanding Mysql Inter">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
@@ -16,78 +117,263 @@
 <meta property="og:description" content="一、前言mysql-server是当前非常流行的开源RDBMS，在其基础上还有多个开源版本，如Percona、Maria DB等，其中以Percona最为常用，不仅包括对mysql-server的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读mysql-server源码需要参考MySQL Internals Manual，还可以阅读书籍，如Understanding Mysql Inter">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/mysql-modules.jpg">
-<meta property="og:updated_time" content="2018-04-29T12:57:57.093Z">
+<meta property="og:updated_time" content="2018-10-25T15:01:24.715Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql-server源码阅读01 - mysql-server模块与架构">
 <meta name="twitter:description" content="一、前言mysql-server是当前非常流行的开源RDBMS，在其基础上还有多个开源版本，如Percona、Maria DB等，其中以Percona最为常用，不仅包括对mysql-server的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读mysql-server源码需要参考MySQL Internals Manual，还可以阅读书籍，如Understanding Mysql Inter">
 <meta name="twitter:image" content="http://yoursite.com/images/mysql-modules.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/29/mysql-server-source-ep01/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>mysql-server源码阅读01 - mysql-server模块与架构 | 海东青</title>
   
-    <link rel="alternate" href="/atom.xml" title="海东青" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
 </head>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">海东青</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-mysql-server-source-ep01" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/29/mysql-server-source-ep01/" class="article-date">
-  <time datetime="2018-04-29T10:46:59.000Z" itemprop="datePublished">2018-04-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
   
-    <h1 class="article-title" itemprop="name">
-      mysql-server源码阅读01 - mysql-server模块与架构
-    </h1>
+  
+    
   
 
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">海东青</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/29/mysql-server-source-ep01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Gyrfalcon,stltqhs@163.com">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="海东青">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">mysql-server源码阅读01 - mysql-server模块与架构
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-04-29 18:46:59" itemprop="dateCreated datePublished" datetime="2018-04-29T18:46:59+08:00">2018-04-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-25 23:01:24" itemprop="dateModified" datetime="2018-10-25T23:01:24+08:00">2018-10-25</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
       
         <h1 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h1><p><a href="https://github.com/mysql/mysql-server" target="_blank" rel="noopener">mysql-server</a>是当前非常流行的开源<code>RDBMS</code>，在其基础上还有多个开源版本，如<code>Percona</code>、<code>Maria DB</code>等，其中以<code>Percona</code>最为常用，不仅包括对<code>mysql-server</code>的很多优化，还包括很多实用工具，而且开发社区很活跃。阅读<code>mysql-server</code>源码需要参考<a href="https://dev.mysql.com/doc/internals/en/" target="_blank" rel="noopener">MySQL Internals Manual</a>，还可以阅读书籍，如<a href="http://shop.oreilly.com/product/9780596009571.do" target="_blank" rel="noopener">Understanding Mysql Internals</a>。关于<code>mysql-server</code>的编译与调试可以参考<a href="https://stltqhs.github.io/2018/03/31/mysql-compile/" target="_blank" rel="noopener">mysql-server编译与调试</a>。</p>
 <h1 id="二、mysql-server模块"><a href="#二、mysql-server模块" class="headerlink" title="二、mysql-server模块"></a>二、mysql-server模块</h1><p><img src="/images/mysql-modules.jpg" alt="mysql-server模块" title="mysql-server模块"></p>
@@ -216,138 +502,362 @@
 
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/29/mysql-server-source-ep01/" data-id="cjhu4b60b000ho6xyubz7nwmz" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
 
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/16/an-sql-optimization-for-fault-table/" rel="next" title="记一次sql优化的过程">
+                <i class="fa fa-chevron-left"></i> 记一次sql优化的过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/29/mysql-server-source-ep02/" rel="prev" title="mysql-server源码阅读02 - 文件格式">
+                mysql-server源码阅读02 - 文件格式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
     </footer>
   </div>
   
-    
-<nav id="article-nav">
   
-    <a href="/2018/04/29/mysql-server-source-ep02/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
         
-          mysql-server源码阅读02 - 文件格式
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Gyrfalcon,stltqhs@163.com</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、前言"><span class="nav-number">1.</span> <span class="nav-text">一、前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、mysql-server模块"><span class="nav-number">2.</span> <span class="nav-text">二、mysql-server模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-服务器初始化模块"><span class="nav-number">2.0.1.</span> <span class="nav-text">1.服务器初始化模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-连接器管理"><span class="nav-number">2.0.2.</span> <span class="nav-text">2.连接器管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-线程管理器"><span class="nav-number">2.0.3.</span> <span class="nav-text">3.线程管理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-连接线程"><span class="nav-number">2.0.4.</span> <span class="nav-text">4.连接线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-用户验证"><span class="nav-number">2.0.5.</span> <span class="nav-text">5.用户验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-访问控制"><span class="nav-number">2.0.6.</span> <span class="nav-text">6.访问控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-解析器"><span class="nav-number">2.0.7.</span> <span class="nav-text">6.解析器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-命令调度"><span class="nav-number">2.0.8.</span> <span class="nav-text">7.命令调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-查询高速缓存"><span class="nav-number">2.0.9.</span> <span class="nav-text">8.查询高速缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-优化器"><span class="nav-number">2.0.10.</span> <span class="nav-text">9.优化器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-表管理器"><span class="nav-number">2.0.11.</span> <span class="nav-text">10.表管理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-表修改"><span class="nav-number">2.0.12.</span> <span class="nav-text">11.表修改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-表维护"><span class="nav-number">2.0.13.</span> <span class="nav-text">12.表维护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-状态报告"><span class="nav-number">2.0.14.</span> <span class="nav-text">13.状态报告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-抽象存储引擎接口（表处理器）"><span class="nav-number">2.0.15.</span> <span class="nav-text">14.抽象存储引擎接口（表处理器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-表存储引擎的实现（MyISAM、InnoDB、MEMORY）"><span class="nav-number">2.0.16.</span> <span class="nav-text">15.表存储引擎的实现（MyISAM、InnoDB、MEMORY）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-日志记录"><span class="nav-number">2.0.17.</span> <span class="nav-text">16.日志记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-主从复制"><span class="nav-number">2.0.18.</span> <span class="nav-text">17.主从复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-客户端-服务端协议API"><span class="nav-number">2.0.19.</span> <span class="nav-text">18.客户端/服务端协议API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-低层次网络IO-API"><span class="nav-number">2.0.20.</span> <span class="nav-text">19.低层次网络IO API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#20-核心API"><span class="nav-number">2.0.21.</span> <span class="nav-text">20.核心API</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、核心类、结构、变量及API"><span class="nav-number">3.</span> <span class="nav-text">三、核心类、结构、变量及API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-核心类"><span class="nav-number">3.0.1.</span> <span class="nav-text">1.核心类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-API"><span class="nav-number">3.0.2.</span> <span class="nav-text">2.API</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
         
       </div>
-    </a>
-  
-  
-    <a href="/2018/04/16/an-sql-optimization-for-fault-table/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">记一次sql优化的过程</div>
-    </a>
-  
-</nav>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Gyrfalcon,stltqhs@163.com</span>
 
   
-</article>
 
-</section>
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
         
-          <aside id="sidebar">
-  
-    
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
-    <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-    </div>
-  </div>
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a>
-    </div>
-  </div>
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
-    </div>
-  </div>
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2018/04/29/mysql-server-source-ep02/">mysql-server源码阅读02 - 文件格式</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/29/mysql-server-source-ep01/">mysql-server源码阅读01 - mysql-server模块与架构</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/16/an-sql-optimization-for-fault-table/">记一次sql优化的过程</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/13/openjdk-introduction/">Openjdk简介</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/10/cloud-native-java/">Cloud Native Java阅读笔记</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
 
-  
-</aside>
+
+
+
         
       </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2018 Gyrfalcon<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    
+	
+    
 
-
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
-
-
-<script src="/js/script.js"></script>
-
-
-
+    
   </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
 </body>
 </html>

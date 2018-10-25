@@ -1,12 +1,113 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
+
+
+
+
+
+
+
+
+
+
+
 
   
-  <title>openjdk编译 | 海东青</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
   <meta name="description" content="一、windows下openjdk编译与hotspot调试过程1.需要使用cygwin编译，同时需要安装visual studio 2013注意不要和babun混用cygwin以下需要修改的文件是：common/autoconf/generated-configure.sh 2.需要安装cpio，在babun的环境下直接使用pact安装1pact install cpio 使用babun安装的数据">
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
@@ -15,77 +116,262 @@
 <meta property="og:site_name" content="海东青">
 <meta property="og:description" content="一、windows下openjdk编译与hotspot调试过程1.需要使用cygwin编译，同时需要安装visual studio 2013注意不要和babun混用cygwin以下需要修改的文件是：common/autoconf/generated-configure.sh 2.需要安装cpio，在babun的环境下直接使用pact安装1pact install cpio 使用babun安装的数据">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-04-01T03:31:08.534Z">
+<meta property="og:updated_time" content="2018-10-25T15:01:24.717Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="openjdk编译">
 <meta name="twitter:description" content="一、windows下openjdk编译与hotspot调试过程1.需要使用cygwin编译，同时需要安装visual studio 2013注意不要和babun混用cygwin以下需要修改的文件是：common/autoconf/generated-configure.sh 2.需要安装cpio，在babun的环境下直接使用pact安装1pact install cpio 使用babun安装的数据">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/31/openjdk-compile/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>openjdk编译 | 海东青</title>
   
-    <link rel="alternate" href="/atom.xml" title="海东青" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
 </head>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">海东青</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-openjdk-compile" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/03/31/openjdk-compile/" class="article-date">
-  <time datetime="2018-03-31T07:34:38.000Z" itemprop="datePublished">2018-03-31</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
   
-    <h1 class="article-title" itemprop="name">
-      openjdk编译
-    </h1>
+  
+    
   
 
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">海东青</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/31/openjdk-compile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Gyrfalcon,stltqhs@163.com">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="海东青">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">openjdk编译
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-03-31 15:34:38" itemprop="dateCreated datePublished" datetime="2018-03-31T15:34:38+08:00">2018-03-31</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-25 23:01:24" itemprop="dateModified" datetime="2018-10-25T23:01:24+08:00">2018-10-25</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
       
         <h1 id="一、windows下openjdk编译与hotspot调试过程"><a href="#一、windows下openjdk编译与hotspot调试过程" class="headerlink" title="一、windows下openjdk编译与hotspot调试过程"></a>一、<code>windows</code>下<code>openjdk</code>编译与<code>hotspot</code>调试过程</h1><h3 id="1-需要使用cygwin编译，同时需要安装visual-studio-2013"><a href="#1-需要使用cygwin编译，同时需要安装visual-studio-2013" class="headerlink" title="1.需要使用cygwin编译，同时需要安装visual studio 2013"></a>1.需要使用<code>cygwin</code>编译，同时需要安装<code>visual studio 2013</code></h3><p>注意不要和babun混用cygwin<br>以下需要修改的文件是：<code>common/autoconf/generated-configure.sh</code></p>
 <h3 id="2-需要安装cpio，在babun的环境下直接使用pact安装"><a href="#2-需要安装cpio，在babun的环境下直接使用pact安装" class="headerlink" title="2.需要安装cpio，在babun的环境下直接使用pact安装"></a>2.需要安装<code>cpio</code>，在<code>babun</code>的环境下直接使用pact安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pact install cpio</span><br></pre></td></tr></table></figure>
@@ -113,141 +399,378 @@
 <h3 id="10-创建VC工程文件"><a href="#10-创建VC工程文件" class="headerlink" title="10.创建VC工程文件"></a>10.创建VC工程文件</h3><p>1)修改hotspot/make/windows/create.bat<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@@ -140,6 +140,7 @@ goto usage</span><br><span class="line"> :test3</span><br><span class="line"> if not &quot;%HOTSPOTMKSHOME%&quot; == &quot;&quot; goto makedir</span><br><span class="line"> if exist c:\cygwin\bin set HOTSPOTMKSHOME=c:\cygwin\bin</span><br><span class="line">+if exist D:\Application\cygwin64\bin set HOTSPOTMKSHOME=D:\Application\cygwin64\bin</span><br><span class="line"> if not &quot;%HOTSPOTMKSHOME%&quot; == &quot;&quot; goto makedir</span><br><span class="line"> echo Warning: please set variable HOTSPOTMKSHOME to place where</span><br><span class="line"> echo          your MKS/Cygwin installation is</span><br></pre></td></tr></table></figure></p>
 <p>2)开始创建工程文件<br>进入cmd，执行VC\bin\amd64\vcvars64.bat<br>设置cygwin的bin目录为环境变量：set PATH=D:\Application\cygwin64\bin:%PATH%<br>执行create openjdk\build\windows-x86_64-normal-server-fastdebug\jdk<br>执行成功后会生成工程文件：openjdk\hotspot\build\vs-amd64\jvm.vcproj<br>11.构建jvm及调试<br>1)工程配置<br>在项目配置窗口（jvm Property Pages）打开Configuration Manager的窗口，修改Active solution configuration为compiler2_fastdebug,Active solution platform: x64<br>Configuration Properties&gt;General选项，Output Directory和Intermediate Directory都改为：openjdk\build\windows-x86_64-normal-server-fastdebug\jdk\bin\server<br>Configuration Properties&gt;Debugging选项，Command改为：openjdk\build\windows-x86_64-normal-server-fastdebug\jdk\bin\java.exe，Command Arguments改为-Djava.class.path=openjdk/debug/src/java com.yuqing.hotspot.HelloDebug，Environment改为JAVA_HOME=openjdk\build\windows-x86_64-normal-server-fastdebug\jdk<br>Configuration Properties&gt;Linker&gt;Input，在Additional Dependencies添加version.lib ，Kernel32.lib ，Psapi.lib<br>2)编译调试文件<br>build/windows-x86_64-normal-server-fastdebug/jdk/bin/javac debug/src/java/com/yuqing/hotspot/HelloDebug.java<br>3)断点<br>share/vm/runtime/thread.cpp第3306行是create_vm方法，在该方法内打下断点<br>4)编译调试<br>点击Local Windows Debbugger开始调试</p>
 <h3 id="12-参考"><a href="#12-参考" class="headerlink" title="12.参考"></a>12.参考</h3><p><a href="http://www.jianshu.com/p/e85f93cc74cb" target="_blank" rel="noopener">http://www.jianshu.com/p/e85f93cc74cb</a></p>
+<h1 id="二、mac下openjdk编译与hotspot调试过程"><a href="#二、mac下openjdk编译与hotspot调试过程" class="headerlink" title="二、mac下openjdk编译与hotspot调试过程"></a>二、<code>mac</code>下<code>openjdk</code>编译与<code>hotspot</code>调试过程</h1><h3 id="1-准备"><a href="#1-准备" class="headerlink" title="1.准备"></a>1.准备</h3><p>查看README-builds.html文件，需要安装Xcode</p>
+<p>参考：<a href="https://www.jianshu.com/p/9e3545ec864f" target="_blank" rel="noopener">在Mac上编译OpenJDK</a></p>
+<h3 id="2-编译"><a href="#2-编译" class="headerlink" title="2.编译"></a>2.编译</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make sanity</span><br><span class="line">make all</span><br></pre></td></tr></table></figure>
+<p>错误：</p>
+<p>1.openjdk/hotspot/src/share/vm/runtime/virtualspace.cpp:527:14: error: ordered comparison between pointer and zero (‘char *’ and ‘int’)</p>
+<p>修改文件openjdk/hotspot/src/share/vm/runtime/virtualspace.cpp第527行和第546行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">long</span>(base()) &gt; <span class="number">0</span>) &#123;</span><br></pre></td></tr></table></figure>
+<p>2.JVM崩溃：[libjvm.dylib+0x3f9c6d]  PerfDataManager::destroy()+0xab</p>
+<p>修改destroy方法，如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> PerfDataManager::destroy() &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (_all == <span class="literal">NULL</span>)</span><br><span class="line">    <span class="comment">// destroy already called, or initialization never happened</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> index = <span class="number">0</span>; index &lt; _all-&gt;length(); index++) &#123;</span><br><span class="line">    <span class="comment">// 注释下面2行</span></span><br><span class="line">    <span class="comment">//PerfData* p = _all-&gt;at(index);</span></span><br><span class="line">    <span class="comment">//delete p;</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">delete</span>(_all);</span><br><span class="line">  <span class="keyword">delete</span>(_sampled);</span><br><span class="line">  <span class="keyword">delete</span>(_constants);</span><br><span class="line"></span><br><span class="line">  _all = <span class="literal">NULL</span>;</span><br><span class="line">  _sampled = <span class="literal">NULL</span>;</span><br><span class="line">  _constants = <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="https://blog.csdn.net/j754379117/article/details/53695426" target="_blank" rel="noopener">第一章 Mac os下编译openJDK 7</a>，<a href="https://www.jianshu.com/p/5107fc72558f" target="_blank" rel="noopener">Mac 10.12.4 编译 openJDK7 记录</a></p>
+<h3 id="3-调试"><a href="#3-调试" class="headerlink" title="3.调试"></a>3.调试</h3><p>使用xcode调试hotspot。</p>
+<p>参考：<a href="https://www.jianshu.com/p/e53e7964db03" target="_blank" rel="noopener">mac 平台编译并调试 OpenJDK7 和 HotSpot</a></p>
 
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/31/openjdk-compile/" data-id="cjhu4b60f000mo6xy6y9ussqv" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
 
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/31/hello-world/" rel="next" title="数据库性能分析">
+                <i class="fa fa-chevron-left"></i> 数据库性能分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/31/mysql-compile/" rel="prev" title="mysql编译与调试">
+                mysql编译与调试 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
     </footer>
   </div>
   
-    
-<nav id="article-nav">
   
-    <a href="/2018/03/31/mysql-compile/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
         
-          mysql编译与调试
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Gyrfalcon,stltqhs@163.com</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、windows下openjdk编译与hotspot调试过程"><span class="nav-number">1.</span> <span class="nav-text">一、windows下openjdk编译与hotspot调试过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-需要使用cygwin编译，同时需要安装visual-studio-2013"><span class="nav-number">1.0.1.</span> <span class="nav-text">1.需要使用cygwin编译，同时需要安装visual studio 2013</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-需要安装cpio，在babun的环境下直接使用pact安装"><span class="nav-number">1.0.2.</span> <span class="nav-text">2.需要安装cpio，在babun的环境下直接使用pact安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-由于检查cygwin时可能存在路径链接深度太大，可以注释cygwin检查"><span class="nav-number">1.0.3.</span> <span class="nav-text">3.由于检查cygwin时可能存在路径链接深度太大，可以注释cygwin检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-如果无法检查系统的CPU类型，可以直接改"><span class="nav-number">1.0.4.</span> <span class="nav-text">4.如果无法检查系统的CPU类型，可以直接改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-如果Visual-Studio的安装目录存在空格，需要使用软链接的方式链接到到Visual-Studio的目录，同时在PATH中添加到VC-bin-amd64的变量"><span class="nav-number">1.0.5.</span> <span class="nav-text">5.如果Visual Studio的安装目录存在空格，需要使用软链接的方式链接到到Visual Studio的目录，同时在PATH中添加到VC/bin/amd64的变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-fixpath报错时需要更改common-src-fixpath-c"><span class="nav-number">1.0.6.</span> <span class="nav-text">6.fixpath报错时需要更改common/src/fixpath.c</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-安装freetype"><span class="nav-number">1.0.7.</span> <span class="nav-text">7.安装freetype</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-编译"><span class="nav-number">1.0.8.</span> <span class="nav-text">9.编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-创建VC工程文件"><span class="nav-number">1.0.9.</span> <span class="nav-text">10.创建VC工程文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-参考"><span class="nav-number">1.0.10.</span> <span class="nav-text">12.参考</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、mac下openjdk编译与hotspot调试过程"><span class="nav-number">2.</span> <span class="nav-text">二、mac下openjdk编译与hotspot调试过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-准备"><span class="nav-number">2.0.1.</span> <span class="nav-text">1.准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编译"><span class="nav-number">2.0.2.</span> <span class="nav-text">2.编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-调试"><span class="nav-number">2.0.3.</span> <span class="nav-text">3.调试</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
         
       </div>
-    </a>
-  
-  
-    <a href="/2018/03/31/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">数据库性能分析</div>
-    </a>
-  
-</nav>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Gyrfalcon,stltqhs@163.com</span>
 
   
-</article>
 
-</section>
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
         
-          <aside id="sidebar">
-  
-    
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
-    <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-    </div>
-  </div>
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a>
-    </div>
-  </div>
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
-    </div>
-  </div>
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2018/04/29/mysql-server-source-ep02/">mysql-server源码阅读02 - 文件格式</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/29/mysql-server-source-ep01/">mysql-server源码阅读01 - mysql-server模块与架构</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/16/an-sql-optimization-for-fault-table/">记一次sql优化的过程</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/13/openjdk-introduction/">Openjdk简介</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/10/cloud-native-java/">Cloud Native Java阅读笔记</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
 
-  
-</aside>
+
+
+
         
       </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2018 Gyrfalcon<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    
+	
+    
 
-
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
-
-
-<script src="/js/script.js"></script>
-
-
-
+    
   </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
 </body>
 </html>
