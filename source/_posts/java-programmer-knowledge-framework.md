@@ -8,7 +8,18 @@ tags: java
 
 # 基准测试
 
-参考：[API性能测试基本性能指标及要求](https://blog.csdn.net/strawbingo/article/details/46458959)
+性能测试工具如下：
+
+* ab
+* siege
+* http_load
+* webbench
+* loadrunner
+* sysbench
+
+结合性能测试数据，使用[gnuplot](http://www.gnuplot.info/)可以绘制一张性能测试图标。
+
+参考：[API性能测试基本性能指标及要求](https://blog.csdn.net/strawbingo/article/details/46458959)，[GNUPLOT 4.2 - A Brief Manual and Tutorial](https://people.duke.edu/~hpgavin/gnuplot.html)
 
 # 分布式原理
 
