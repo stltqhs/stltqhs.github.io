@@ -94,6 +94,8 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 # Innodb索引
 
+参考：[MySQL源码：索引相关的数据结构(前篇)](http://www.orczhou.com/index.php/2012/11/mysql-source-code-data-structure-about-index/)，[MySQL源码：索引相关的数据结构(后篇)](http://www.orczhou.com/index.php/2012/11/mysql-source-code-how-mysql-find-usable-index/)
+
 # Innodb锁
 
 参考：[Understanding Innodb locks and deadlocks](https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/understandinginnodblocksanddeadlocks.pdf)
