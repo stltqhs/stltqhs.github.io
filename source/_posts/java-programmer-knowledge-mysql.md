@@ -98,11 +98,189 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 # Innodb锁
 
-参考：[Understanding Innodb locks and deadlocks](https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/understandinginnodblocksanddeadlocks.pdf)
+锁是用来实现事务一致性和隔离性的常用技术，Innodb存储引擎实现了两种行级锁：
+
+* 共享锁（S Lock），允许事物读一行事物；
+* 排他锁（X Lock），允许事物删除或者更新一行数据；
+
+Innodb存储引擎也支持允许表锁和行锁共存的多粒度意向锁（即表级锁）：
+
+* 意向共享锁（IS Lock），事务想要获取一张表中某几行的共享锁；
+* 意向排他锁（IX Lock），事务想要获得一张表中某几行的排他锁；
+
+因为Innodb存储引擎支持的是行级别的锁，因此意向锁不会阻塞除全表扫描（如`LOCK TABLES ... WRITE`）以外的锁。
+
+在Mysql源码的lock0priv.h定义了几种锁的兼容性，代码如下：
+
+```c
+static const byte lock_compatibility_matrix[5][5] = {
+ /**         IS     IX       S     X       AI */
+ /* IS */ {  TRUE,  TRUE,  TRUE,  FALSE,  TRUE},
+ /* IX */ {  TRUE,  TRUE,  FALSE, FALSE,  TRUE},
+ /* S  */ {  TRUE,  FALSE, TRUE,  FALSE,  FALSE},
+ /* X  */ {  FALSE, FALSE, FALSE, FALSE,  FALSE},
+ /* AI */ {  TRUE,  TRUE,  FALSE, FALSE,  FALSE}
+};
+```
+
+> AI是Auto-Increment锁，即自增锁，也是表级锁
+
+Innodb存储引擎支持三种行锁的算法：
+
+* record lock：单个索引记录上的锁，即记录锁；
+* gap lock：间隙锁，锁定一个范围，但不包含记录本身；
+* next-key lock：gap lock + record lock，锁定一个范围，并且锁定记录本身；
+
+Innodb表级锁数据结构定义如下：
+
+```c
+// lock0priv.h
+/** A table lock */
+struct lock_table_t {
+	dict_table_t*	table;		/*!< database table in dictionary
+					cache */
+	UT_LIST_NODE_T(lock_t)
+			locks;		/*!< list of locks on the same
+					table */
+};
+```
+
+记录锁数据结构定义如下：
+
+```c
+// lock0priv.h
+/** Record lock for a page */
+struct lock_rec_t {
+	ib_uint32_t	space;		/*!< space id */
+	ib_uint32_t	page_no;	/*!< page number */
+	ib_uint32_t	n_bits;		/*!< number of bits in the lock
+					bitmap; NOTE: the lock bitmap is
+					placed immediately after the
+					lock struct */
+};
+```
+
+`lock_rec_t`结构说明记录锁是根据页的组织形式来管理的（Innodb文件结构可阅读[Innodb File Space](https://dev.mysql.com/doc/refman/5.6/en/innodb-file-space.html)，更详细的说明可阅读Jeremy Cole的文章[Innodb](https://blog.jcole.us/innodb/)），若要知道页中某一条记录是否已经有锁，则通过位图的方式，即位图中值为1表示该记录已经持有锁，位图中索引与记录的`heap_no`（页上每行数据紧接着存放，内部使用一个 `heap_no`来表示是第几行数据。因此`[space, page_no, heap_no]`可以唯一确定一行）一一对应。
+
+由于锁是被事务持有，因此还需要`lock_t`数据结构，定义如下：
+
+```c
+// lock0priv.h
+/** Lock struct; protected by lock_sys->mutex */
+struct lock_t {
+	trx_t*		trx;		/*!< transaction owning the
+					lock */
+	UT_LIST_NODE_T(lock_t)
+			trx_locks;	/*!< list of the locks of the
+					transaction */
+
+	dict_index_t*	index;		/*!< index for a record lock */
+
+	lock_t*		hash;		/*!< hash chain node for a record
+					lock. The link node in a singly linked
+					list, used during hashing. */
+
+	union {
+		lock_table_t	tab_lock;/*!< table lock */
+		lock_rec_t	rec_lock;/*!< record lock */
+	} un_member;			/*!< lock details */
+
+	ib_uint32_t	type_mode;	/*!< lock type, mode, LOCK_GAP or
+					LOCK_REC_NOT_GAP,
+					LOCK_INSERT_INTENTION,
+					wait flag, ORed */
+};
+```
+
+由于一个事务可能在不同页上有多个行锁，因此需要使用`trx_locks`将一个事务的所有锁信息进行链接。`type_mode`中的lock type有：
+
+```c
+// lock0lock.h
+#define LOCK_TABLE	16	/*!< table lock */
+#define	LOCK_REC	32	/*!< record lock */
+```
+
+lock mode有：
+
+```c
+// lock0types.h
+/* Basic lock modes */
+enum lock_mode {
+	LOCK_IS = 0,	/* intention shared */
+	LOCK_IX,	/* intention exclusive */
+	LOCK_S,		/* shared */
+	LOCK_X,		/* exclusive */
+	LOCK_AUTO_INC,	/* locks the auto-inc counter of a table
+			in an exclusive mode */
+	LOCK_NONE,	/* this is used elsewhere to note consistent read */
+	LOCK_NUM = LOCK_NONE, /* number of lock modes */
+	LOCK_NONE_UNSET = 255
+};
+```
+
+表示Innodb整个事务锁系统的数据结构是`lock_sys_t`，定义如下：
+
+```c
+// lock0lock.h
+/** The lock system struct */
+struct lock_sys_t{
+	char		pad1[CACHE_LINE_SIZE];	/*!< padding to prevent other
+						memory update hotspots from
+						residing on the same memory
+						cache line */
+	LockMutex	mutex;			/*!< Mutex protecting the
+						locks */
+	hash_table_t*	rec_hash;		/*!< hash table of the record
+						locks */
+	hash_table_t*	prdt_hash;		/*!< hash table of the predicate
+						lock */
+	hash_table_t*	prdt_page_hash;		/*!< hash table of the page
+						lock */
+
+	char		pad2[CACHE_LINE_SIZE];	/*!< Padding */
+	LockMutex	wait_mutex;		/*!< Mutex protecting the
+						next two fields */
+	srv_slot_t*	waiting_threads;	/*!< Array  of user threads
+						suspended while waiting for
+						locks within InnoDB, protected
+						by the lock_sys->wait_mutex */
+	srv_slot_t*	last_slot;		/*!< highest slot ever used
+						in the waiting_threads array,
+						protected by
+						lock_sys->wait_mutex */
+	ibool		rollback_complete;
+						/*!< TRUE if rollback of all
+						recovered transactions is
+						complete. Protected by
+						lock_sys->mutex */
+
+	ulint		n_lock_max_wait_time;	/*!< Max wait time */
+
+	os_event_t	timeout_event;		/*!< Set to the event that is
+						created in the lock wait monitor
+						thread. A value of 0 means the
+						thread is not active */
+
+	bool		timeout_thread_active;	/*!< True if the timeout thread
+						is running */
+};
+```
+
+`lock_sys_t`中的`rec_hash`哈希表的键通过调用`lock_rec_fold(space, page_no)`生成。因此若需要查询某一行记录是否有锁，首先是根据行所在的页进行哈希查询，然后根据查询得到的`lock_rec_t`，扫描 lock bitmap 才能最终得到该行记录是否有锁。
+
+在Innodb存储引擎中还存在两种不同属性的锁：显式锁（explicit lock）和隐式锁（implicit lock）。显式锁可以是共享锁，也可以是排他锁，而隐式锁只能是排他锁。显式锁使用`lock_rec_t`表示，占用内存。隐式锁指索引记录逻辑上有排他锁，但实际在内存对象中并不含用这个锁信息，没有任何内存开销。因为行锁本质上是索引记录锁，当锁定一行聚集索引（Cluster Index）记录时，如果该记录上还有二级索引（Secondary Index），还需要对二级索引上的记录进行加锁。隐式锁既可以存在聚集索引中，也可以存在二级索引中。对于聚集索引，当插入一条row id = 4的记录时，但事务还没有提交，此时row id = 4的记录就包含一个隐式锁，然而在`lock_sys_t`中查询不到此新记录的锁。对于二级索引记录，例如对row id = 4的聚集索引记录进行了更改，并且更改的列是二级索引的列，那么在该二级索引上同样含有一个隐式锁。
+
+参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
 # 存储引擎
 
-# 查询优化
+# 优化
+
+# 容量扩展
+
+[MaxScale](https://github.com/mariadb-corporation/MaxScale/tree/1.4.3)，[Galara](https://github.com/codership/galera),https://severalnines.com/resources/tutorials/galera-cluster-mysql-tutorial
+
+参考：[设计数据密集型应用](https://vonng.gitbooks.io/ddia-cn/content/part-i.html)
 
 # Nosql
 
