@@ -268,8 +268,6 @@ struct lock_sys_t{
 
 `lock_sys_t`中的`rec_hash`哈希表的键通过调用`lock_rec_fold(space, page_no)`生成。因此若需要查询某一行记录是否有锁，首先是根据行所在的页进行哈希查询，然后根据查询得到的`lock_rec_t`，扫描 lock bitmap 才能最终得到该行记录是否有锁。
 
-在Innodb存储引擎中还存在两种不同属性的锁：显式锁（explicit lock）和隐式锁（implicit lock）。显式锁可以是共享锁，也可以是排他锁，而隐式锁只能是排他锁。显式锁使用`lock_rec_t`表示，占用内存。隐式锁指索引记录逻辑上有排他锁，但实际在内存对象中并不含用这个锁信息，没有任何内存开销。因为行锁本质上是索引记录锁，当锁定一行聚集索引（Cluster Index）记录时，如果该记录上还有二级索引（Secondary Index），还需要对二级索引上的记录进行加锁。隐式锁既可以存在聚集索引中，也可以存在二级索引中。对于聚集索引，当插入一条row id = 4的记录时，但事务还没有提交，此时row id = 4的记录就包含一个隐式锁，然而在`lock_sys_t`中查询不到此新记录的锁。对于二级索引记录，例如对row id = 4的聚集索引记录进行了更改，并且更改的列是二级索引的列，那么在该二级索引上同样含有一个隐式锁。有关显式锁和隐式锁其他描述可阅读[lock0priv.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/lock0priv.h)第303行的注释。
-
 对表加锁通过函数`lock_table`完成，表加锁是根据事务和表来进行的。函数`lock_table`中会调用函数`lock_table_create`来完成对表锁对象`lock_t`的初始化。产生的表锁对象`lock_t`加入到表对象`lock_table_t`的`locks`链表中。`lock_table`函数在[lock0lock.cc](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/lock/lock0lock.cc)文件中实现，通过搜索该函数的调用层级，可以知道哪些SQL操作会调用`lock_table`。创建索引时`lock_table`的`mode`参数是`LOCK_S`，当执行DELETE和UPDATE语句时`mode`参数是`LOCK_IX`，当执行SELECT语句时`mode`参数是`LOCK_IS`。根据锁兼容性定义`lock_compatibility_matrix`，`LOCK_S`和`LOCK_IX`不能兼容，故索引创建索引时，执行DELETE和UPDATE会阻塞，而SELECT不会阻塞。
 
 对记录加锁通过函数`lock_rec_lock`完成，行记录加锁根据事务和页来进行。函数`lock_rec_lock`中会调用函数`lock_rec_create`创建一个`lock_t`对象，并加入到等待队列。由于行锁使用位图实现，因此如果多个记录的page_no和锁模式相同时会重用`lock_t`对象，标记对应head_no位为1。
