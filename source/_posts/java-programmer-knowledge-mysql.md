@@ -290,7 +290,100 @@ SELECT * FROM table WHERE key_column = xxx FOR UPDATE;
 SELECT * FROM table WHERE key_column <= xxx FOR UPDATE;
 ```
 
+在介绍DML涉及的锁操作前，需要先介绍Innodb如何定位记录以便进行DML操作。在Innodb中定位记录的实现是index page cursor（即索引页的游标），它是用来指向记录所在位置的游标，在源码中的数据结构如下：
 
+```c
+// page0cur.h
+/** Index page cursor */
+struct page_cur_t{
+	const dict_index_t*	index;
+	rec_t*		rec;	/*!< pointer to a record on page */
+	ulint*		offsets;
+	buf_block_t*	block;	/*!< pointer to the block containing rec */
+};
+```
+
+定位记录的函数是`page_cur_search_with_match`，声明如下：
+
+```c
+// page0cur.cc
+/****************************************************************//**
+Searches the right position for a page cursor. */
+void
+page_cur_search_with_match(
+/*=======================*/
+	const buf_block_t*	block,	/*!< in: buffer block */
+	const dict_index_t*	index,	/*!< in/out: record descriptor */
+	const dtuple_t*		tuple,	/*!< in: data tuple */
+	page_cur_mode_t		mode,	/*!< in: PAGE_CUR_L,
+					PAGE_CUR_LE, PAGE_CUR_G, or
+					PAGE_CUR_GE */
+	ulint*			iup_matched_fields,
+					/*!< in/out: already matched
+					fields in upper limit record */
+	ulint*			ilow_matched_fields,
+					/*!< in/out: already matched
+					fields in lower limit record */
+	page_cur_t*		cursor,	/*!< out: page cursor */
+	rtr_info_t*		rtr_info)/*!< in/out: rtree search stack */
+```
+
+假如存在下面的记录：
+
+```text
+1,2,2,3,3,3,4,5,5,6,7
+```
+
+定位大于等于3或者小于3的记录的查询过程如下：
+
+```text
+初始时：
+   1   2   2   3   3   3   4   5   5   6   7
+   ^                   ^                   ^
+   |                   |                   |
+  low                 mid                 up
+
+由于定位的记录是大于等于3或者小于3，记录都在mid的左侧，因此需要将up移动到mid位置：
+   1   2   2   3   3   3   4   5   5   6   7
+   ^       ^           ^
+   |       |           |
+  low     mid          up
+  
+   1   2   2   3   3   3   4   5   5   6   7
+           ^   ^       ^
+           |   |       |
+          low mid      up
+ 
+ 直到low与up相差1:
+   1   2   2   3   3   3   4   5   5   6   7
+           ^   ^
+           |   |
+          low up
+```
+
+若查询模式为大于等于3，则page cursor定位到up所指的记录3；若查询的模式为小于3，则page cursor定位到所指向的记录2。
+
+记录定位的方法已经介绍完，接下来介绍DML涉及的锁操作。
+
+INSERT涉及的锁操作为：
+
+* 首先对表加上IX表锁；
+* 根据查询模式PAGE_CUR_LE定位记录的next_rec；
+* 判断记录next_rec是否有锁，有的话就等待锁的释放，否则直接插入；
+
+UPDATE/DELETE涉及的锁操作为：首先尝试对更新的记录加上X锁，若待更新的记录上存在其他锁时，则事务被阻塞，需要等待记录上的锁被释放。
+
+Innodb使用等待图（wait-for graph）的死锁检测方法来检测死锁，它要求在数据库中保存以下两种信息：
+
+* 锁的信息链表
+* 事务等待链表
+
+通过上述链表可以构造出一张图，而在这个图中若存在回路，那么就代表存在死锁。
+
+与锁相关的注意事项有：
+
+* 如果表数据并发量大，就不要将主键设置为自增auto_increment，因为自增锁是表锁；
+* 行锁实质是索引记录锁，如果锁住的记录资源越少，并发性就越高，所以对于UPDATE/DELETE操作的WHERE条件需要能命中索引（聚集索引或者二级索引），如果不能命中，则Innodb需要将所有聚集索引记录加锁。
 
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
