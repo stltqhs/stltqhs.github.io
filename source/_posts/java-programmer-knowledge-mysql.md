@@ -383,7 +383,8 @@ Innodb使用等待图（wait-for graph）的死锁检测方法来检测死锁，
 与锁相关的注意事项有：
 
 * 如果表数据并发量大，就不要将主键设置为自增auto_increment，因为自增锁是表锁；
-* 行锁实质是索引记录锁，如果锁住的记录资源越少，并发性就越高，所以对于UPDATE/DELETE操作的WHERE条件需要能命中索引（聚集索引或者二级索引），如果不能命中，则Innodb需要将所有聚集索引记录加锁。
+* 行锁实质是索引记录锁，如果锁住的记录资源越少，并发性就越高，所以对于UPDATE/DELETE操作的WHERE条件需要能命中索引（聚集索引或者二级索引），如果不能命中，则Innodb需要将所有聚集索引记录加锁；
+* 不要使用`SELECT ... LOCK IN SHARE MODE`，它容易造成死锁。
 
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
