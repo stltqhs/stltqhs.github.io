@@ -423,6 +423,100 @@ update table set column = 'B' where id = 'A'; -- Transaction B
 
 当执行完第4行代码时，事务A和事务B都持有记录A的`LOCK_S`锁，当执行第5行时，由于事务B持有记录A的`LOCK_S`锁，事务A需要等待事务B释放记录A的`LOCK_S`锁，因此事务A需要等待。当执行第6行代码时，由于事务B需要等待事务A释放记录A的`LOCK_S`锁，于是出现了互相等待（循环等待），即死锁。
 
+`SHOW ENGINE INNODB STATUS`可以用来查看当前运行中的事务占用的锁以及上次发生死锁的锁信息。为了说明`SHOW ... STATUS`的用法，使用表`t_device`来叙述。表`t_device`的DDL如下：
+
+```sql
+CREATE TABLE `t_device` (
+  `id` varchar(16) NOT NULL,
+  `mac` varchar(16) DEFAULT NULL,
+  `did` varchar(22) DEFAULT NULL,
+  `status` tinyint(3) unsigned DEFAULT NULL,
+  `create_at` datetime DEFAULT NULL,
+  `update_at` datetime DEFAULT NULL,
+  `product_key` varchar(45) DEFAULT NULL,
+  `inter_type` smallint(6) DEFAULT '1',
+  `protocol_version` smallint(6) DEFAULT '0',
+  `pile_id` varchar(19) DEFAULT NULL,
+  `channel_id` varchar(32) DEFAULT NULL,
+  `channel_type` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_mac` (`mac`),
+  UNIQUE KEY `idx_did` (`did`),
+  KEY `idx_channel_id` (`channel_type`,`channel_id`,`create_at`)
+) ENGINE=InnoDB
+```
+
+插入数据：
+
+```sql
+INSERT INTO t_device(id,mac,did,status,create_at,update_at,product_key,inter_type,protocol_version,pile_id,channel_id,channel_type) values ('0000000000000027', '868986021449112', 'dY9VMJSNZHfaxK9QmPnRCU', 4, '2018-07-28 09:01:02', '2018-12-15 11:55:40', '696018edf68443e3b9856dc87aefe251', 48, 0, NULL, NULL, 0);
+```
+
+先检查输出锁信息的变量值是否设置为开启状态，如下：
+
+```sql
+mysql> show variables like 'innodb_status_output_locks';
++----------------------------+-------+
+| Variable_name              | Value |
++----------------------------+-------+
+| innodb_status_output_locks | ON    |
++----------------------------+-------+
+1 row in set (0.00 sec)
+
+```
+
+如果`Value`为`ON`表示已经开启，否则需要执行SQL语句将其开启，如下：
+
+```sql
+set global innodb_status_output_locks = 1;
+```
+
+ 开启输出锁信息后，可以执行更新记录和查看锁记录的操作，如下：
+
+```sql
+mysql> start transaction;
+Query OK, 0 rows affected (0.00 sec)
+mysql> update t_device set status = 3 where id = '0000000000000027';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+mysql> show engine innodb status\G
+---TRANSACTION 48945, ACTIVE 8 sec
+2 lock struct(s), heap size 360, 1 row lock(s), undo log entries 1
+MySQL thread id 45, OS thread handle 0x70000c4b5000, query id 25439 localhost root init
+show engine innodb status
+TABLE LOCK table `charge`.`t_device` trx id 48945 lock mode IX
+RECORD LOCKS space id 839 page no 8 n bits 224 index `PRIMARY` of table `charge`.`t_device` trx id 48945 lock_mode X locks rec but not gap
+Record lock, heap no 154 PHYSICAL RECORD: n_fields 14; compact format; info bits 0
+ 0: len 16; hex 30303030303030303030303030303237; asc 0000000000000027;;
+ 1: len 6; hex 00000000bf31; asc      1;;
+ 2: len 7; hex 7100000d2a2e50; asc q   *.P;;
+ 3: len 15; hex 383638393836303231343439313132; asc 868986021449112;;
+ 4: len 22; hex 645939564d4a534e5a486661784b39516d506e524355; asc dY9VMJSNZHfaxK9QmPnRCU;;
+ 5: len 1; hex 03; asc  ;;
+ 6: len 5; hex 99a0789042; asc   x B;;
+ 7: len 5; hex 99a19ebde8; asc      ;;
+ 8: len 30; hex 393639303138656466363834343365336239383536646338376165666532; asc 969018edf68443e3b9856dc87aefe2; (total 32 bytes);
+ 9: len 2; hex 8030; asc  0;;
+ 10: len 2; hex 8000; asc   ;;
+ 11: SQL NULL;
+ 12: SQL NULL;
+ 13: len 1; hex 00; asc  ;;
+```
+
+为了输出内容精简，已经去掉其他信息。第10行表示事务48945正在执行`show engine innodb status`SQL语句。第11行表示事务48945获取了表`t_device`的意向排他锁`IX`，因为执行了更新表`t_device`记录的SQL语句。第12行表示锁记录信息，根据前面对锁记录数据结构的描述，可以知道`space id 839`、`page no 8`、`n bits 224`、`heap no 154`的意义。`lock_mode X locks rec but not gap`表示的事`LOCK_X`类型的记录锁（rec lock）但没有使用间隙锁锁住该记录之前的数据。`n_fields 14`表示该记录锁有14个字段，这些字段是表结构中聚集索引或者二级索引相关的信息。由于第3行是按照主键更新，因此需要使用聚集索引。对于聚集索引，Innodb为每一行添加3个额外的字段，分别是6字节的DB_TRX_ID（记录插入或者更新该行的事务ID）；1字节的删除标记位Deleted（当执行Deleted时，将该标记置为1）；7字节的DB_ROLL_PTR（用来记录修改前的行指针）。所以第14行就是`t_device`的id，因为更新的是id为0000000000000027的记录，该行显示该记录的长度是16，十六进制hex的内容是`30303030303030303030303030303237`，ASC码内容为`0000000000000027`，因为id列的类型是字符类型，因此ASC码的内容正是第3行更新语句中指定的id。第15行是6字节的DB_TRX_ID，由于第5表的`Change`为1，表示执行UPDATE语句更新了一条记录，更新该记录的事务号是48945，而48945的HEX格式正是`bf31`。第16行是7字节的DB_ROLL_PTR。从第17行起显示的内容都是表t_device除id列外的其他列的值信息，故第17行是mac，第18行是did，以此类推。
+
+根据前面叙述的内容可以解释下列死锁原因：
+
+```sql
+start transaction; -- Transaction A
+start transaction; -- Transaction B
+update t_device set status = 4 where id = '0000000000000027'; -- Transaction A
+update t_device set mac = null,did = null where mac = '868986021449112' and did = 'dY9VMJSNZHfaxK9QmPnRCU'; -- Transaction B
+update t_device set mac = null,did = null where mac = '868986021449112' and did = 'dY9VMJSNZHfaxK9QmPnRCU'; -- Transaction A
+```
+
+执行到第4行时，由于记录0000000000000027的mac也是`868986021449112`，而mac是二级索引，因此需要先锁定二级索引的记录，再锁住聚集索引的记录。而因为第3行的原因，事务B需要等待事务A释放记录0000000000000027的锁，因此事务B所属的线程会等待。当执行到第5行时，由于二级索引的记录已经被事务B获取，因此事务A又等待事务B等待释放二级索引的记录锁，所以出现了循环等待，于是死锁。
+
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
 # 存储引擎
