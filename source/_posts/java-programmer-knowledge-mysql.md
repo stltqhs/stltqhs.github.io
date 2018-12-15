@@ -373,6 +373,18 @@ INSERT涉及的锁操作为：
 
 UPDATE/DELETE涉及的锁操作为：首先尝试对更新的记录加上X锁，若待更新的记录上存在其他锁时，则事务被阻塞，需要等待记录上的锁被释放。
 
+[死锁(Deadleck)](https://zh.wikipedia.org/wiki/%E6%AD%BB%E9%94%81)在维基百科的定义为：当两个以上的运算单元，双方都在等待对方停止运行，以获取系统资源，但是没有一方提前退出时，就称为死锁。死锁的四个条件是：
+
+* 禁止抢占 no preemption - 系统资源不能被强制从一个进程/线程中退出
+
+* 持有和等待 hold and wait - 一个进程/线程可以在等待时持有系统资源
+
+* 互斥 mutual exclusion - 只有一个进程/线程能持有一个资源
+
+* 循环等待 circular waiting - 一系列进程/线程互相持有其他进程/线程所需要的资源
+
+死锁只有在这四个条件同时满足时出现。预防死锁就是至少破坏这四个条件其中一项，即破坏“禁止抢占”、破坏“持有等待”、破坏“资源互斥”和破坏“循环等待”。由于MYSQL系统并发性和锁的设计，可以被破坏的规则只有“循环等待”，也就是要保证加锁的顺序是一致的。
+
 Innodb使用等待图（wait-for graph）的死锁检测方法来检测死锁，它要求在数据库中保存以下两种信息：
 
 * 锁的信息链表
@@ -385,6 +397,31 @@ Innodb使用等待图（wait-for graph）的死锁检测方法来检测死锁，
 * 如果表数据并发量大，就不要将主键设置为自增auto_increment，因为自增锁是表锁；
 * 行锁实质是索引记录锁，如果锁住的记录资源越少，并发性就越高，所以对于UPDATE/DELETE操作的WHERE条件需要能命中索引（聚集索引或者二级索引），如果不能命中，则Innodb需要将所有聚集索引记录加锁；
 * 不要使用`SELECT ... LOCK IN SHARE MODE`，它容易造成死锁。
+
+为什么使用`SELECT ... LOCK IN SHARE MODE`容易造成死锁？上面说到要避免死锁就需要保证加锁的顺序是一致的。但如果使用`SELECT ... LOCK IN SHARE MODE`，就算加锁顺序是一致的，依然会出现死锁。
+
+假如有如下SQL代码，当有两个线程并发执行这串SQL代码时，会出现死锁。
+
+```sql
+start transaction;
+select * from table where id = 'A' lock in share mode;
+update table set column = 'B' where id = 'A';
+commit;
+```
+
+两个线程并发执行时的逻辑顺序如下：
+
+```sql
+start transaction; -- Transaction A
+start transaction; -- Transaction B
+select * from table where id = 'A' lock in share mode; -- Transaction A
+select * from table where id = 'A' lock in share mode; -- Transaction B
+update table set column = 'B' where id = 'A'; -- Transaction A
+update table set column = 'B' where id = 'A'; -- Transaction B
+
+```
+
+当执行完第4行代码时，事务A和事务B都持有记录A的`LOCK_S`锁，当执行第5行时，由于事务B持有记录A的`LOCK_S`锁，事务A需要等待事务B释放记录A的`LOCK_S`锁，因此事务A需要等待。当执行第6行代码时，由于事务B需要等待事务A释放记录A的`LOCK_S`锁，于是出现了互相等待（循环等待），即死锁。
 
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
