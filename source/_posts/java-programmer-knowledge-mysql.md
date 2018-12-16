@@ -94,7 +94,105 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 # Innodb索引
 
-参考：[MySQL源码：索引相关的数据结构(前篇)](http://www.orczhou.com/index.php/2012/11/mysql-source-code-data-structure-about-index/)，[MySQL源码：索引相关的数据结构(后篇)](http://www.orczhou.com/index.php/2012/11/mysql-source-code-how-mysql-find-usable-index/)
+该文叙述Innodb索引的物理存储结构和逻辑结构，为后续SQL优化做铺垫。
+
+存储Innodb表数据的逻辑存储空间称为表空间，一个表空间可以由多个物理文件组成。MYSQL的data目录下的ibdata1为系统表空间，通过开启变量`innodb_file_per_table`时为每个表生成的文件（以`.ibd`结尾的文件）可以称为per_table表空间。系统表空间和per_table表空间只有细微差别，本文将以per_table表空间（以下简称表空间）阐述。
+
+表空间由页（Page），区（Extent），段（Segment）所组成，页是表空间存储的最小单位，大小为16KB。一个区由64个页组成，大小为1MB。段用来保存特定类型的数据，而数据是根据主键值以B+树索引的方式组织的，因此每张表至少有2个段，聚集索引的叶子结点段和非叶子结点段。
+
+页的结构如下（可以在文件[fil0fil.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/fil0fil.h)中找到，可在源码內搜索`#define FIL_PAGE_SPACE_OR_CHKSUM 0`）：
+
+```text
+0    +-------------------------+ ----+
+     |     Checksum (4)        |     |
+4    +-------------------------+     |
+     | Offset(Page Number) (4) |     |
+8    +-------------------------+     |
+     |    Previous Page (4)    |     |
+12   +-------------------------+     |
+     |      Next Page (4)      |     |
+16   +-------------------------+   FIL Header （38）
+     |         LSN (8)         |     |
+24   +-------------------------+     |
+     |     Page Type (2)       |     |
+26   +-------------------------+     |
+     |     Flush LSN (8)       |     |
+34   +-------------------------+     |
+     |      Space ID (4)       |     |
+38   +-------------------------+ ----+
+     |       Page Data         |
+16376+-------------------------+ ----+
+     | Old-style checksum (4)  |     |
+16380+-------------------------+   FIL Trailer （8）
+     | Low 32 bits of LSN (4)  |     |
+16384+-------------------------+ ----+
+```
+
+- Page Type表示页类型，根据Page Type可以解析Page Data内容；
+- Previous Page和Next Page可以组成一个双向链表；
+- 64位的日志序列号LSN（LSN是log sequence number的缩写）表示最后一次页修改时的LSN。它的低32位（Low 32 bits of LSN）保存在尾部；
+- 64位的 Flush LSN只存储在系统表空间（space 0）的Page 0页中，它表示脏页刷新到磁盘时的LSN；
+- Page Data表示页数据，可以存储其他类型的头信息（比如FSP Header）和索引数据等。
+
+由于Page Number为4字节，而一个页有16K，因此一个表空间的最大容量为64TB（2<sup>32</sup> * 16KB）。
+
+为了管理表空间，需要使用一种数据结构来记录表空间的使用情况，这个数据结构称为FSP Header，该结构的数据总是存储在表空间的第0页，格式可以在文件[fsp0fsp.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/fsp0fsp.h)中找到，可在源码內搜索`#define FSP_SPACE_ID`。FSP Header结构如下：
+
+```text
++-- start of FSP Header
+|
+0    +-------------------------+  38 -- start of FIL Header
+     |     FSP_SPACE_ID (4)    |     当前空间的id
+4    +-------------------------+  42
+     |     FSP_NOT_USED (4)    |     未使用
+8    +-------------------------+  46
+     |       FSP_SIZE (4)      |     已经使用的页的总大小
+12   +-------------------------+  50
+     |   FSP_FREE_LIMIT (4)    |     已经用到的位置，大于该部分的位置表示还未被初始化
+16   +-------------------------+  54
+     |   FSP_SPACE_FLAGS (4)   |     fil_space_t.flags
+20   +-------------------------+  58
+     |   FSP_FRAG_N_USED (4)   |     碎片区中已经使用的页的总数
+24   +-------------------------+  62
+     |      FSP_FREE (16)      |     空闲区链表
+40   +-------------------------+  78
+     |    FSP_FREE_FRAG (16)   |     空闲碎片区（包含FSP Header和XDES的区）链表
+56   +-------------------------+  94
+     |    FSP_FULL_FRAG (16)   |     已经完全使用的碎片区链表
+72   +-------------------------+  110
+     |      FSP_SEG_ID (8)     |     下一个段的ID
+80   +-------------------------+  118
+     | FSP_SEG_INODES_FULL (16)|     已经使用的inode页链表
+96   +-------------------------+  134
+     | FSP_SEG_INODES_FREE (16)|     空闲的inode页链表
+112  +-------------------------+  150
+```
+
+详细的页管理内容可阅读[Page management in InnoDB space files](https://blog.jcole.us/2013/01/04/page-management-in-innodb-space-files/)。
+
+segment inode用于保存段的信息，格式可以在文件[fsp0fsp.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/fsp0fsp.h)中找到，可在源码內搜索`#define	FSEG_ID`，如下：
+
+```text
+0    +-------------------------+
+     |      FSEG_ID (8)        |    段的ID
+8    +-------------------------+
+     | FSEG_NOT_FULL_N_USED (4)|    链表FSEG_NOT_FULL中所有已经分配页的数量
+12   +-------------------------+
+     |     FSEG_FREE (16)      |    空闲区链表
+28   +-------------------------+
+     |   FSEG_NOT_FULL (16)    |    全部页未被使用的区链表
+44   +-------------------------+
+     |     FSEG_FULL (16)      |    全部页已被使用的区链表
+60   +-------------------------+
+     |     FSEG_MAGIC_N (4)    |    魔法数
+64   +-------------------------+
+     |  FSEG_FRAG_ARR (128)    |    碎片页链表，一共32个页，保存每个页在表空间中的偏移量，即32 * 4
+192  +-------------------------+
+```
+
+
+
+参考：[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[Jeremy Cole-InnoDB](https://blog.jcole.us/innodb/)
 
 # Innodb锁
 
@@ -518,8 +616,6 @@ update t_device set mac = null,did = null where mac = '868986021449112' and did 
 执行到第4行时，由于记录0000000000000027的mac也是`868986021449112`，而mac是二级索引，因此需要先锁定二级索引的记录，再锁住聚集索引的记录。而因为第3行的原因，事务B需要等待事务A释放记录0000000000000027的锁，因此事务B所属的线程会等待。当执行到第5行时，由于二级索引的记录已经被事务B获取，因此事务A又等待事务B等待释放二级索引的记录锁，所以出现了循环等待，于是死锁。
 
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
-
-# 存储引擎
 
 # 优化
 
