@@ -96,7 +96,9 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 该文叙述Innodb索引的物理存储结构和逻辑结构，为后续SQL优化做铺垫。
 
-存储Innodb表数据的逻辑存储空间称为表空间，一个表空间可以由多个物理文件组成。MYSQL的data目录下的ibdata1为系统表空间，通过开启变量`innodb_file_per_table`时为每个表生成的文件（以`.ibd`结尾的文件）可以称为per_table表空间。系统表空间和per_table表空间只有细微差别，本文将以per_table表空间（以下简称表空间）阐述。
+存储Innodb表数据的逻辑存储空间称为表空间，一个表空间可以由多个物理文件组成。MYSQL的data目录下的ibdata1为系统表空间，通过开启变量`innodb_file_per_table`时为每个表生成的文件（以`.ibd`结尾的文件）可以称为ibd表空间。系统表空间和ibd表空间只有细微差别，本文将以ibd表空间（以下简称表空间）阐述。ibd文件的结构如下图所示：
+
+![IBD File Overview](https://github.com/jeremycole/innodb_diagrams/blob/6e952a74a32c3b2a4b7921b1f1a14b3e94f1f73f/images/InnoDB_Structures/IBD%20File%20Overview.png?raw=true "IBD File Overview")
 
 表空间由页（Page），区（Extent），段（Segment）所组成，页是表空间存储的最小单位，大小为16KB。一个区由64个页组成，大小为1MB。段用来保存特定类型的数据，而数据是根据主键值以B+树索引的方式组织的，因此每张表至少有2个段，聚集索引的叶子结点段和非叶子结点段。
 
@@ -192,7 +194,24 @@ segment inode用于保存段的信息，格式可以在文件[fsp0fsp.h](https:/
 
 
 
-参考：[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[Jeremy Cole-InnoDB](https://blog.jcole.us/innodb/)
+```sql
+CREATE TABLE table_a
+(
+b bigint primary key,
+c varchar(3) not null,
+d int not null
+);
+
+INSERT INTO table_a(b,c,d) values(1,'aaa', 2),(3,'bbb', 4),(5,'ccc', 6);
+```
+
+
+
+
+
+
+
+参考：[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[Jeremy Cole-InnoDB](https://blog.jcole.us/innodb/)，[InnoDB Diagrams](https://github.com/jeremycole/innodb_diagrams)
 
 # Innodb锁
 
@@ -471,7 +490,7 @@ INSERT涉及的锁操作为：
 
 UPDATE/DELETE涉及的锁操作为：首先尝试对更新的记录加上X锁，若待更新的记录上存在其他锁时，则事务被阻塞，需要等待记录上的锁被释放。
 
-[死锁(Deadleck)](https://zh.wikipedia.org/wiki/%E6%AD%BB%E9%94%81)在维基百科的定义为：当两个以上的运算单元，双方都在等待对方停止运行，以获取系统资源，但是没有一方提前退出时，就称为死锁。死锁的四个条件是：
+[死锁(Deadlock)](https://zh.wikipedia.org/wiki/%E6%AD%BB%E9%94%81)在维基百科的定义为：当两个以上的运算单元，双方都在等待对方停止运行，以获取系统资源，但是没有一方提前退出时，就称为死锁。死锁的四个条件是：
 
 * 禁止抢占 no preemption - 系统资源不能被强制从一个进程/线程中退出
 
