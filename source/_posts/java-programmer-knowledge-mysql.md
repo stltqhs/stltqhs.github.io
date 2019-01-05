@@ -172,7 +172,7 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 详细的页管理内容可阅读[Page management in InnoDB space files](https://blog.jcole.us/2013/01/04/page-management-in-innodb-space-files/)。
 
-segment inode用于保存段的信息，格式可以在文件[fsp0fsp.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/fsp0fsp.h)中找到，可在源码內搜索`#define	FSEG_ID`，如下：
+INODE页包括85个INODE Entry，INODE Entry用于保存段的信息，格式可以在文件[fsp0fsp.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/fsp0fsp.h)中找到，可在源码內搜索`#define	FSEG_ID`，如下：
 
 ```text
 0    +-------------------------+
@@ -194,6 +194,8 @@ segment inode用于保存段的信息，格式可以在文件[fsp0fsp.h](https:/
 
 
 
+执行下面的SQL，MYSQL会生成`table_a.ibd`文件，使用`hexdump -C table_a.ibd`输出[`table_a`表的HEX内容](https://github.com/stltqhs/stltqhs.github.io/blob/res-draft/source/misc/table_a_hexdump.txt)。
+
 ```sql
 CREATE TABLE table_a
 (
@@ -205,9 +207,186 @@ d int not null
 INSERT INTO table_a(b,c,d) values(1,'aaa', 2),(3,'bbb', 4),(5,'ccc', 6);
 ```
 
+通过对ibd文件布局（[Page management in InnoDB space files](https://blog.jcole.us/2013/01/04/page-management-in-innodb-space-files/)和[The physical structure of InnoDB index pages](https://blog.jcole.us/2013/01/07/the-physical-structure-of-innodb-index-pages/)），可以从HEX内容读出`table_a`表的数据。
 
+首先读取第0页的`FIL_HEADER`和`FIL_TRAILER`，内容如下：
 
+```text
+# FIL_HEADER
+checksum:            4e 15 30 a8
+page number:         00 00 00 00
+previous page:       00 00 00 00
+next page:           00 00 00 00
+LSN:                 00 00 00 07 45 a3 42 a5
+Page Type:           00 08
+Flush LSN:           00 00 00 00 00 00 00 00
+Space ID:            00 00 03 49
 
+# FIL_TRAILER
+Old-style checksum:  65 48 44 0f
+Low 32 bits of LSN:  45 a3 42 a5
+```
+
+4字节的Space ID为`00 00 03 49`，十进制就是841，查询该表的Space ID：
+
+```sql
+mysql> select space from information_schema.INNODB_SYS_TABLES where name = 'employees/table_a';
++-------+
+| space |
++-------+
+|   841 |
++-------+
+```
+
+Page Type可选值有：
+
+```c
+/** File page types (values of FIL_PAGE_TYPE) @{ */
+#define FIL_PAGE_INDEX		17855	/*!< B-tree node */
+#define FIL_PAGE_RTREE		17854	/*!< B-tree node */
+#define FIL_PAGE_UNDO_LOG	2	/*!< Undo log page */
+#define FIL_PAGE_INODE		3	/*!< Index node */
+#define FIL_PAGE_IBUF_FREE_LIST	4	/*!< Insert buffer free list */
+/* File page types introduced in MySQL/InnoDB 5.1.7 */
+#define FIL_PAGE_TYPE_ALLOCATED	0	/*!< Freshly allocated page */
+#define FIL_PAGE_IBUF_BITMAP	5	/*!< Insert buffer bitmap */
+#define FIL_PAGE_TYPE_SYS	6	/*!< System page */
+#define FIL_PAGE_TYPE_TRX_SYS	7	/*!< Transaction system data */
+#define FIL_PAGE_TYPE_FSP_HDR	8	/*!< File space header */
+#define FIL_PAGE_TYPE_XDES	9	/*!< Extent descriptor page */
+#define FIL_PAGE_TYPE_BLOB	10	/*!< Uncompressed BLOB page */
+#define FIL_PAGE_TYPE_ZBLOB	11	/*!< First compressed BLOB page */
+#define FIL_PAGE_TYPE_ZBLOB2	12	/*!< Subsequent compressed BLOB page */
+#define FIL_PAGE_TYPE_UNKNOWN	13	/*!< In old tablespaces, garbage
+					in FIL_PAGE_TYPE is replaced with this
+					value when flushing pages. */
+#define FIL_PAGE_COMPRESSED	14	/*!< Compressed page */
+#define FIL_PAGE_ENCRYPTED	15	/*!< Encrypted page */
+#define FIL_PAGE_COMPRESSED_AND_ENCRYPTED 16
+					/*!< Compressed and Encrypted page */
+#define FIL_PAGE_ENCRYPTED_RTREE 17	/*!< Encrypted R-tree page */
+
+/** Used by i_s.cc to index into the text description. */
+#define FIL_PAGE_TYPE_LAST	FIL_PAGE_TYPE_UNKNOWN
+					/*!< Last page type */
+```
+
+`table_a`的第0页的Page Type为`00 08`，也就是`FIL_PAGE_TYPE_FSP_HDR`，所以该页的Page Data需要按照FSP的结构来解析。解析FSP_HEADER：
+
+```text
+FSP_SPACE_ID:         00 00 03 49
+FSP_NOT_USED:         00 00 00 00
+FSP_SIZE:             00 00 00 06
+FSP_FREE_LIMIT:       00 00 00 40
+FSP_SPACE_FLAGS:      00 00 00 00
+FSP_FRAG_N_USED:      00 00 00 04
+FSP_FREE:             00 00 00 00 ff ff ff ff 00 00 ff ff ff ff 00 00
+FSP_FREE_FRAG:        00 00 00 01 00 00 00 00 00 9e 00 00 00 00 00 9e
+FSP_FULL_FRAG:        00 00 00 00 ff ff ff ff 00 00  ff ff ff ff 00 00
+FSP_SEG_ID:           00 00 00 00 00 00 00 03
+FSP_SEG_INODES_FULL:  00 00 00 00 ff ff ff ff 00 00 ff ff ff ff 00 00
+FSP_SEG_INODES_FREE:  00 00 00 01 00 00 00 02 00 26 00 00 00 02 00 26
+
+```
+
+`FSP_SIZE`是`00 00 00 06`，即已使用了6页，那么`table_a.ibd`文件的大小应该是：`6 * 16 * 1024 = 98304`字节，查看该文件大小：
+
+```shell
+$ ls -l table_a.ibd
+-rw-rw----  1 yuqing  staff  98304  1  5 22:00 table_a.ibd
+```
+
+`FSP_SPACE_FLAGS`的值会作为函数`bool fsp_flags_is_valid(ulint	flags)`的参数对该表空间的flag进行验证。
+
+`FSP_FREE_LIMIT`的值是`00 00 00 40`，十进制值是64，按照`FSP_FREE_LIMIT`的解释：
+
+```c
+#define	FSP_FREE_LIMIT		12	/* Minimum page number for which the
+					free list has not been initialized:
+					the pages >= this limit are, by
+					definition, free; note that in a
+					single-table tablespace where size
+					< 64 pages, this number is 64, i.e.,
+					we have initialized the space
+					about the first extent, but have not
+					physically allocated those pages to the
+					file */
+```
+
+在ibd中，该值最小为64。
+
+`FSP_SEG_INODES_FREE`的值是`00 00 00 01 00 00 00 02 00 26 00 00 00 02 00 26`，表示链表长度为1，上一页编码为2，偏移量是38（十六进制的26），下一页的编码是2，偏移量是38。所以接下来解析第2页，也就是从文件的`2 * 16 * 1024 = 32768`字节开始。
+
+读取第2页的`FIL_HEADER`和`FIL_TRAILER`，内容如下：
+
+```text
+# FIL_HEADER
+checksum:            89 fe e6 17
+page number:         00 00 00 02
+previous page:       00 00 00 00
+next page:           00 00 00 00
+LSN:                 00 00 00 07 45 a3 42 a5
+Page Type:           00 03
+Flush LSN:           00 00 00 00 00 00 00 00
+Space ID:            00 00 03 49
+
+# FIL_TRAILER
+Old-style checksum:  ba 41 b7 63
+Low 32 bits of LSN:  45 a3 42 a5
+```
+
+Page Type值是`00 03`，即`FIL_PAGE_INODE`，所以该页的Page Data需要按照INODE页来解析。
+
+该页从第38字节开始后的12个字节，表示INODE页的链表，该值是`ff ff ff ff 00 00 ff ff ff ff 00 00`。从第50字节开始，就是第一个INODE Entry，解析该结构：
+
+```text
+FSEG_ID:                00 00 00 00 00 00 00 01
+FSEG_NOT_FULL_N_USED:   00 00 00 00
+FSEG_FREE:              00 00 00 00 ff ff ff ff 00 00 ff ff ff ff 00 00
+FSEG_NOT_FULL:          00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+FSEG_FULL:              00 00 00 00 ff ff ff ff 00 00 ff ff ff ff 00 00
+FSEG_MAGIC_N:           05 d6 69 d2
+FSEG_FRAG_ARR:          00 00 00 03 ff ff ff ff *
+```
+
+`FSEG_FRAG_ARR`表示只有第3页的碎片页被使用。接下来读取第3页。
+
+读取第3页的`FIL_HEADER`和`FIL_TRAILER`，内容如下：
+
+```text
+# FIL_HEADER
+checksum:            fa 93 08 8e
+page number:         00 00 00 03
+previous page:       ff ff ff ff
+next page:           ff ff ff ff
+LSN:                 00 00 00 07 45 a3 46 99
+Page Type:           45 bf
+Flush LSN:           00 00 00 00 00 00 00 00
+Space ID:            00 00 03 49
+
+# FIL_TRAILER
+Old-style checksum:  d1 f7 f0 04
+Low 32 bits of LSN:  45 a3 42 a5
+```
+
+Page Type值是`45 bf`，十进制是17855，即`FIL_PAGE_INDEX`，这表示该页是B数索引，用来存储数据。
+
+INDEX Header的格式可以在文件[page0page.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/page0page.h)中找到，可在源码內搜索`#define PAGE_N_DIR_SLOTS 0`。解析该页的INDEX Header为：
+
+```text
+PAGE_N_DIR_SLOTS:   00 02
+PAGE_HEAP_TOP:      00 de
+PAGE_N_HEAP:        80 05
+PAGE_FREE:          00 00
+PAGE_GARBAGE:       00 00
+PAGE_LAST_INSERT:   00 c2
+PAGE_DIRECTION:     00 c2
+PAGE_N_DIRECTION:   00 c2
+PAGE_N_RECS:        00 03
+PAGE_MAX_TRX_ID:    00 00 00 00 00 00 00 00
+PAGE_LEVEL:         00 00 00 00
+PAGE_INDEX_ID:      00 00 00 00
+```
 
 
 
