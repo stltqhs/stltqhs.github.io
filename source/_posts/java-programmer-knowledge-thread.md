@@ -85,7 +85,7 @@ enum {
 
 参考：[Java多线程学习(三)---线程的生命周期](https://www.cnblogs.com/sunddenly/p/4106562.html)，[一张图让你看懂JAVA线程间的状态转换](https://my.oschina.net/mingdongcheng/blog/139263)，[对Java线程概念的理解](https://blog.csdn.net/fuzhongmin05/article/details/71425191)，[visualvm thread states](https://stackoverflow.com/questions/27406200/visualvm-thread-states)
 
-# 2.wait()、sleep()、notify()区别 
+# wait()、sleep()、notify()区别 
 
 - wait
 

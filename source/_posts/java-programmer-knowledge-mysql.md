@@ -98,7 +98,7 @@ Mysql的Innodb引擎支持事务，定义了4类隔离级别，分别是读取�
 
 存储Innodb表数据的逻辑存储空间称为表空间，一个表空间可以由多个物理文件组成。MYSQL的data目录下的ibdata1为系统表空间，通过开启变量`innodb_file_per_table`时为每个表生成的文件（以`.ibd`结尾的文件）可以称为ibd表空间。系统表空间和ibd表空间只有细微差别，本文将以ibd表空间（以下简称表空间）阐述。ibd文件的结构如下图所示：
 
-![IBD File Overview](https://github.com/jeremycole/innodb_diagrams/blob/6e952a74a32c3b2a4b7921b1f1a14b3e94f1f73f/images/InnoDB_Structures/IBD%20File%20Overview.png?raw=true "IBD File Overview")
+![IBD File Overview](http://d.jcole.us/blog/files/innodb/20130103/72dpi/IBD_File_Overview.png "IBD File Overview")
 
 表空间由页（Page），区（Extent），段（Segment）所组成，页是表空间存储的最小单位，大小为16KB。一个区由64个页组成，大小为1MB。段用来保存特定类型的数据，而数据是根据主键值以B+树索引的方式组织的，因此每张表至少有2个段，聚集索引的叶子结点段和非叶子结点段。
 
@@ -349,6 +349,18 @@ FSEG_MAGIC_N:           05 d6 69 d2
 FSEG_FRAG_ARR:          00 00 00 03 ff ff ff ff *
 ```
 
+第二个INODE Entry，解析该结构：
+
+```text
+FSEG_ID:                00 00 00 00 00 00 00 02
+FSEG_NOT_FULL_N_USED:   00 00 00 00
+FSEG_FREE:              00 00 00 00 ff ff ff ff 00 00 ff ff ff ff 00 00
+FSEG_NOT_FULL:          00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+FSEG_FULL:              00 00 00 00 ff ff ff ff 00 00 ff ff ff ff 00 00
+FSEG_MAGIC_N:           05 d6 69 d2
+FSEG_FRAG_ARR:          ff ff ff ff ff ff ff ff *
+```
+
 `FSEG_FRAG_ARR`表示只有第3页的碎片页被使用。接下来读取第3页。
 
 读取第3页的`FIL_HEADER`和`FIL_TRAILER`，内容如下：
@@ -369,7 +381,11 @@ Old-style checksum:  d1 f7 f0 04
 Low 32 bits of LSN:  45 a3 42 a5
 ```
 
-Page Type值是`45 bf`，十进制是17855，即`FIL_PAGE_INDEX`，这表示该页是B数索引，用来存储数据。
+Page Type值是`45 bf`，十进制是17855，即`FIL_PAGE_INDEX`，这表示该页是B树索引，用来存储数据。
+
+Page Index结构如下图：
+
+![Page Index Overview](http://d.jcole.us/blog/files/innodb/20130106/72dpi/INDEX_Page_Overview.png "Page Index Overview")
 
 INDEX Header的格式可以在文件[page0page.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/page0page.h)中找到，可在源码內搜索`#define PAGE_N_DIR_SLOTS 0`。解析该页的INDEX Header为：
 
@@ -384,11 +400,36 @@ PAGE_DIRECTION:     00 c2
 PAGE_N_DIRECTION:   00 c2
 PAGE_N_RECS:        00 03
 PAGE_MAX_TRX_ID:    00 00 00 00 00 00 00 00
-PAGE_LEVEL:         00 00 00 00
-PAGE_INDEX_ID:      00 00 00 00
+PAGE_LEVEL:         00 00
+PAGE_INDEX_ID:      00 00 00 00 00 00 07 08
 ```
 
+FSEG Header的格式可以在文件[fsp0types.h](https://github.com/mysql/mysql-server/blob/5.7/storage/innobase/include/fsp0types.h)中找到，可在源码內搜索`#define FSEG_HDR_SPACE		0`。解析该页的FSEG Header为：
 
+```text
+# Leaf
+FSEG_HDR_SPACE:    00 00 03 49
+FSEG_HDR_PAGE_NO:  00 00 00 02
+FSEG_HDR_OFFSET:   00 f2
+# Non-Leaf
+FSEG_HDR_SPACE:    00 00 03 49
+FSEG_HDR_PAGE_NO:  00 00 00 02
+FSEG_HDR_OFFSET:   00 32
+```
+
+Leaf指向的是第2页的第二个INODE Entry，它的FSEG ID是2，但是该INODE表示的段并未被使用。Non-Leaf指向的是第1页的第二个INODE Entry，它的FSEG ID是1，只使用了第3页这个碎片页存储数据。
+
+解析System Records：
+
+```text
+Info Flags:0
+n_owned:1
+order:0
+record type:2
+next:00 1b
+```
+
+Record type为2表示infimum，下一条记录的位置需要前进1b个长度
 
 参考：[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[Jeremy Cole-InnoDB](https://blog.jcole.us/innodb/)，[InnoDB Diagrams](https://github.com/jeremycole/innodb_diagrams)
 
@@ -584,6 +625,13 @@ SELECT * FROM table WHERE key_column = xxx FOR UPDATE;
 
 ```sql
 SELECT * FROM table WHERE key_column <= xxx FOR UPDATE;
+```
+
+当加锁的记录不存在时，需要使用gap lock锁住记录，比如：
+
+```sql
+-- pk 表示主键，假设当前只存在pk为1和9的记录
+SELECT * FROM table WHERE pk = 3 FOR UPDATE; -- 使用 gap lock 锁住(1,9)的数据
 ```
 
 在介绍DML涉及的锁操作前，需要先介绍Innodb如何定位记录以便进行DML操作。在Innodb中定位记录的实现是index page cursor（即索引页的游标），它是用来指向记录所在位置的游标，在源码中的数据结构如下：
@@ -812,6 +860,82 @@ update t_device set mac = null,did = null where mac = '868986021449112' and did 
 ```
 
 执行到第4行时，由于记录0000000000000027的mac也是`868986021449112`，而mac是二级索引，因此需要先锁定二级索引的记录，再锁住聚集索引的记录。而因为第3行的原因，事务B需要等待事务A释放记录0000000000000027的锁，因此事务B所属的线程会等待。当执行到第5行时，由于二级索引的记录已经被事务B获取，因此事务A又等待事务B等待释放二级索引的记录锁，所以出现了循环等待，于是死锁。
+
+大多数系统实现类似`updateOrInsert`的功能都不合适，因为实现方式大致都是先执行UPDATE，更新不成功时再INSERT，如下所示：
+
+```java
+public boolean updateOrInsert(Entity entity) {
+    return updateById(entity) || insert(entity);
+}
+```
+
+这种实现方法存在死锁风险，按照如下方式执行SQL命令：
+
+```sql
+CREATE TABLE `test` (
+  `a` int(11) NOT NULL,
+  `b` varchar(3) DEFAULT NULL,
+  `c` int(11) DEFAULT NULL,
+  PRIMARY KEY (`a`),
+  KEY `idx_c` (`c`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+insert into test(a,b,c) values(3,'3',3),(5,'5',5);
+start transaction; -- Transaction A
+start transaction; -- Transaction B
+update test set c = 4 where a = 4; -- Transaction A
+update test set c = 4 where a = 4; -- Transaction B，不会阻塞
+insert into test(a,b,c) values(4,'4',4); -- Transaction A，阻塞，等待Transaction B释放锁
+insert into test(a,b,c) values(4,'4',4); -- Transaction B，死锁
+```
+
+值得注意的是Transaction B执行`update test set c = 4 where a = 4;`并不会阻塞，此时Transaction A和Transaction B都获得了(3,5)间隙锁。当Transaction B执行`insert into test(a,b,c) values(4,'4',4);`就会发生死锁，死锁信息如下：
+
+```sql
+------------------------
+LATEST DETECTED DEADLOCK
+------------------------
+2019-02-21 14:38:11 700008137000
+*** (1) TRANSACTION:
+TRANSACTION 50958, ACTIVE 273 sec inserting
+mysql tables in use 1, locked 1
+LOCK WAIT 3 lock struct(s), heap size 360, 2 row lock(s)
+MySQL thread id 1, OS thread handle 0x7000080f3000, query id 48 localhost root update
+insert into test(a,b,c) values(4,'4',4)
+*** (1) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 838 page no 3 n bits 72 index `PRIMARY` of table `employees`.`test` trx id 50958 lock_mode X locks gap before rec insert intention waiting
+Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
+ 0: len 4; hex 80000005; asc     ;;
+ 1: len 6; hex 00000000bf39; asc      9;;
+ 2: len 7; hex 74000001320ba0; asc t   2  ;;
+ 3: len 1; hex 36; asc 6;;
+ 4: len 4; hex 80000006; asc     ;;
+
+*** (2) TRANSACTION:
+TRANSACTION 50960, ACTIVE 132 sec inserting
+mysql tables in use 1, locked 1
+3 lock struct(s), heap size 360, 2 row lock(s)
+MySQL thread id 2, OS thread handle 0x700008137000, query id 49 localhost root update
+insert into test(a,b,c) values(4,'4',4)
+*** (2) HOLDS THE LOCK(S):
+RECORD LOCKS space id 838 page no 3 n bits 72 index `PRIMARY` of table `employees`.`test` trx id 50960 lock_mode X locks gap before rec
+Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
+ 0: len 4; hex 80000005; asc     ;;
+ 1: len 6; hex 00000000bf39; asc      9;;
+ 2: len 7; hex 74000001320ba0; asc t   2  ;;
+ 3: len 1; hex 36; asc 6;;
+ 4: len 4; hex 80000006; asc     ;;
+
+*** (2) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 838 page no 3 n bits 72 index `PRIMARY` of table `employees`.`test` trx id 50960 lock_mode X locks gap before rec insert intention waiting
+Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
+ 0: len 4; hex 80000005; asc     ;;
+ 1: len 6; hex 00000000bf39; asc      9;;
+ 2: len 7; hex 74000001320ba0; asc t   2  ;;
+ 3: len 1; hex 36; asc 6;;
+ 4: len 4; hex 80000006; asc     ;;
+
+*** WE ROLL BACK TRANSACTION (2)
+```
 
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
