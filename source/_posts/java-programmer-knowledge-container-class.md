@@ -160,7 +160,7 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
 ConcurrentHashMap使用`锁分段`的方式来实现高效的HashMap，使用`不变性`和`volatile`来减少加锁操作，提高线程并发。
 
-ConcurrentHashMap包含n个segment（segment是ReentrantLock的子类，初始时n为16，且n为2的幂次），segment的3个重要成员变量定义如下：
+ConcurrentHashMap包含n个segment（segment是ReentrantLock的子类，初始时n为16，且n为2的幂次），segment的几个重要成员变量定义如下：
 
 ```java
 transient volatile int count;
@@ -170,7 +170,7 @@ transient volatile HashEntry<K,V>[] table;
 final float loadFactor;
 ```
 
-每个segment由HashEntry组成，HashEntry的3个重要的成员变量的声明如下：
+每个segment由HashEntry组成，HashEntry的几个重要的成员变量的声明如下：
 
 ```java
 final K key;
@@ -228,7 +228,7 @@ private static class SynchronizedMap<K,V>
 
 # hashCode()和equals()方法的作用 
 
-hashCode和equals方法在Object类中定义，其中hashCode方法为native方法，equals方法定义如下：
+`hashCode`和`equals`方法在`Object`类中定义，其中`hashCode`方法为`native`方法，`equals`方法定义如下：
 
 ```java
 public boolean equals(Object obj) {
@@ -236,11 +236,11 @@ public boolean equals(Object obj) {
     }
 ```
 
-在不重写equals方法时，equals和==操作符是等价的。
+在不重写`equals`方法时，`equals`和`==`操作符是等价的。
 
-hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时hashCode和equals方法存在关联，因为查找元素时先获得对象的hashCode，定位hash索引，然后调用equals方法查找对象。
+`hashCode`方法只有在`hash`表才用到，比如`HashSet`，`HashMap`等，此时`hashCode`和`equals`方法存在关联，因为查找元素时先获得对象的`hashCode`，定位`hash`索引，然后调用`equals`方法查找对象。
 
-重写equals方法需要遵循如下要求：
+重写`equals`方法需要遵循如下要求：
 
 - **自反性**（reflexive）。对于任意不为`null`的引用值x，`x.equals(x)`一定是`true`。
 - **对称性**（symmetric）。对于任意不为`null`的引用值`x`和`y`，当且仅当`x.equals(y)`是`true`时，`y.equals(x)`也是`true`。
@@ -248,15 +248,15 @@ hashCode方法只有在hash表才用到，比如HashSet，HashMap等，此时has
 - **一致性**（consistent）。对于任意不为`null`的引用值`x`和`y`，如果用于equals比较的对象信息没有被修改的话，多次调用时`x.equals(y)`要么一致地返回`true`要么一致地返回`false`。
 - 对于任意不为`null`的引用值`x`，`x.equals(null)`返回`false`。
 
-重写hashCode方法时需要遵循如下要求：
+重写`hashCode`方法时需要遵循如下要求：
 
 - 在一个Java应用的执行期间，如果一个对象提供给equals做比较的信息没有被修改的话，该对象多次调用`hashCode()`方法，该方法必须始终如一返回同一个integer。
 
-- 如果两个对象根据`equals(Object)`方法是相等的，那么调用二者各自的`hashCode()`方法必须产生同一个integer结果。
+- 如果两个对象根据`equals(Object)`方法是相等的，那么调用二者各自的`hashCode()`方法必须产生同一个`int`结果。
 
 
 
-  基于上述两个性质，一般是重写equals方法就要重写hashCode方法。
+  基于上述两个性质，一般是重写`equals`方法就要重写`hashCode`方法。
 
 参考：[Java hashCode() 和 equals()的若干问题解答](https://www.cnblogs.com/skywang12345/p/3324958.html)，[Java提高篇——equals()与hashCode()方法详解](https://www.cnblogs.com/Qian123/p/5703507.html)
 
