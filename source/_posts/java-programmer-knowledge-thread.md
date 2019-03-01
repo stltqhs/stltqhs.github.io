@@ -267,7 +267,7 @@ try {
 
 
 
-一般来说，当方法声明了要跑出`InterruptedException`则暗示该方法可中断，即方法内部会检查中断标记位，然后抛出异常，并且清除中断标记位。Java中很多阻塞方法如`BlockingQueue.put`、`BlockingQueue.take`、`Object.wait`、`Thread.sleep`。
+一般来说，当方法声明了要跑出`InterruptedException`则暗示该方法可中断，即方法内部会检查中断标记位，然后抛出异常，并且清除中断标记位。Java中很多阻塞方法如`BlockingQueue.put`、`BlockingQueue.take`、`Object.wait`、`Thread.sleep`都支持中断。
 
 参考：[详细分析Java中断机制](http://www.infoq.com/cn/articles/java-interrupt-mechanism)
 
