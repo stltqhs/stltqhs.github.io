@@ -141,7 +141,28 @@ Java实现CAS操作依然是靠底层处理器来完成，CAS操作方法定义�
 3. P2修改数值A为数值B，然后又修改回A
 4. P1被唤醒，比较后发现数值A没有变化，程序继续执行。
 
-ABA问题可能会导致灾难性的后果，因此在某些场景需要使用特殊的方法解决**ABA**问题。目前解决**ABA**问题的方法是使用一个修改次数的变量作为版本号。Java提供的`AtomicStampedReference`也是基于版本控制来解决**ABA**问题。
+ABA问题可能会导致灾难性的后果，因此在某些场景需要使用特殊的方法解决**ABA**问题。目前解决**ABA**问题的方法是使用一个修改次数的变量作为版本号。Java提供的`AtomicStampedReference`也是基于版本控制来解决**ABA**问题。`AtomicStampedReference`的比较替换方法如下：
+
+```java
+public boolean compareAndSet(V   expectedReference,
+                             V   newReference,
+                             int expectedStamp,
+                             int newStamp) {
+    Pair<V> current = pair;
+    return
+        expectedReference == current.reference &&
+        expectedStamp == current.stamp &&
+        ((newReference == current.reference &&
+          newStamp == current.stamp) ||
+         casPair(current, Pair.of(newReference, newStamp)));
+}
+
+private boolean casPair(Pair<V> cmp, Pair<V> val) {
+    return UNSAFE.compareAndSwapObject(this, pairOffset, cmp, val);
+}
+```
+
+
 
 参考：[深入浅出CAS](https://www.jianshu.com/p/fb6e91b013cc)，[比较并交换](https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2)，[JAVA中CAS-ABA的问题解决方案AtomicStampedReference](https://juejin.im/entry/5a7288645188255a8817fe26)
 
@@ -164,27 +185,208 @@ LockSupport提供了`park`和`unpark`方法用于阻塞线程和解除线程阻�
         at java.lang.Thread.run(Thread.java:745)
 ```
 
-`park`和`unpark`方法都是调用`sun.misc.Unsafe`的相关方法实现，这些方法的签名如下：
+`park`和`unpark`方法分别调用`sun.misc.Unsafe`的`park`和`unpark`方法，这两个方法的签名如下：
 
 ```java
 public native void unpark(Object thread);
 public native void park(boolean isAbsolute, long time);
 ```
 
-这两个方法都是native方法，由底层C++代码实现。不同操作系统平台有不同实现方式，这里以linux平台为例。linux实现的代码在文件`hotspot/src/os/linux/vm/os_linux.cpp `中，方法声明如下：
+`sun.misc.Unsafe.park`和`sun.misc.Unsafe.unpark`都是native方法，由C++代码调用操作系统API实现。不同操作系统有不同实现方式，本文以Linux平台的实现方式叙述`sun.misc.Unsafe.park`和`sun.misc.Unsafe.unpark`是如何实现的。Linux实现的代码在文件[hotspot/src/os/linux/vm/os_linux.cpp](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/os/linux/vm/os_linux.cpp)中，方法定义如下：
 
 ```c++
-void Parker::park(bool isAbsolute, jlong time);
-void Parker::unpark();
+void Parker::park(bool isAbsolute, jlong time) {
+  // Ideally we'd do something useful while spinning, such
+  // as calling unpackTime().
+
+  // Optional fast-path check:
+  // Return immediately if a permit is available.
+  // We depend on Atomic::xchg() having full barrier semantics
+  // since we are doing a lock-free update to _counter.
+  if (Atomic::xchg(0, &_counter) > 0) return;
+
+  Thread* thread = Thread::current();
+  assert(thread->is_Java_thread(), "Must be JavaThread");
+  JavaThread *jt = (JavaThread *)thread;
+
+  // Optional optimization -- avoid state transitions if there's an interrupt pending.
+  // Check interrupt before trying to wait
+  if (Thread::is_interrupted(thread, false)) {
+    return;
+  }
+
+  // Next, demultiplex/decode time arguments
+  timespec absTime;
+  if (time < 0 || (isAbsolute && time == 0) ) { // don't wait at all
+    return;
+  }
+  if (time > 0) {
+    unpackTime(&absTime, isAbsolute, time);
+  }
+
+
+  // Enter safepoint region
+  // Beware of deadlocks such as 6317397.
+  // The per-thread Parker:: mutex is a classic leaf-lock.
+  // In particular a thread must never block on the Threads_lock while
+  // holding the Parker:: mutex.  If safepoints are pending both the
+  // the ThreadBlockInVM() CTOR and DTOR may grab Threads_lock.
+  ThreadBlockInVM tbivm(jt);
+
+  // Don't wait if cannot get lock since interference arises from
+  // unblocking.  Also. check interrupt before trying wait
+  if (Thread::is_interrupted(thread, false) || pthread_mutex_trylock(_mutex) != 0) {
+    return;
+  }
+
+  int status ;
+  if (_counter > 0)  { // no wait needed
+    _counter = 0;
+    status = pthread_mutex_unlock(_mutex);
+    assert (status == 0, "invariant") ;
+    // Paranoia to ensure our locked and lock-free paths interact
+    // correctly with each other and Java-level accesses.
+    OrderAccess::fence();
+    return;
+  }
+
+#ifdef ASSERT
+  // Don't catch signals while blocked; let the running threads have the signals.
+  // (This allows a debugger to break into the running thread.)
+  sigset_t oldsigs;
+  sigset_t* allowdebug_blocked = os::Linux::allowdebug_blocked_signals();
+  pthread_sigmask(SIG_BLOCK, allowdebug_blocked, &oldsigs);
+#endif
+
+  OSThreadWaitState osts(thread->osthread(), false /* not Object.wait() */);
+  jt->set_suspend_equivalent();
+  // cleared by handle_special_suspend_equivalent_condition() or java_suspend_self()
+  assert(_cur_index == -1, "invariant");
+  if (time == 0) {
+    _cur_index = REL_INDEX; // arbitrary choice when not timed
+    status = pthread_cond_wait (&_cond[_cur_index], _mutex) ;
+  } else {
+    _cur_index = isAbsolute ? ABS_INDEX : REL_INDEX;
+    status = os::Linux::safe_cond_timedwait (&_cond[_cur_index], _mutex, &absTime) ;
+    if (status != 0 && WorkAroundNPTLTimedWaitHang) {
+      pthread_cond_destroy (&_cond[_cur_index]) ;
+      pthread_cond_init    (&_cond[_cur_index], isAbsolute ? NULL : os::Linux::condAttr());
+    }
+  }
+  _cur_index = -1;
+
+  assert_status(status == 0 || status == EINTR ||
+                status == ETIME || status == ETIMEDOUT,
+                status, "cond_timedwait");
+
+#ifdef ASSERT
+  pthread_sigmask(SIG_SETMASK, &oldsigs, NULL);
+#endif
+
+  _counter = 0 ;
+  status = pthread_mutex_unlock(_mutex) ;
+  assert_status(status == 0, status, "invariant") ;
+  // Paranoia to ensure our locked and lock-free paths interact
+  // correctly with each other and Java-level accesses.
+  OrderAccess::fence();
+
+  // If externally suspended while waiting, re-suspend
+  if (jt->handle_special_suspend_equivalent_condition()) {
+    jt->java_suspend_self();
+  }
+}
+
+void Parker::unpark() {
+  int s, status ;
+  status = pthread_mutex_lock(_mutex);
+  assert (status == 0, "invariant") ;
+  s = _counter;
+  _counter = 1;
+  if (s < 1) {
+    // thread might be parked
+    if (_cur_index != -1) {
+      // thread is definitely parked
+      if (WorkAroundNPTLTimedWaitHang) {
+        status = pthread_cond_signal (&_cond[_cur_index]);
+        assert (status == 0, "invariant");
+        status = pthread_mutex_unlock(_mutex);
+        assert (status == 0, "invariant");
+      } else {
+        status = pthread_mutex_unlock(_mutex);
+        assert (status == 0, "invariant");
+        status = pthread_cond_signal (&_cond[_cur_index]);
+        assert (status == 0, "invariant");
+      }
+    } else {
+      pthread_mutex_unlock(_mutex);
+      assert (status == 0, "invariant") ;
+    }
+  } else {
+    pthread_mutex_unlock(_mutex);
+    assert (status == 0, "invariant") ;
+  }
+}
 ```
 
-每个线程都有一个许可，当调用`unpark`时，许可置为1，当调用`park`时，如果许可为1，将许可置为0并返回，否则等待许可（由`unpark`释放许可）。这个过程类似于信号量，不同的是许可不能累加，最大值为1。需要特别注意的一点：**`park` 方法还可以在其他任何时间“毫无理由”地返回，因此通常必须在重新检查返回条件的循环里调用此方法**。`unpark`方法可以先于`park`调用。
+当调用`Parker::unpark`方法时，首先获取`_mutex`的锁，`pthread_mutex_lock`函数是阻塞方法，只有线程获取了`_mutex`的锁时函数才会返回0，否则阻塞，直到获取`_mutex`的锁。获取了`_mutex`的锁后将许可`_counter`备份在本地变量`s`中，将其赋值为1。如果许可`_counter`旧值`s`小于1，表示线程可能调用了`Parker::park`方法。如果`_cur_index`的值大于等于0，表示线程已经调用了`Parker::park`方法并通过系统函数`pthread_cond_wait`将该线程阻塞等待`_cur_index`条件变量的信号通知。此时需要调用`pthread_cond_signal`函数向阻塞的线程发送信号通知，解除线程阻塞。
 
-`Parker`类使用`_counter`字段表示许可，当调用`park`方法时，先尝试将`_counter`置为0（`if (Atomic::xchg(0, &_counter) > 0) return;`当`_counter`大于0时才会成功地设置为0），如果设置成功，`park`方法返回，如果设置不成功，调用`pthread_mutex_trylock`方法尝试锁住互斥变量`_mutex `。如果获取锁不成功，`park`方法返回，需要由上层代码继续调用`park`方法。如果获取锁成功，检查`_counter`是否大于0，如果大于0，将`_counter`置为0，调用`pthread_mutex_unlock`方法解除互斥锁，然后返回。如果不大于0，表示没有许可，调用`pthread_cond_wait`方法等待许可。
+当调用`Parker::park`方法时，先将许可`_counter`置为0，实现的方式是使用`Atomic::xchg`方法完成，该方法的定义如下：
 
-当调用`unpark`方法时，调用`pthread_mutex_lock`方法获取互斥锁，将`_counter`置为1，即添加许可。如果`_counter`之前为0，则调用`pthread_cond_signal `通知其他线程可以。最后调用`pthread_mutex_unlock`释放互斥锁，`unpark`方法返回。
+```cpp
+inline jint     Atomic::xchg    (jint     exchange_value, volatile jint*     dest) {
+  __asm__ volatile (  "xchgl (%2),%0"
+                    : "=r" (exchange_value)
+                    : "0" (exchange_value), "r" (dest)
+                    : "memory");
+  return exchange_value;
+}
+```
 
-使用`os::Linux::safe_cond_timedwait`方法可以设置等待一个互斥变量的超时时间。
+`Atomic::xchg`的方法的工作方式类似于`swap`置换变量的方式：
+
+```text
+dest -> TEMP
+exchange_value -> dest
+TEMP -> exchange_value
+```
+
+`xchg`汇编指令描述可参考[Exchange Register / Memory With Register (xchg)](https://docs.oracle.com/cd/E19620-01/805-4693/instructionset-124/index.html)，`__asm__`语法可参考[GCC Inline Assembly HOWTO](http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html)。
+
+如果`Atomic::xchg(0, &_counter) > 0`为`true`时，表示许可`_counter`值为1，表示该线程处于`unpark`状态，此时函数返回，并未让线程阻塞。这需要上层程序在循环中判断线程是否可以获取某个资源，不能获取资源时则调用`park`方法，比如：
+
+```java
+// Block while not first in queue or cannot acquire lock
+while (waiters.peek() != current ||
+       !locked.compareAndSet(false, true)) {
+   LockSupport.park(this);
+   if (Thread.interrupted()) // ignore interrupts while waiting
+     wasInterrupted = true;
+}
+```
+
+当第一次执行循环体，调用`LockSupport.park(this);`时线程未阻塞，则`while`循环的条件需要让该线程继续获取资源，如果获取失败，则继续调用`LockSupport.park(this)`方法。此时`Atomic::xchg(0, &_counter) > 0`为`false`，此时`Parker::park`方法将会尝试阻塞该线程。事实上，**`park` 方法还可以在其他任何时间“毫无理由”地返回，因此通常必须在重新检查返回条件的循环里调用此方法**。可以认为当调用`Parker::unpark`时，许可`_counter`置为1，当调用`Parker::park`时，如果许可`_counter`为1，将许可`_counter`置为0并返回，否则等待许可`_counter`。这个过程类似于信号量，不同的是许可不能累加，最大值为1。
+
+`ThreadBlockInVM`的功能是插入内存栅栏，防止CPU对代码进行重排序，将线程的工作内存都刷新。`ThreadBlockInVM`在[hotspot/src/share/vm/runtime/interfaceSupport](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/interfaceSupport.hpp)中定义，如下：
+
+```cpp
+class ThreadBlockInVM : public ThreadStateTransition {
+ public:
+  ThreadBlockInVM(JavaThread *thread)
+  : ThreadStateTransition(thread) {
+    // Once we are blocked vm expects stack to be walkable
+    thread->frame_anchor()->make_walkable(thread);
+    trans_and_fence(_thread_in_vm, _thread_blocked);
+  }
+  ~ThreadBlockInVM() {
+    trans_and_fence(_thread_blocked, _thread_in_vm);
+    // We don't need to clear_walkable because it will happen automagically when we return to java
+  }
+};
+```
+
+`Parker::park`方法会调用`pthread_mutex_trylock`函数尝试获取`_mutex`的锁，该函数并非阻塞模式，因此如果无法获取锁，`Parker::park`方法会立即返回。此时调用`LockSupport.park(this)`的循环体会一直执行，要么该线程能够获得资源，否则继续调用`LockSupport.park(this)`方法，`Parker::park`将再次尝试获取`_mutex`的锁。如果`_mutex`的锁获取成功，检查许可`_counter`的值，如果大于0，表示该线程执行了`Parker::unpark`方法将许可`_counter`置为1，函数释放锁后立即返回，在下次循环中将许可`_counter`置为0；如果小于0，则调用`pthread_cond_wait`函数阻塞该线程，此时完成了线程阻塞操作。
+
+`unpark`方法可以先于`park`调用。使用`os::Linux::safe_cond_timedwait`方法可以设置等待一个互斥变量的超时时间。
 
 参考： [浅谈Java并发编程系列（八）—— LockSupport原理剖析](https://segmentfault.com/a/1190000008420938)，[Java的LockSupport.park()实现分析](https://blog.csdn.net/hengyunabc/article/details/28126139)
 
@@ -192,7 +394,7 @@ void Parker::unpark();
 
 AQS是`AbstractQueuedSynchronizer`类的简称，它是`java.concurrent.util`包里各种独占锁或者共享锁（包括`ReentrantLock`和`Semaphore`等）实现的基础。
 
-AQS使用一个`volatile int state`表示同步状态，并使用CAS操作保证条件判断与动作更新的原子性。线程阻塞和唤醒使用`LockSupport.park()`和`LockSupport.unpark()`完成，使用FIFO队列管理阻塞的线程。
+AQS使用一个`volatile int state`表示同步状态，并使用CAS操作保证条件判断与值更新的原子性。线程阻塞和唤醒使用`LockSupport.park()`和`LockSupport.unpark()`完成，使用FIFO队列管理阻塞的线程。
 
 AQS使用下列方法实现独占锁和共享锁：
 
