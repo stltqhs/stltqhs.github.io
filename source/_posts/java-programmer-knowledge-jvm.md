@@ -179,7 +179,7 @@ JVM垃圾收集器分为串行和并行两类，新生代可用的垃圾收集�
 
 - CMS收集器
 
-CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器，使用“标记-清除”算法实现。它的运作过程分为4个阶段：初始标记、并发标记、重新标记、并发清除。其中初始标记和重新标记需要“Stop the world”，并发标记和并发清除可以与用户线程并发执行。耗时最长的也是并发标记和并发清除，而这两个阶段可以与用户线程一起执行，减少了停顿时间。CMS收集器有3个缺点：对CPU资源敏感（并发阶段会占用一部分线程导致应用线程变慢，总吞吐量会降低）、无法处理浮动垃圾（并发清理阶段用户线程还在运行，此时会产生新的垃圾）、存在空间碎片（由于“标记-清除算法“）。当可用空间不足或者垃圾碎片太多没有足够空间容纳晋升对象时会发生并发模式失败，此时老年代将进行垃圾收集以释放可用空间，同时也会以整理压缩以消除碎片，这个操作需要停止所有的Java应用进程，并且需要执行相当长时间。与Parallel Scavenge收集器相比，CMS老年代停顿变短了，但代价是新生代停顿略微拉长、吞吐量有所降低，堆的大小有所增加，并且由于并发，垃圾收集还会占用应用的CPU周期。
+CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器，使用“标记-清除”算法实现。它的运作过程分为4个阶段：初始标记、并发标记、重新标记、并发清除。其中初始标记和重新标记需要“Stop The World”，并发标记和并发清除可以与用户线程并发执行。耗时最长的也是并发标记和并发清除，而这两个阶段可以与用户线程一起执行，减少了停顿时间。CMS收集器有3个缺点：对CPU资源敏感（并发阶段会占用一部分线程导致应用线程变慢，总吞吐量会降低）、无法处理浮动垃圾（并发清理阶段用户线程还在运行，此时会产生新的垃圾）、存在空间碎片（由于“标记-清除算法”）。当可用空间不足或者垃圾碎片太多没有足够空间容纳晋升对象时会发生并发模式失败，此时老年代将进行垃圾收集以释放可用空间，同时也会以整理压缩以消除碎片，这个操作需要停止所有的Java应用进程，并且需要执行相当长时间。与Parallel Scavenge收集器相比，CMS老年代停顿变短了，但代价是新生代停顿略微拉长、吞吐量有所降低，堆的大小有所增加，并且由于并发，垃圾收集还会占用应用的CPU周期。
 
 - G1收集器
 
@@ -334,7 +334,7 @@ Hotspot VM是Oracle JVM的实现，`OutOfMemoryError`是常见的Hotspot VM致�
 
 对JVM性能调优前，首先需要对应用进行必要的监控，然后根据监控信息来调整相关配置，继续监控调整配置后的应用运行性能。由于JVM调优主要在垃圾收集方面，因此需要对JVM的垃圾收集进行监控，可以使用参数`-XX:+PrintGCDetails`让JVM输出垃圾收集日志，可以使用参数`-Xloggc`指定垃圾收集日志输出到文件。其他参数还包括：`-verbose:gc`（基本垃圾收集日志）、`-XX:+PrintGCTimeStamps`（打印垃圾收集触发时间戳）、`-XX:+PrintGCApplicationConcurrentTime`（垃圾收集时应用线程并发执行的时间）、`-XX:+PrintGCApplicationStoppedTime`（垃圾收集时应用线程停止执行的时间）、`-XX:+PrintTenuringDistribution`（输出每次Minor GC时晋升分布情况）。可以使用GUI工具[GCHisto](https://github.com/jewes/gchisto)分析垃圾收集日志文件。垃圾收集日志中重点需要关注这些数据指标：当前使用的垃圾收集器、Java堆大小、新生代和老年代的大小、永久代的大小、Minor GC的频率、Minor GC的空间回收量、Full GC的执行时间、Full GC的频率、每个并发垃圾收集周期内的空间回收量、垃圾收集前后Java堆的占用量、垃圾收集前后新生代和老年代的占用量、垃圾收集前后永久代的占用量、是否老年代或永久代的占用触发了Full GC、应用是否显示调用了`System.gc()`。每种收集器打印的垃圾收集日志会有差异，可以参考[Diagnosing a Garbage Collection problem](https://www.oracle.com/technetwork/java/example-141412.html)说明的日志格式，分析日志文件。
 
-除了设置JVM输出垃圾收集日志外，在测试环境中（注意不是生产环境），还可以使用[Oracle Solaris Studio Performance Analyzer](https://www.oracle.com/technetwork/cn/server-storage/developerstudio/features/performance-analyzer-2292312-zhs.html)和[NetBeans profiler](https://profiler.netbeans.org/)收集应用运行的数据性能，包括方法执行时间、耗时最长的方法系统态CPU时间和用户态CPU时间。
+除了设置JVM输出垃圾收集日志外，在测试环境中（注意不是生产环境），还可以使用[Oracle Solaris Studio Performance Analyzer](https://www.oracle.com/technetwork/cn/server-storage/developerstudio/features/performance-analyzer-2292312-zhs.html)和[NetBeans profiler](https://profiler.netbeans.org/)收集应用运行的性能数据，包括方法执行时间、耗时最长的方法系统态CPU时间和用户态CPU时间。
 
 JVM运行模式分为Client模式和Server模式，Client模式的特点是启动快、占用内存少、JIT编译器生成代码的速度也快，Server模式则提供了更复杂的生成代码优化功能。使用32位JVM还是64位JVM是由应用程序的内存占用决定的，同时需要考虑应用程序中的第三方库是否支持64位JVM、Java应用程序中是否使用了本地组件。早期的64位JVM会占用太多内存，原因是指针是有64位存储，而且性能也比32位JVM差，之后，JVM引入了指针压缩（`-XX:+UseCompressdOops`）的方式解决该问题。
 
@@ -344,15 +344,15 @@ JVM运行模式分为Client模式和Server模式，Client模式的特点是启�
 survivor空间大小 = -Xmn<value> / (-XX:SurvivorRatio=<ratio> + 2)
 ```
 
-如果发现Minor GC持续的时间过长，就应该减少新生代空间的大小，持续调整，知道满足Minor GC的持续时间要求。
+如果发现Minor GC持续的时间过长，就应该减少新生代空间的大小，持续调整，直到满足Minor GC的持续时间要求。
 
-CMS垃圾收集器是最复杂（除了替换CMS的G1垃圾收集器）的垃圾收集器，对其优化过程极为复杂和困难。成功的CMS收集器调优要能以对象从新生代提升到老年代的同等速度对老年代中的对象进行垃圾收集，达不到这个标准则称为“失速”（Lost the Race），“失速”的结果就会发生Stop-the-world压缩式垃圾收集，避免“失速”的关键是要结合足够大的老年代空间和足够快的初始化CMS垃圾收集周期，让它以比提升速率更快的速度回收空间。如果出现并发模式失效就会发生Stop-the-world压缩式垃圾收集，此时可以使用参数`-XX:CMSInitiatingOccupancyFraction=<percent>`设置CMS垃圾收集周期在老年代空间占用达到多少百分比时启动。并发模式失效可以通过`-XX:+PrintGCDetails`打印的日志：
+CMS垃圾收集器是最复杂（除了替换CMS的G1垃圾收集器）的垃圾收集器，对其优化过程极为复杂和困难。成功的CMS收集器调优要能以对象从新生代提升到老年代的同等速度对老年代中的对象进行垃圾收集，达不到这个标准则称为“失速”（Lost the Race），“失速”的结果是发生Stop The World压缩式垃圾收集，避免“失速”的关键是要结合足够大的老年代空间和足够快的初始化CMS垃圾收集周期，让它以比提升速率更快的速度回收空间。如果出现并发模式失效就会发生Stop The World压缩式垃圾收集，此时可以使用参数`-XX:CMSInitiatingOccupancyFraction=<percent>`设置CMS垃圾收集周期在老年代空间占用达到多少百分比时启动。并发模式失效可以通过`-XX:+PrintGCDetails`打印的日志：
 
 ```text
 174.445: [GC 174.446: [ParNew: 66408K->66408K(66416K), 0.0000618 secs]174.446: [CMS(concurrent mode failure):161928K->162118K(175104K), 4.0975124 secs] 228336K->162118K(241520K)]
 ```
 
-其中关键字`concurrent mode failure`表示并发模式失效。可以使用`-XX:+UseCMSInitiatingOccupancyOnly`告知Hotspot VM总是使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为启动CMS周期的老年代空间占用阈值。如果不使用`-XX:+UseCMSInitiatingOccupancyOnly`，Hotspot VM仅在第一个CMS周期里使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为占用比率，之后的周期中又转向自适应地启动CMS周期。`-XX:CMSInitiatingOccupancyFraction`设置的一个通用原则是老年代占用百分比应该至少是活跃数据大小的1.5倍，活跃数据大小是应用程序运行于稳定态时，长期存活的对象在Java堆中占用的空间大小，也就是Full GC后Java堆中老年代和年轻代（《Java性能优化权威指南》说是永久代，应该是书中的错误，因为Java堆使用`-Xms`或者`-Xmx`设置，而永久代使用`-XX:MaxPermSize`设置，且永久代也不属于Java堆）。CMS周期中有两个阶段是Stop-The-World，处于这两个阶段的应用程序会被阻塞，这两个阶段分别是初始标记阶段和重新标记阶段。虽然初始标记阶段是单线程的，却极少占用很长的时间，通常情况下远小于其他的垃圾收集停顿时间。重新标记阶段是多线程的，通过`-XX:ParallelGCThreads=<n>`可以控制重新标记阶段使用的线程数。使用`-XX:+CMSScavengeBeforeRemark`强制Hotspot VM在进入CMS重新标记阶段之前先进行一次Minor GC，Minor GC可以减少引用老年代空间的新生代对象数目，将重新标记阶段的工作量减到最少。CMS收集器与ParNew收集器是结合使用，以如下垃圾收集日志为例，说明CMS收集器的工作方式：
+其中关键字`concurrent mode failure`表示并发模式失效。可以使用`-XX:+UseCMSInitiatingOccupancyOnly`告知Hotspot VM总是使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为启动CMS周期的老年代空间占用阈值。如果不使用`-XX:+UseCMSInitiatingOccupancyOnly`，Hotspot VM仅在第一个CMS周期里使用`-XX:CMSInitiatingOccupancyFraction`设定的值作为占用比率，之后的周期中又转向自适应地启动CMS周期。`-XX:CMSInitiatingOccupancyFraction`设置的一个通用原则是老年代占用百分比应该至少是活跃数据大小的1.5倍，活跃数据大小是应用程序运行于稳定态时，长期存活的对象在Java堆中占用的空间大小，也就是Full GC后Java堆中老年代和年轻代（《Java性能优化权威指南》说是永久代，应该是书中的错误，因为Java堆使用`-Xms`或者`-Xmx`设置，而永久代使用`-XX:MaxPermSize`设置，且永久代也不属于Java堆）。CMS周期中有两个阶段是Stop The World，处于这两个阶段的应用程序会被阻塞，这两个阶段分别是初始标记阶段和重新标记阶段。虽然初始标记阶段是单线程的，却极少占用很长的时间，通常情况下远小于其他的垃圾收集停顿时间。重新标记阶段是多线程的，通过`-XX:ParallelGCThreads=<n>`可以控制重新标记阶段使用的线程数。使用`-XX:+CMSScavengeBeforeRemark`强制Hotspot VM在进入CMS重新标记阶段之前先进行一次Minor GC，Minor GC可以减少引用老年代空间的新生代对象数目，将重新标记阶段的工作量减到最少。CMS收集器与ParNew收集器是结合使用，以如下垃圾收集日志为例，说明CMS收集器的工作方式：
 
 ```text
 [GC [ParNew: 64576K->960K(64576K), 0.0377639 secs] 140122K->78078K(261184K), 0.0379598 secs]
