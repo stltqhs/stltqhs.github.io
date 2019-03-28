@@ -105,7 +105,7 @@ Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存�
 
 - 方法区
 
-方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用`-XX:MaxPermSize`调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。**运行时常量池**（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。在Java8中，方法区已被移除，引进了Metaspace（本地堆内存）来存放类信息，字符串常量池移至堆区。
+方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用`-XX:MaxPermSize`调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。**运行时常量池**（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后存放在方法区的运行时常量池中。在Java8中，方法区已被移除，引进了Metaspace（本地堆内存）来存放类信息，字符串常量池移至堆区。
 
 - 堆
 
