@@ -879,7 +879,7 @@ void syncCodeBlock() {
 hash:25 —>| age:4 biased_lock:1 lock:2
 ```
 
-hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示标志位。`Mark Word`是JVM实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。JVM对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁，~~锁状态的变化只能是从低到高，不能从高到低，即只存在锁升级，不存在锁降级~~<sup>[[HotSpot VM重量级锁降级机制的实现原理]](https://zhuanlan.zhihu.com/p/28505703)</sup>。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为JVM同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁<sup>[[java重量锁，轻量锁，偏向锁]](https://focusvirtualization.blogspot.com/2017/02/linux-85-java.html)</sup>。
+hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示标志位。`Mark Word`是JVM实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。JVM对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为JVM同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁<sup>[[java重量锁，轻量锁，偏向锁]](https://focusvirtualization.blogspot.com/2017/02/linux-85-java.html)</sup>。
 
 各种锁状态的变化过程如下：
 
