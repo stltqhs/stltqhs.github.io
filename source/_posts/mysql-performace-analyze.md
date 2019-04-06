@@ -1,21 +1,28 @@
 ---
-title: 数据库性能分析
-date: 2018-03-31 11:23:49
-tags: mysql
+title: mysql_performace_analyze
+date: 2019-04-06 19:50:34
+tags:
 ---
+
 # 1.查询锁等待的sql
+
 ```
 select requesting_trx_id,requested_lock_id,t1.trx_query as request_trx_query,blocking_trx_id,blocking_lock_id,t2.trx_query as blocking_trx_query from innodb_lock_waits left join innodb_trx t1 on requesting_trx_id=t1.trx_id left join innodb_trx t2 on blocking_trx_id = t2.trx_id\G
 ```
+
 # 2.profile
+
 ```
 show profiles;
 set profiling=1;// 默认关闭
 show profile [source] for query 2;
 show profile block io,cpu for query 2;
 ```
+
 还可以查询PROFILING视图
+
 # 3.查看临时表
+
 ```
 > show global status like '%tmp%';
 +-------------------------+---------+
@@ -27,12 +34,17 @@ show profile block io,cpu for query 2;
 +-------------------------+---------+
 Created_tmp_disk_tables / Created_tmp_tables * 100% <= 25%（该值不清楚）
 ```
+
 # 4.查看innodb状态
+
 ```
 show engine innodb status\G
 ```
+
 可以看到IO情况，事务加锁的情况等。
+
 # 5.查看表状态
+
 ```
 show table status like 't_charging'\G
 *************************** 1. row ***************************
@@ -56,9 +68,12 @@ Max_data_length: 0
         Comment: 充电记录
 1 row in set (0.00 sec)
 ```
+
 # 6.开启optimizer_trace
+
 ```
 set optimizer_trace="enabled=on";
 select sum(length(val)) from t where j = 2 and i between 100 and 200;
 select * from information_schema.optimizer_trace;
 ```
+
