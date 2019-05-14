@@ -35,3 +35,4 @@ Saga事务[原理](https://www.jianshu.com/p/e4b662407c66)。
 
 实现[Zab](https://zhuanlan.zhihu.com/p/27335748)算法的有[Zookeeper](https://github.com/apache/zookeeper)。
 
+VR（[Viewstamped Replication](http://www.pmg.csail.mit.edu/papers/vr.pdf)）算法。
