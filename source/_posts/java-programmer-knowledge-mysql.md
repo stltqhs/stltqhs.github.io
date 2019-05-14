@@ -922,7 +922,17 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 
 # 复制
 
-[Advantages and Disadvantages of Statement-Based and Row-Based Replication](https://dev.mysql.com/doc/refman/5.6/en/replication-sbr-rbr.html)
+基于日志复制方式有：
+
+* 基于SQL语句复制
+* 基于行复制
+* SQL语句和行复制的结合（混合复制）
+
+它们的优缺点见[Advantages and Disadvantages of Statement-Based and Row-Based Replication](https://dev.mysql.com/doc/refman/5.6/en/replication-sbr-rbr.html)。
+
+上述所说的复制方法由mysql的binlog实现，是[复制状态机](https://en.wikipedia.org/wiki/State_machine_replication)的一种实现。捕获数据更改日志的工具有[Canal](https://github.com/alibaba/canal)和[Databus](<https://github.com/linkedin/databus>)。
+
+其他复制方法还有Write-ahead log。
 
 # 优化
 
