@@ -8,8 +8,6 @@ tags:
 
 CAP理论和BASE理论。
 
-[分布式系统原理介绍](http://blog.sciencenet.cn/home.php?mod=attachment&id=31413)。
-
 # 分布式事务
 
 2PC的[原理](https://en.wikipedia.org/wiki/Two-phase_commit_protocol)及实现[Raincat](https://github.com/yu199195/Raincat)和[XA](https://en.wikipedia.org/wiki/X/Open_XA)。
