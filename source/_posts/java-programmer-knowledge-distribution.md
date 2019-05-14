@@ -31,5 +31,5 @@ TCC的原理及实现[ByteTCC](https://github.com/liuyangming/ByteTCC)和[hmily]
 
 实现[Raft](https://www.infoq.cn/article/raft-paper)算法的有[etcd](https://github.com/etcd-io/etcd)。
 
-实现[Zab]()算法的有[Zookeeper](https://github.com/apache/zookeeper)。
+实现[Zab](https://zhuanlan.zhihu.com/p/27335748)算法的有[Zookeeper](https://github.com/apache/zookeeper)。
 
