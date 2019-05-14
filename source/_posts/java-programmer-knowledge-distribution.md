@@ -37,7 +37,4 @@ Saga事务[原理](https://www.jianshu.com/p/e4b662407c66)。
 
 VR（[Viewstamped Replication](http://www.pmg.csail.mit.edu/papers/vr.pdf)）算法。
 
-Paxos、VR、Zab的区别：[Paxos vs. Viewstamped Replication vs. Zab](https://www.cs.cornell.edu/fbs/publications/viveLaDifference.pdf)。
-
-Raft与Zab的区别：[choices in consensus algorithm](http://baotiao.github.io/2017/11/16/choice-in-consensus/)。
-
+Paxos、VR、Zab的区别：[Paxos vs. Viewstamped Replication vs. Zab](https://www.cs.cornell.edu/fbs/publications/viveLaDifference.pdf)、[choices in consensus algorithm](http://baotiao.github.io/2017/11/16/choice-in-consensus/)。
