@@ -33,6 +33,11 @@ Saga事务[原理](https://www.jianshu.com/p/e4b662407c66)。
 
 实现[Raft](https://raft.github.io/raft.pdf)算法（[译文](https://www.infoq.cn/article/raft-paper))的有[etcd](https://github.com/etcd-io/etcd)。
 
-实现[Zab](https://zhuanlan.zhihu.com/p/27335748)算法的有[Zookeeper](https://github.com/apache/zookeeper)。
+实现[Zab](http://www.tcs.hut.fi/Studies/T-79.5001/reports/2012-deSouzaMedeiros.pdf)算法的有[Zookeeper](https://github.com/apache/zookeeper)。
 
 VR（[Viewstamped Replication](http://www.pmg.csail.mit.edu/papers/vr.pdf)）算法。
+
+Paxos、VR、Zab的区别：[Paxos vs. Viewstamped Replication vs. Zab](https://www.cs.cornell.edu/fbs/publications/viveLaDifference.pdf)。
+
+Raft与Zab的区别：[choices in consensus algorithm](http://baotiao.github.io/2017/11/16/choice-in-consensus/)。
+
