@@ -217,7 +217,7 @@ private final class Worker
 
 线程池线程数量的规划需要根据任务的性质决定。如果是CPU密集型任务，应配置尽可能小的线程数，一般配置Ncpu+1个线程的线程池；如果是IO密集型任务，由于IO密集型任务线程并不是一直在执行任务，则应配置尽可能多的线程，如2*Ncpu。混合型的任务，如果可以拆分，将其拆分成一个CPU密集型任务  和一个IO密集型任务，只要这两个任务执行的时间相差不是太大，那么分解后执行的吞吐量将高于串行执行的吞吐量。如果这两个任务执行时间相差太大，则没必要进行分解。
 
-参考：[线程池的实现原理](https://blog.csdn.net/wzq6578702/article/details/68926320)
+参考：[线程池的实现原理](https://blog.csdn.net/wzq6578702/article/details/68926320)，[ThreadPoolExecutor线程池解析与BlockingQueue的三种实现](https://blog.csdn.net/a837199685/article/details/50619311)
 
 # ThreadLocal实现方式 
 

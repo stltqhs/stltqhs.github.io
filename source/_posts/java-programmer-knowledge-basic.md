@@ -237,7 +237,7 @@ Java序列化允许将Java对象保存为一组字节，之后可以读取这组
 
 
 
-参考：[深入分析Java的序列化与反序列化](http://www.hollischuang.com/archives/1140)，[java序列化和反序列化](https://www.jianshu.com/p/5a85011de960)
+参考：[深入分析Java的序列化与反序列化](http://www.hollischuang.com/archives/1140)，[java序列化和反序列化](https://www.jianshu.com/p/5a85011de960)，[Java 序列化机制（二） -- 控制序列化的兼容性](https://blog.csdn.net/y874961524/article/details/51412585)
 
 # 反射
 

@@ -920,6 +920,10 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 
 参考：[InnoDB Locking](https://dev.mysql.com/doc/refman/5.6/en/innodb-locking.html)，[MySQL内核：InnoDB存储引擎 卷1](https://book.douban.com/subject/25872763/)，[MySQL · 引擎特性 · Innodb 锁子系统浅析](http://mysql.taobao.org/monthly/2017/12/02/)
 
+# 复制
+
+[Advantages and Disadvantages of Statement-Based and Row-Based Replication](https://dev.mysql.com/doc/refman/5.6/en/replication-sbr-rbr.html)
+
 # 优化
 
 # 容量扩展

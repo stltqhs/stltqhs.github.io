@@ -25,12 +25,6 @@ tags: java
 
 Ansible,CheungSSH,Jumpserver
 
-# 分布式原理
-
-参考：[分布式系统原理介绍](http://blog.sciencenet.cn/home.php?mod=attachment&id=31413)
-
-# 分布式锁的实现方式
-
 # 流量控制
 
 # 全文搜索引擎

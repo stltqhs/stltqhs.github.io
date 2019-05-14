@@ -18,15 +18,11 @@ tags: java
 
 https://blog.csdn.net/xiaojimanman/article/details/50358506)
 
-# 选举算法
-
-Raft、Paxos、Zab
-
-参考：[Paxos和Raft的前世今生](https://mp.weixin.qq.com/s/OXE7prU9cMuZG8kFydPm9A)
-
 # 流量控制算法
 
 # 布隆过滤器
+
+# HyperLogLog
 
 # 无锁队列RingBuffer
 
