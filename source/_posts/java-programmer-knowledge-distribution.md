@@ -31,7 +31,7 @@ Saga事务[原理](https://www.jianshu.com/p/e4b662407c66)。
 
 实现[Paxos](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)算法的有[Chubby](https://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf)和[PhxPaxos](https://github.com/Tencent/phxpaxos)。
 
-实现[Raft](https://raft.github.io/raft.pdf)算法的有[etcd](https://github.com/etcd-io/etcd)。
+实现[Raft](https://raft.github.io/raft.pdf)算法（[译文](https://www.infoq.cn/article/raft-paper))的有[etcd](https://github.com/etcd-io/etcd)。
 
 实现[Zab](https://zhuanlan.zhihu.com/p/27335748)算法的有[Zookeeper](https://github.com/apache/zookeeper)。
 
