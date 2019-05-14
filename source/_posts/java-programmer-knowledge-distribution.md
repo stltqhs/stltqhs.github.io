@@ -4,7 +4,7 @@ date: 2019-05-13 12:06:20
 tags:
 ---
 
-# 分布式原理与一致性
+# 分布式系统原理
 
 CAP理论和BASE理论。
 
@@ -24,7 +24,7 @@ TCC的原理及实现[ByteTCC](https://github.com/liuyangming/ByteTCC)和[hmily]
 
 # 一致性算法
 
-实现[Paxos](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)算法的有[Chubby](https://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf)和[(PhxPaxos)](https://github.com/Tencent/phxpaxos)。
+实现[Paxos](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)算法的有[Chubby](https://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf)和[PhxPaxos](https://github.com/Tencent/phxpaxos)。
 
 实现[Raft](https://www.infoq.cn/article/raft-paper)算法的有[etcd](https://github.com/etcd-io/etcd)。
 
