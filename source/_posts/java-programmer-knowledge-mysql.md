@@ -930,7 +930,7 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 
 它们的优缺点见[Advantages and Disadvantages of Statement-Based and Row-Based Replication](https://dev.mysql.com/doc/refman/5.6/en/replication-sbr-rbr.html)。
 
-上述所说的复制方法由mysql的binlog实现，是[复制状态机](https://en.wikipedia.org/wiki/State_machine_replication)的一种实现。捕获数据更改日志的工具有[Canal](https://github.com/alibaba/canal)和[Databus](<https://github.com/linkedin/databus>)。
+上述所说的复制方法由mysql的binlog实现，是[复制状态机](https://en.wikipedia.org/wiki/State_machine_replication)的一种实现。捕获数据更改日志的工具有[Canal](https://github.com/alibaba/canal)、[Open Replicator](https://github.com/whitesock/open-replicator)和[Databus](<https://github.com/linkedin/databus>)。
 
 其他复制方法还有Write-ahead log。
 
@@ -960,6 +960,8 @@ Rebalance的方案：[MongoDB Rebalance](http://www.cnblogs.com/daizhj/archive/2
 # 备份与恢复
 
 [xtrabackup](https://www.percona.com/doc/percona-xtrabackup/2.4/index.html)可实现全量和增量备份，参考[xtrabackup增量、全量备份mysql innodb教程](https://www.centos.bz/2017/09/xtrabackup-backup-mysql-innodb/)。
+
+异地灾备同步方案：[otter](https://github.com/alibaba/otter)
 
 # Nosql
 
