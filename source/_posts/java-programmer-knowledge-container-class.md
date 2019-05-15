@@ -158,6 +158,8 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
 # ConcurrentHashMap的实现方式 
 
+#### JDK1.7实现
+
 ConcurrentHashMap使用`锁分段`的方式来实现高效的HashMap，使用`不变性`和`volatile`来减少加锁操作，提高线程并发。
 
 ConcurrentHashMap包含n个segment（segment是ReentrantLock的子类，初始时n为16，且n为2的幂次），segment的几个重要成员变量定义如下：
@@ -182,9 +184,22 @@ final HashEntry<K,V> next;
 ConcurrentHashMap数据结构如下图：
 ![ConcurrentHashMap结构](http://static.zybuluo.com/Rico123/zaqxg0nmu1qq79lm6wpwss2f/ConcurrentHashMap.jpg "ConcurrentHashMap结构")
 
+不管是put还是get操作，都需要通过key计算segment的位置。由于put操作需要需改segment结构，所以put操作需要加锁，加锁方法如下：
+
+```java
+HashEntry<K,V> node = tryLock() ? null :
+        scanAndLockForPut(key, hash, value);
+```
+
+首先尝试获取锁（`tryLock()`），当获取锁失败时，则会进入`scanAndLockForPut`方法，该方法会自旋获取锁。自旋的实现是`while(tryLock())`，当自旋次数超过了`MAX_SCAN_RETRIES`时，则使用阻塞锁获取（`lock()`）。
+
 由于`HashEntry.next`是`final`类型，链表的`put`操作需要在表头添加一个新元素，该操作不影响读取或者对链表的遍历操作，因此读取可以不用加锁（除了`value`为`null`时需要加锁再读一次），`remove`操作是复制被删除节点的前驱节点构造新链表，同时将被删除节点的`next`值复制到该链表的尾节点的`next`，该操作不影响读取或者对链表的遍历操作。对于`size()`操作，先使用不加锁的方式计算每个segment的count，同时比较计算前和计算后的`modCount`值是否改变，如果改变，表示计算期间存在修改情况，此时再加锁计算。
 
-参考：[探索 ConcurrentHashMap 高并发性的实现机制](https://www.ibm.com/developerworks/cn/java/java-lo-concurrenthashmap/index.html)，[Map 综述（三）：彻头彻尾理解 ConcurrentHashMap](https://blog.csdn.net/justloveyou_/article/details/72783008)
+#### JDK 1.8实现
+
+JDK1.8的ConcurrentHashMap的实现抛弃了1.7使用的分段锁，改用“CAS+synchronized“，`Node.next`字段为`volatile`类型，而不是1.7的`final`类型。
+
+参考：[探索 ConcurrentHashMap 高并发性的实现机制](https://www.ibm.com/developerworks/cn/java/java-lo-concurrenthashmap/index.html)，[Map 综述（三）：彻头彻尾理解 ConcurrentHashMap](https://blog.csdn.net/justloveyou_/article/details/72783008)，[HashMap? ConcurrentHashMap? 相信看完这篇没人能难住你！](https://crossoverjie.top/2018/07/23/java-senior/ConcurrentHashMap/)，[为并发而生的 ConcurrentHashMap（Java 8）](https://www.cnblogs.com/yangming1996/p/8031199.html)
 
 # Collections.synchronizedMap实现方式 
 
