@@ -10,21 +10,31 @@ tags: java
 
 性能测试工具如下：
 
-* ab
-* siege
-* http_load
-* webbench
-* loadrunner
-* sysbench
+* [ab](https://httpd.apache.org/docs/2.4/programs/ab.html)
+* [siege](https://github.com/JoeDog/siege)
+* [http_load](https://acme.com/software/http_load/)
+* [webbench](http://home.tiscali.cz/~cz210552/webbench.html)
+* loadrunner（收费软件）
+* [sysbench](https://github.com/akopytov/sysbench)
+* [JMeter](https://jmeter.apache.org/)
 
-结合性能测试数据，使用[gnuplot](http://www.gnuplot.info/)可以绘制一张性能测试图标。
+可使用[gnuplot](http://www.gnuplot.info/)（GNU手册[GNUPLOT 4.2 - A Brief Manual and Tutorial](https://people.duke.edu/~hpgavin/gnuplot.html)）绘制性能测试图表以便可视化性能数据。
 
-参考：[API性能测试基本性能指标及要求](https://blog.csdn.net/strawbingo/article/details/46458959)，[GNUPLOT 4.2 - A Brief Manual and Tutorial](https://people.duke.edu/~hpgavin/gnuplot.html)
+# DevOps工具
 
-# 运维
+[percona-toolkit](https://www.percona.com/doc/percona-toolkit/LATEST/index.html)
 
-Ansible,CheungSSH,Jumpserver
+[Ansible](https://docs.ansible.com/)
 
-# 流量控制
+[ttyd](https://github.com/tsl0922/ttyd)
 
-# 全文搜索引擎
+[Jumpserver](https://github.com/jumpserver/jumpserver)
+
+[Jenkins](https://jenkins.io/)
+
+[Zabbix](https://www.zabbix.com/manuals)
+
+# 架构模型
+
+[SEDA](http://www.sosp.org/2001/papers/welsh.pdf)，[Reactor](http://www.dre.vanderbilt.edu/~schmidt/PDF/reactor-siemens.pdf)，SOA
+

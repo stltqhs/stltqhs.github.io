@@ -934,13 +934,26 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 
 其他复制方法还有Write-ahead log。
 
+多节点复制算法有：
+
+* Single-Leader Replication：
+* Multi-Leader Replication：
+* Leaderless Replication：
+
+复制方式有同步复制和异步复制，异步复制的方式就是使用binlog复制，同步复制的实现有[Galera](https://github.com/codership/galera)。
+
 # 优化
 
 # 容量扩展
 
-[MaxScale](https://github.com/mariadb-corporation/MaxScale/tree/1.4.3)，[Galara](https://github.com/codership/galera),https://severalnines.com/resources/tutorials/galera-cluster-mysql-tutorial
+分区方法：
 
-参考：[设计数据密集型应用](https://vonng.gitbooks.io/ddia-cn/content/part-i.html)
+* Hash Code Range
+* Key Range
+
+Rebalance实现。
+
+在线扩容方法：[Online migrations at scale](https://stripe.com/blog/online-migrations)，[如何做到不停机分库分表迁移？](https://www.toutiao.com/i6688586480102670856/?tt_from=weixin&utm_campaign=client_share&wxshare_count=1×tamp=1557843543&app=news_article&utm_source=weixin&utm_medium=toutiao_android&req_id=201905142219020101520262097768D47&group_id=6688586480102670856)
 
 # Nosql
 

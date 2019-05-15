@@ -21,7 +21,7 @@ tags:
 
 TCC的[原理](https://blog.csdn.net/kobejayandy/article/details/54783212)及实现[ByteTCC](https://github.com/liuyangming/ByteTCC)和[hmily](https://github.com/yu199195/hmily)。
 
-Saga事务[原理](https://www.jianshu.com/p/e4b662407c66)。
+[Saga](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)事务[原理](https://www.jianshu.com/p/e4b662407c66)。
 
 基于可靠消息的事务实现[myth](https://github.com/yu199195/myth)。
 
