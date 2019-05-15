@@ -951,9 +951,11 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 * Hash Code Range
 * Key Range
 
-Rebalance实现。
+分片方法的选择可以参考[MongoDB Sharding](https://docs.mongodb.com/manual/sharding/)。
 
-在线扩容方法：[Online migrations at scale](https://stripe.com/blog/online-migrations)，[如何做到不停机分库分表迁移？](https://www.toutiao.com/i6688586480102670856/?tt_from=weixin&utm_campaign=client_share&wxshare_count=1×tamp=1557843543&app=news_article&utm_source=weixin&utm_medium=toutiao_android&req_id=201905142219020101520262097768D47&group_id=6688586480102670856)
+[修改大表](http://mysql.rjweb.org/doc.php/alterhuge)的工具[gh-ost](https://github.com/github/gh-ost)，[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html)
+
+Rebalance的方案：[MongoDB Rebalance](http://www.cnblogs.com/daizhj/archive/2011/05/23/mongos_balancer_source_code.html)，[Codis Rebalance](http://www.voidcn.com/article/p-rvijtsvp-boy.html)，[Vitess Resharding](https://chuansongme.com/n/1747905853923)
 
 # Nosql
 
