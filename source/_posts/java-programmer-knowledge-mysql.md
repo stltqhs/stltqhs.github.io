@@ -957,6 +957,10 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 
 Rebalance的方案：[MongoDB Rebalance](http://www.cnblogs.com/daizhj/archive/2011/05/23/mongos_balancer_source_code.html)，[Codis Rebalance](http://www.voidcn.com/article/p-rvijtsvp-boy.html)，[Vitess Resharding](https://chuansongme.com/n/1747905853923)
 
+# 备份与恢复
+
+[xtrabackup](https://www.percona.com/doc/percona-xtrabackup/2.4/index.html)可实现全量和增量备份，参考[xtrabackup增量、全量备份mysql innodb教程](https://www.centos.bz/2017/09/xtrabackup-backup-mysql-innodb/)。
+
 # Nosql
 
 参考：[MongoDB – Internals & Performance](https://iuliantabara.com/2016/01/mongodb-internals-performance/)
