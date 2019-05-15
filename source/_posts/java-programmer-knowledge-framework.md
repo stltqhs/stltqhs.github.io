@@ -18,7 +18,7 @@ tags: java
 * [sysbench](https://github.com/akopytov/sysbench)
 * [JMeter](https://jmeter.apache.org/)
 
-可使用[gnuplot](http://www.gnuplot.info/)（GNU手册[GNUPLOT 4.2 - A Brief Manual and Tutorial](https://people.duke.edu/~hpgavin/gnuplot.html)）绘制性能测试图表以便可视化性能数据。
+可使用[gnuplot](http://www.gnuplot.info/)（GNUPLOT手册[GNUPLOT 4.2 - A Brief Manual and Tutorial](https://people.duke.edu/~hpgavin/gnuplot.html)）绘制性能测试图表以便可视化性能数据。
 
 # DevOps工具
 
