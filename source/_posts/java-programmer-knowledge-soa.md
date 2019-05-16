@@ -14,5 +14,5 @@ tags:
 
 # 服务化框架
 
-[Dubbo](http://dubbo.apache.org/en-us/index.html)，[Spring Cloud](https://cloud.spring.io/spring-cloud-static/Finchley.RELEASE/single/spring-cloud.html)，[Motan](https://github.com/weibocom/motan)
+[Dubbo](http://dubbo.apache.org/en-us/index.html)（源码解析[dubbo2.0.pdf](http://songwie.com/attached/dubbo/dubbo2.0.pdf)），[Spring Cloud](https://cloud.spring.io/spring-cloud-static/Finchley.RELEASE/single/spring-cloud.html)，[Motan](https://github.com/weibocom/motan)
 
