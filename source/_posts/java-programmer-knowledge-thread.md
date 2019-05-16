@@ -290,3 +290,10 @@ try {
   当出现活跃性故障时，除了终止应用程序之外没有其他任何机制可以帮助从这种故障恢复过来。
 
 参考：[java并发编程中的活跃性问题](http://study-a-j8.iteye.com/blog/2366489)
+
+# GO Routine
+
+[Analysis of the Go runtime scheduler](http://www.cs.columbia.edu/~aho/cs6998/reports/12-12-11_DeshpandeSponslerWeiss_GO.pdf)
+
+[The Go scheduler](http://morsmachine.dk/go-scheduler)
+
