@@ -37,5 +37,7 @@ TCC的[原理](https://blog.csdn.net/kobejayandy/article/details/54783212)及实
 
 VR（[Viewstamped Replication](http://www.pmg.csail.mit.edu/papers/vr.pdf)）算法。
 
+实现[Gossip](http://publicatio.bibl.u-szeged.hu/1529/1/gossip11.pdf)协议（[原理](http://bitsavers.trailing-edge.com/pdf/xerox/parc/techReports/CSL-89-1_Epidemic_Algorithms_for_Replicated_Database_Maintenance.pdf)）的有Cassandra和Redis Cluster。
+
 一致性算法的区别：[Paxos vs. Viewstamped Replication vs. Zab](https://www.cs.cornell.edu/fbs/publications/viveLaDifference.pdf)、[choices in consensus algorithm](http://baotiao.github.io/2017/11/16/choice-in-consensus/)、[state machine replication vs primary backup system](https://zhuanlan.zhihu.com/p/30856272)。
 
