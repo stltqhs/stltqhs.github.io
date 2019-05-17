@@ -955,7 +955,7 @@ Record lock, heap no 4 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
 
 [修改大表](http://mysql.rjweb.org/doc.php/alterhuge)的工具[gh-ost](https://github.com/github/gh-ost)，[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html)
 
-Rebalance的方案：[MongoDB Rebalance](http://www.cnblogs.com/daizhj/archive/2011/05/23/mongos_balancer_source_code.html)，[Codis Rebalance](http://www.voidcn.com/article/p-rvijtsvp-boy.html)，[Vitess Resharding](https://chuansongme.com/n/1747905853923)
+Rebalance的方案：[MongoDB Rebalance](http://www.cnblogs.com/daizhj/archive/2011/05/23/mongos_balancer_source_code.html)，[Redis Cluster Resharding](https://redis.io/commands/cluster-setslot)（和[ Redirection and resharding](https://redis.io/topics/cluster-spec#redirection-and-resharding)），[Vitess Resharding](https://chuansongme.com/n/1747905853923)
 
 # 备份与恢复
 
