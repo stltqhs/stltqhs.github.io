@@ -219,7 +219,9 @@ public static void notNull(Object object, String message) {
 
 - JVM新特性
 
-  使用Metaspace替代PermGen Space，
+  使用Metaspace替代PermGen Space
+
+Java9新特性见[Java 9 新特性概述](https://www.ibm.com/developerworks/cn/java/the-new-features-of-Java-9/index.html)。
 
 参考：[Java 8的新特性—终极版](https://www.jianshu.com/p/5b800057f2d8)
 
