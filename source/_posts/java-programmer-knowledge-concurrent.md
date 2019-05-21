@@ -1011,6 +1011,8 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
   虽然StringBuffer的append是一个同步方法，但是这段程序中的StringBuffer属于一个局部变量，并且不会从该方法中逃逸出去，所以其实这过程是线程安全的，可以将锁消除。
 
+除了上面JVM对锁的优化，在程序端还可以使用锁分段（如ConcurrentHashMap实现）和锁分离（ReadWriteLock实现）的技术提高并发。
+
 参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)，[JVM源码分析之synchronized实现](https://www.jianshu.com/p/c5058b6fe8e5)
 
 # 锁的升级和降级

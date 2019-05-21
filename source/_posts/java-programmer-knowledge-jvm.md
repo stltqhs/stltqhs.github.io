@@ -419,3 +419,13 @@ CMS收集器的垃圾收集周期以`CMS-initial-mark`开始，到`CMS-concurren
 现代CPU都是多核多线程架构，应用程序可以使用该特点尽可能地使用更多的CPU资源。比如在一个大集合排序中，可以将集合划分多个区域，使用多个CPU资源（就是使用多线程）排序，然后使用归并排序算法完成整个大集合的排序。
 
 参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)，[做JAVA开发的同学一定遇到过的爆表问题，看这里解决](https://juejin.im/post/5bbf18a2f265da0adb30f3b5)，[Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning](https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html)，[Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
+
+# 动态追踪技术
+
+DTrace
+
+SystemTap
+
+[BTrace](https://github.com/btraceio/btrace)
+
+相关文章：[动态追踪技术漫谈](http://openresty.org/posts/dynamic-tracing/)，[BTrace原理浅析](https://www.rowkey.me/blog/2016/09/20/btrace/)
