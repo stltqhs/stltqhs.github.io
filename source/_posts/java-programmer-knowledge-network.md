@@ -16,5 +16,7 @@ https://my.oschina.net/fzyz999/blog/704510
 
 # IO多路复用
 
-[C10K](http://www.kegel.com/c10k.html)
+[C10K](http://www.kegel.com/c10k.html)问题
+
+基于IO多路复用的高并发学习框架[handy](https://github.com/yedf/handy)
 
