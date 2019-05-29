@@ -130,6 +130,12 @@ HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, 
 
 参考：[HashSet 的实现原理](http://wiki.jikexueyuan.com/project/java-collection/hashset.html)
 
+# TreeSet实现
+
+TreeSet基于TreeMap实现。
+
+参考：[通过分析 JDK 源代码研究 TreeMap 红黑树算法实现](https://www.ibm.com/developerworks/cn/java/j-lo-tree/index.html)
+
 # Set,Queue,List,Map,Stack 
 
 - Set
