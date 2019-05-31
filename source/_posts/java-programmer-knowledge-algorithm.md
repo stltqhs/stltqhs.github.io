@@ -98,7 +98,7 @@ KMP模式匹配算法
 
 关键路径算法
 
-有些数据结构难以理解是因为不够直观，可以查看[Data Structure Visualizations](https://www.cs.usfca.edu/~galles/visualization/Algorithms.html)，可视化数据结构。
+有些数据结构难以理解是因为不够直观，可以查看[Data Structure Visualizations](https://www.cs.usfca.edu/~galles/visualization/Algorithms.html)和[Algorithm Visualizer](https://github.com/algorithm-visualizer/algorithm-visualizer)，可视化数据结构。
 
 # 算法思想
 
