@@ -37,5 +37,5 @@ tags: java
 
 # 架构模型
 
-[SEDA](http://www.sosp.org/2001/papers/welsh.pdf)，[Reactor](http://www.dre.vanderbilt.edu/~schmidt/PDF/reactor-siemens.pdf)，SOA
+[SEDA](http://www.sosp.org/2001/papers/welsh.pdf)，[Reactor](http://www.dre.vanderbilt.edu/~schmidt/PDF/reactor-siemens.pdf)（C语言[实现](https://www.adamtornhill.com/Patterns%20in%20C%205,%20REACTOR.pdf)），SOA
 
