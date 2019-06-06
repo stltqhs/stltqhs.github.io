@@ -18,6 +18,8 @@ tags:
 
 [Designing Data-Intensive Applications](https://book.douban.com/subject/26197294/)（豆瓣9.7分）
 
+[Python深度学习](https://book.douban.com/subject/30293801/)（豆瓣9.7分）
+
 [Computer Architecture](https://book.douban.com/subject/6795919/)（豆瓣9.6分）
 
 [A Primer on Memory Consistency and Cache Coherence](https://book.douban.com/subject/6829746/)（豆瓣9.5分）
