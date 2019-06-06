@@ -64,6 +64,8 @@ tags:
 
 [数学之美](https://book.douban.com/subject/10750155/)（豆瓣8.7分）
 
+[Streaming Systems](https://book.douban.com/subject/27080632/)（豆瓣8.7分）
+
 [Systems Performance](https://book.douban.com/subject/24840375/)（豆瓣8.6分）
 
 [Linux内核源代码情景分析（上册）](https://book.douban.com/subject/1231584/)（豆瓣8.6分）
