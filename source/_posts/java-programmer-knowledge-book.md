@@ -10,6 +10,8 @@ tags:
 
 [计算机程序设计艺术（第2卷）](https://book.douban.com/subject/1231891/)（豆瓣9.8分）
 
+[深入理解计算机系统（原书第3版）](https://book.douban.com/subject/26912767/)（豆瓣9.8分）
+
 [Operating Systems: Three Easy Pieces](http://pages.cs.wisc.edu/~remzi/OSTEP/)（[豆瓣](https://book.douban.com/subject/19973015/)9.7分）
 
 [Designing Data-Intensive Applications](https://book.douban.com/subject/26197294/)（豆瓣9.7分）
@@ -26,7 +28,10 @@ tags:
 
 [Head First 设计模式（中文版）](https://book.douban.com/subject/2243615/)（豆瓣9.2分）
 
+[算法](https://book.douban.com/subject/10432347/)（豆瓣9.2分）
+
 [Java并发编程实战](https://book.douban.com/subject/10484692/)（豆瓣9.1分）
 
-[深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
+[TCP/IP详解 卷1：协议](https://book.douban.com/subject/1088054/)（豆瓣9.1分）
 
+[深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
