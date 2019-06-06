@@ -56,6 +56,8 @@ tags:
 
 [浪潮之巅](https://book.douban.com/subject/6709783/)（豆瓣9.1分）
 
+[领域驱动设计](https://book.douban.com/subject/5344973/)（豆瓣9.1分）
+
 [文明之光（第一册）](https://book.douban.com/subject/25902942/)（豆瓣9.0分）
 
 [深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
