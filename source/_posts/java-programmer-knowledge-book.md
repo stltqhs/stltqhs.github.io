@@ -35,3 +35,5 @@ tags:
 [TCP/IP详解 卷1：协议](https://book.douban.com/subject/1088054/)（豆瓣9.1分）
 
 [深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
+
+[Redis设计与实现](https://book.douban.com/subject/25900156/)（豆瓣8.5分）
