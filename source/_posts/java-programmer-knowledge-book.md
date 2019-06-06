@@ -6,6 +6,10 @@ tags:
 
 # 书籍列表
 
+[计算机程序设计艺术（第3卷）](https://book.douban.com/subject/1241037/)（豆瓣9.9分）
+
+[计算机程序设计艺术（第2卷）](https://book.douban.com/subject/1231891/)（豆瓣9.8分）
+
 [Operating Systems: Three Easy Pieces](http://pages.cs.wisc.edu/~remzi/OSTEP/)（[豆瓣](https://book.douban.com/subject/19973015/)9.7分）
 
 [Designing Data-Intensive Applications](https://book.douban.com/subject/26197294/)（豆瓣9.7分）
@@ -15,6 +19,8 @@ tags:
 [A Primer on Memory Consistency and Cache Coherence](https://book.douban.com/subject/6829746/)（豆瓣9.5分）
 
 [Is Parallel Programming Hard, And, If So, What Can You Do About It?](https://book.douban.com/subject/6957175/)（豆瓣9.5分）
+
+[计算机程序设计艺术（第1卷）](https://book.douban.com/subject/1231933/)（豆瓣9.5分）
 
 [高性能MySQL](https://book.douban.com/subject/23008813/)（豆瓣9.3分）
 
