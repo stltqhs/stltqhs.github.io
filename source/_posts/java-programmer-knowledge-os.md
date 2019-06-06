@@ -6,10 +6,6 @@ tags: java
 
 
 
-# 操作系统书籍
-
-[Operating Systems: Three Easy Pieces](http://pages.cs.wisc.edu/~remzi/OSTEP/)（[豆瓣](https://book.douban.com/subject/19973015/)9.7分）
-
 # 分支预测、流水线与条件转移
 
 [浅谈分支预测、流水线与条件转移](https://www.cnblogs.com/yangecnu/p/introduce-branch-predict-pipelining-and-conditonal-move-instruction.html)
