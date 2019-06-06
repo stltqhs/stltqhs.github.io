@@ -36,4 +36,6 @@ tags:
 
 [深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
 
+[Systems Performance](https://book.douban.com/subject/24840375/)（豆瓣8.6分）
+
 [Redis设计与实现](https://book.douban.com/subject/25900156/)（豆瓣8.5分）
