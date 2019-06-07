@@ -76,6 +76,8 @@ tags:
 
 [企业IT架构转型之道：阿里巴巴中台战略思想与架构实战](https://book.douban.com/subject/27039508/)（豆瓣8.5分）
 
+[自己动手写Java虚拟机](https://book.douban.com/subject/26802084/)（豆瓣8.2分）
+
 [Linux内核源代码情景分析（下册）](https://book.douban.com/subject/1240321/)（豆瓣8.1分）
 
 
