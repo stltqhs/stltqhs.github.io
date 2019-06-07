@@ -112,7 +112,7 @@ tags: java
 
 
 
-  参考：[使用ArrayList.subList()和Arrays.asList()方法要注意的地方](https://www.jianshu.com/p/d2a69f7dc563)
+  参考：[使用ArrayList.subList()和Arrays.asList()方法要注意的地方](https://www.jianshu.com/p/d2a69f7dc563)，[新手程序员觉得自己代码很溜！阿里P6:你别再乱用Arrays.asList了](https://www.toutiao.com/a6699409617690034700/?tt_from=weixin&utm_campaign=client_share&wxshare_count=1×tamp=1559872988&app=news_article&utm_source=weixin&utm_medium=toutiao_android&req_id=201906071003080101520192005646A3C&group_id=6699409617690034700)
 
 - Vector
 
