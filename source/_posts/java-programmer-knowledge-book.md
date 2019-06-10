@@ -46,6 +46,8 @@ tags:
 
 [操作系统设计与实现（上册）](https://book.douban.com/subject/2044818/)（豆瓣9.2分）
 
+[Deep Learning](https://book.douban.com/subject/26883982/)（豆瓣9.2分）
+
 [Java并发编程实战](https://book.douban.com/subject/10484692/)（豆瓣9.1分）
 
 [Java编程思想 （第4版）](https://book.douban.com/subject/2130190/)（豆瓣9.1分）
