@@ -216,4 +216,4 @@ tags:
 
 
 
-内容来自[100-open-source-big-data-architecture-papers-anil-madan](https://www.linkedin.com/pulse/100-open-source-big-data-architecture-papers-anil-madan)和[bigdatapaper](https://github.com/stevenlii/bigdatapaper)
+内容来自[papers we love](https://github.com/papers-we-love/papers-we-love)，[100-open-source-big-data-architecture-papers-anil-madan](https://www.linkedin.com/pulse/100-open-source-big-data-architecture-papers-anil-madan)和[bigdatapaper](https://github.com/stevenlii/bigdatapaper)
