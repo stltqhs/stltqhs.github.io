@@ -214,6 +214,8 @@ tags:
 
 [Hypertable Architecture Overview](http://www.hypertable.com/collateral/whitepaper-hypertable-architecture.pdf)
 
+数据处理
 
+[MapReduce: Simplified Data Processing on Large Clusters](https://cs.stanford.edu/~matei/courses/2015/6.S897/readings/mapreduce-cacm.pdf)
 
 内容来自[papers we love](https://github.com/papers-we-love/papers-we-love)，[100-open-source-big-data-architecture-papers-anil-madan](https://www.linkedin.com/pulse/100-open-source-big-data-architecture-papers-anil-madan)和[bigdatapaper](https://github.com/stevenlii/bigdatapaper)
