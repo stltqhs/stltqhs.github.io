@@ -330,7 +330,7 @@ Hotspot VM是Oracle JVM的实现，`OutOfMemoryError`是常见的Hotspot VM致�
 
 # 调优方法
 
-对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。
+对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。通过打印应用程序停顿时间（使用参赛`-XX:+PrintGCApplicationStoppedTime`）检查应用程序代码问题，该部分内容涉及到GC Safepoint，将在下节介绍。
 
 对JVM性能调优前，首先需要对应用进行必要的监控，然后根据监控信息来调整相关配置，继续监控调整配置后的应用运行性能。由于JVM调优主要在垃圾收集方面，因此需要对JVM的垃圾收集进行监控，可以使用参数`-XX:+PrintGCDetails`让JVM输出垃圾收集日志，可以使用参数`-Xloggc`指定垃圾收集日志输出到文件。其他参数还包括：`-verbose:gc`（基本垃圾收集日志）、`-XX:+PrintGCTimeStamps`（打印垃圾收集触发时间戳）、`-XX:+PrintGCApplicationConcurrentTime`（垃圾收集时应用线程并发执行的时间）、`-XX:+PrintGCApplicationStoppedTime`（垃圾收集时应用线程停止执行的时间）、`-XX:+PrintTenuringDistribution`（输出每次Minor GC时晋升分布情况）。可以使用GUI工具[GCHisto](https://github.com/jewes/gchisto)分析垃圾收集日志文件。垃圾收集日志中重点需要关注这些数据指标：当前使用的垃圾收集器、Java堆大小、新生代和老年代的大小、永久代的大小、Minor GC的频率、Minor GC的空间回收量、Full GC的执行时间、Full GC的频率、每个并发垃圾收集周期内的空间回收量、垃圾收集前后Java堆的占用量、垃圾收集前后新生代和老年代的占用量、垃圾收集前后永久代的占用量、是否老年代或永久代的占用触发了Full GC、应用是否显示调用了`System.gc()`。每种收集器打印的垃圾收集日志会有差异，可以参考[Diagnosing a Garbage Collection problem](https://www.oracle.com/technetwork/java/example-141412.html)说明的日志格式，分析日志文件。
 
@@ -418,13 +418,34 @@ CMS收集器的垃圾收集周期以`CMS-initial-mark`开始，到`CMS-concurren
 
 现代CPU都是多核多线程架构，应用程序可以使用该特点尽可能地使用更多的CPU资源。比如在一个大集合排序中，可以将集合划分多个区域，使用多个CPU资源（就是使用多线程）排序，然后使用归并排序算法完成整个大集合的排序。
 
+使用`-XX:+PrintGCApplicationStoppedTime`打印的日志如下：
+
+```text
+Total time for which application threads were stopped: 0.0051000 seconds  
+Total time for which application threads were stopped: 0.0041930 seconds  
+Total time for which application threads were stopped: 0.0051210 seconds  
+Total time for which application threads were stopped: 0.0050940 seconds  
+Total time for which application threads were stopped: 0.0058720 seconds  
+Total time for which application threads were stopped: 5.1298200 seconds
+Total time for which application threads were stopped: 0.0197290 seconds  
+Total time for which application threads were stopped: 0.0087590 seconds 
+```
+
+其中有一次应用程序停顿的时间非常长，可能的问题是应用程序设计不当，导致某个或者某些线程在垃圾回收期间无法立即进入到GC Safepoint，不当的情况有：1.大循环体导致JVM不能插入check safepoint代码，2.大IO时，操作系统需要读取或者写入文件时，线程需要等待操作系统完成才能继续执行代码，才能执行check safepoint代码。
+
 参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)，[做JAVA开发的同学一定遇到过的爆表问题，看这里解决](https://juejin.im/post/5bbf18a2f265da0adb30f3b5)，[Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning](https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html)，[Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
+
+# Safepoint
+
+[JVM源码分析之安全点safepoint](https://www.jianshu.com/p/c79c5e02ebe6)
 
 # 动态追踪技术
 
 DTrace
 
 SystemTap
+
+Strace
 
 [BTrace](https://github.com/btraceio/btrace)
 
