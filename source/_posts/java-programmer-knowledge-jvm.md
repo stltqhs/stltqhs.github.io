@@ -439,6 +439,8 @@ Total time for which application threads were stopped: 0.0087590 seconds
 
 [JVM源码分析之安全点safepoint](https://www.jianshu.com/p/c79c5e02ebe6)
 
+[Java 工具（jmap,jstack）在linux上的源码分析（四）safe point](https://blog.csdn.net/raintungli/article/details/7162468)
+
 # 动态追踪技术
 
 DTrace
