@@ -431,7 +431,7 @@ Total time for which application threads were stopped: 0.0197290 seconds
 Total time for which application threads were stopped: 0.0087590 seconds 
 ```
 
-其中有一次应用程序停顿的时间非常长，可能的问题是应用程序设计不当，导致某个或者某些线程在垃圾回收期间无法立即进入到GC Safepoint，不当的情况有：1.大循环体导致JVM不能插入check safepoint代码，2.大IO时，操作系统需要读取或者写入文件时，线程需要等待操作系统完成才能继续执行代码，才能执行check safepoint代码。打印停顿实现时还需要配合`-XX:+PrintSafepointStatistics`和`-XX:PrintSafepointStatisticsCount=1`两个参数以便查看停顿时系统正在执行什么VM操作。该问题的排查可参考 [ParNew 应用暂停时间偶尔会出现好几秒的情况](https://hllvm-group.iteye.com/group/topic/38836)。
+其中有一次应用程序停顿的时间非常长，可能的问题是应用程序设计不当，导致某个或者某些线程在垃圾回收期间无法立即进入到GC Safepoint，不当的情况有：1.大循环体导致JVM不能插入check safepoint代码，2.大IO时，操作系统需要读取或者写入文件时，线程需要等待操作系统完成才能继续执行代码，才能执行check safepoint代码。打印停顿实现时还需要配合`-XX:+PrintSafepointStatistics`和`-XX:PrintSafepointStatisticsCount=1`两个参数以便查看停顿时系统正在执行什么VM操作。相关案例可参考 [ParNew 应用暂停时间偶尔会出现好几秒的情况](https://hllvm-group.iteye.com/group/topic/38836)和[Eliminating Large JVM GC Pauses Caused by Background IO Traffic](https://engineering.linkedin.com/blog/2016/02/eliminating-large-jvm-gc-pauses-caused-by-background-io-traffic)
 
 参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)，[做JAVA开发的同学一定遇到过的爆表问题，看这里解决](https://juejin.im/post/5bbf18a2f265da0adb30f3b5)，[Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning](https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html)，[Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
 
