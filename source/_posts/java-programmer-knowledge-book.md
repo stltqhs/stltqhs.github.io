@@ -70,6 +70,8 @@ tags:
 
 [Streaming Systems](https://book.douban.com/subject/27080632/)（豆瓣8.7分）
 
+[机器学习](https://study.163.com/course/introduction/1004570029.htm)（豆瓣8.7分）
+
 [Systems Performance](https://book.douban.com/subject/24840375/)（豆瓣8.6分）
 
 [Linux内核源代码情景分析（上册）](https://book.douban.com/subject/1231584/)（豆瓣8.6分）
@@ -84,4 +86,14 @@ tags:
 
 
 
-其他参考：[计算机经典书籍](https://www.douban.com/doulist/12466401/)，[计算机专业经典书籍](https://www.douban.com/doulist/3966437/)，[计算机](https://book.douban.com/tag/%E8%AE%A1%E7%AE%97%E6%9C%BA?type=S)
+其他参考
+
+[计算机经典书籍](https://www.douban.com/doulist/12466401/)
+
+[计算机专业经典书籍](https://www.douban.com/doulist/3966437/)
+
+[计算机](https://book.douban.com/tag/%E8%AE%A1%E7%AE%97%E6%9C%BA?type=S)
+
+# 课程列表
+
+[吴恩达机器学习](https://study.163.com/course/introduction/1004570029.htm)
