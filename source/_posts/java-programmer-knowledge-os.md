@@ -6,13 +6,15 @@ tags: java
 
 
 
-# 分支预测、流水线与条件转移
+# Linux from scratch
 
-[浅谈分支预测、流水线与条件转移](https://www.cnblogs.com/yangecnu/p/introduce-branch-predict-pipelining-and-conditonal-move-instruction.html)
+[Linux from scratch](http://www.linuxfromscratch.org/)叙述如何制作Linux版本，包括制作引导程序、编译linux内核、制作initrd文件系统。
 
-# Linux系统原理
+Linux from scratch对于初学者会比较复杂，可以先阅读[从零开始制作Linux](https://blog.csdn.net/linyt/article/details/80142036)迅速感受一下。
 
-参考：[Linux内核源代码情景分析---第一章 预备知识](http://blog.sina.com.cn/s/blog_6b94d5680101uwae.html)，[Linux内核源代码情景分析---第二章 存储管理](http://blog.sina.com.cn/s/blog_6b94d5680101v3q8.html)，[Linux内核源代码情景分析---第三章 中断、异常和系统调用](http://blog.sina.com.cn/s/blog_6b94d5680101va6e.html)，[Linux内核源代码情景分析---第四章 进程与进程调度](http://blog.sina.com.cn/s/blog_6b94d5680101vkiv.html)，[Linux内核源代码情景分析---第五章 文件系统](http://blog.sina.com.cn/s/blog_6b94d5680101vfqv.html)，[Linux内核源代码情景分析---第六章 传统的Unix进程间通信](http://blog.sina.com.cn/s/blog_6b94d5680101vnvo.html)，[Linux内核源代码情景分析---第七章 基于socket的进程间的通信](http://blog.sina.com.cn/s/blog_6b94d5680101vr45.html)，[Linux内核源代码情景分析---第八章 设备驱动](http://blog.sina.com.cn/s/blog_6b94d5680101vnw2.html)
+# 操作系统实现
+
+
 
 # 容器化技术
 
@@ -22,6 +24,4 @@ tags: java
 
 [Everything You Need to Know about Linux Containers, Part II: Working with Linux Containers (LXC)](https://www.linuxjournal.com/content/everything-you-need-know-about-linux-containers-part-ii-working-linux-containers-lxc)
 
-# 内存映射
-
-参考：[认真分析mmap：是什么 为什么 怎么用](https://www.cnblogs.com/huxiao-tee/p/4660352.html)
+https://www.cnblogs.com/huxiao-tee/p/4660352.html)
