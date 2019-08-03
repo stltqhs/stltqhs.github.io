@@ -8,6 +8,8 @@ tags:
 
 [blessed-contrib :  Build terminal dashboards using ascii/ansi art and javascript](https://github.com/yaronn/blessed-contrib)
 
+[sampler: A tool for shell commands execution, visualization and alerting](https://github.com/sqshq/sampler)
+
 ansible
 
 gotty/ttyd
