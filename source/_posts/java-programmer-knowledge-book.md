@@ -88,6 +88,8 @@ tags:
 
 其他参考
 
+[经典编程书籍大全](https://github.com/jobbole/awesome-programming-books)
+
 [计算机经典书籍](https://www.douban.com/doulist/12466401/)
 
 [计算机专业经典书籍](https://www.douban.com/doulist/3966437/)

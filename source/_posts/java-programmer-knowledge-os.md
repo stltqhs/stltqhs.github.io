@@ -14,9 +14,58 @@ Linux from scratch对于初学者会比较复杂，可以先阅读[从零开始�
 
 # 操作系统实现
 
+### 1 进程
+
+#### 1.1 调度算法
+
+#### 1.2 上下文切换
+
+### 2 内存
+
+#### 2.1 进程地址空间与地址转换
+
+#### 2.2 段
+
+#### 2.3 页
+
+#### 2.4 TLB
+
+### 3 并发
 
 
-# 容器化技术
+
+# 容器
+
+### Namespace
+
+Linux Namespace用于实现系统资源隔离，不同namespace的进程使用的资源相互独立<sup>[1]</sup>。
+
+### API
+
+* clone
+
+clone<sup>2</sup>类似fork，用于创建进程，同时还可以通过 <i>flags</i> 参数指定创建命名空间，实现Linux容器的命名空间有`CLONE_NEWCGROUP`、`CLONE_NEWIPC`、`CLONE_NEWNET`、`CLONE_NEWNS`、`CLONE_NEWPID`、`CLONE_NEWUTS`、`CLONE_NEWUSER`、`CLONE_NEWUTS`<sup>3</sup>。
+
+* chroot
+* mount
+
+
+
+### 参考
+
+1.[https://lwn.net/Articles/531114/#series_index](https://lwn.net/Articles/531114/#series_index)
+
+2.[http://man7.org/linux/man-pages/man2/clone.2.html](http://man7.org/linux/man-pages/man2/clone.2.html)
+
+3.[http://man7.org/linux/man-pages/man7/namespaces.7.html](http://man7.org/linux/man-pages/man7/namespaces.7.html)
+
+5.[https://coolshell.cn/articles/17010.html](https://coolshell.cn/articles/17010.html)
+
+6.[https://coolshell.cn/articles/17029.html](https://coolshell.cn/articles/17029.html)
+
+
+
+
 
 轻量级容器实现[cocker](https://github.com/calvinwilliams/cocker)
 
