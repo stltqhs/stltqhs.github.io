@@ -238,7 +238,7 @@ instrument实现了JVMTIAgent（动态库为`libinstrument.so`），它称为jav
 
 使用javagent实现的一些知名的库有[Btrace](https://github.com/btraceio/btrace)，[HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)。
 
-参考：[javaagent](https://liuzhengyang.github.io/2017/03/15/javaagent/)，[如何在生产环境使用Btrace进行调试](https://www.jianshu.com/p/dbb3a8b5c92f)，[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)
+参考：[javaagent](https://liuzhengyang.github.io/2017/03/15/javaagent/)，[如何在生产环境使用Btrace进行调试](https://www.jianshu.com/p/dbb3a8b5c92f)，[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)，[JVM CPU Profiler技术原理及源码深度解析](https://mp.weixin.qq.com/s/RKqmy8dw7B7WtQc6Xy2CLA)
 
 # Hotswap
 
