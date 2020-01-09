@@ -34,6 +34,12 @@ tags:
 
 [算法（第4版）](https://book.douban.com/subject/19952400/)（豆瓣9.4分）
 
+[强化学习（第2版）](https://book.douban.com/subject/34809689/)（豆瓣9.4分）
+
+[软件架构设计](https://book.douban.com/subject/30443578/)（豆瓣9.4分）
+
+[Hadoop Application Architectures](https://book.douban.com/subject/25940455/)（豆瓣9.4分）
+
 [高性能MySQL](https://book.douban.com/subject/23008813/)（豆瓣9.3分）
 
 [算法导论（原书第2版）](https://book.douban.com/subject/1885170/)（豆瓣9.3分）
@@ -62,7 +68,19 @@ tags:
 
 [领域驱动设计](https://book.douban.com/subject/5344973/)（豆瓣9.1分）
 
+[系统架构](https://book.douban.com/subject/26938710/)（豆瓣9.1分）
+
+[编程珠玑](https://book.douban.com/subject/3227098/)（豆瓣9.1分）
+
 [文明之光（第一册）](https://book.douban.com/subject/25902942/)（豆瓣9.0分）
+
+[集体智慧编程](https://book.douban.com/subject/3288908/)（豆瓣9.0分）
+
+[重构](https://book.douban.com/subject/4262627/)（豆瓣9.0分）
+
+[计算机体系结构](https://book.douban.com/subject/20452387/)（豆瓣9.0分）
+
+[大数据技术原理与应用（第2版）](https://book.douban.com/subject/27606713/)（豆瓣8.9分）
 
 [深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
 
@@ -76,9 +94,13 @@ tags:
 
 [Linux内核源代码情景分析（上册）](https://book.douban.com/subject/1231584/)（豆瓣8.6分）
 
+[海量数据库解决方案](https://book.douban.com/subject/5346169//)（豆瓣8.6分）
+
 [Redis设计与实现](https://book.douban.com/subject/25900156/)（豆瓣8.5分）
 
 [企业IT架构转型之道：阿里巴巴中台战略思想与架构实战](https://book.douban.com/subject/27039508/)（豆瓣8.5分）
+
+[海量数据库解决方案](https://book.douban.com/subject/5346169/)（豆瓣8.4分）
 
 [自己动手写Java虚拟机](https://book.douban.com/subject/26802084/)（豆瓣8.2分）
 
