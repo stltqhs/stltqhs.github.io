@@ -54,6 +54,8 @@ tags:
 
 [Deep Learning](https://book.douban.com/subject/26883982/)（豆瓣9.2分）
 
+[微服务架构设计模式](https://book.douban.com/subject/33425123/)（豆瓣9.2分）
+
 [Java并发编程实战](https://book.douban.com/subject/10484692/)（豆瓣9.1分）
 
 [Java编程思想 （第4版）](https://book.douban.com/subject/2130190/)（豆瓣9.1分）
@@ -71,6 +73,8 @@ tags:
 [系统架构](https://book.douban.com/subject/26938710/)（豆瓣9.1分）
 
 [编程珠玑](https://book.douban.com/subject/3227098/)（豆瓣9.1分）
+
+[人类简史](https://book.douban.com/subject/26953606/)（豆瓣9.1分）
 
 [文明之光（第一册）](https://book.douban.com/subject/25902942/)（豆瓣9.0分）
 
