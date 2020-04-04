@@ -108,7 +108,7 @@ TreeSet基于TreeMap实现。
 
 # ConcurrentHashMap的实现方式 
 
-#### JDK1.7实现
+## JDK1.7实现
 
 ConcurrentHashMap使用`锁分段`的方式来实现高效的HashMap，使用`不变性`和`volatile`来减少加锁操作，提高线程并发。
 
@@ -145,7 +145,7 @@ HashEntry<K,V> node = tryLock() ? null :
 
 由于`HashEntry.next`是`final`类型，链表的`put`操作需要在表头添加一个新元素，该操作不影响读取或者对链表的遍历操作，因此读取可以不用加锁（除了`value`为`null`时需要加锁再读一次），`remove`操作是复制被删除节点的前驱节点构造新链表，同时将被删除节点的`next`值复制到该链表的尾节点的`next`，该操作不影响读取或者对链表的遍历操作。对于`size()`操作，先使用不加锁的方式计算每个segment的count，同时比较计算前和计算后的`modCount`值是否改变，如果改变，表示计算期间存在修改情况，此时再加锁计算。
 
-#### JDK 1.8实现
+## JDK 1.8实现
 
 JDK1.8的ConcurrentHashMap的实现抛弃了1.7使用的分段锁，改用“CAS+synchronized“，`Node.next`字段为`volatile`类型，而不是1.7的`final`类型。
 
