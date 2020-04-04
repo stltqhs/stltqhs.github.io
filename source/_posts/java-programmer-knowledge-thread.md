@@ -83,7 +83,7 @@ enum {
 
 ![线程状态机](https://i.stack.imgur.com/FTHOR.png "线程状态机")
 
-参考：[Java多线程学习(三)---线程的生命周期](https://www.cnblogs.com/sunddenly/p/4106562.html)，[一张图让你看懂JAVA线程间的状态转换](https://my.oschina.net/mingdongcheng/blog/139263)，[对Java线程概念的理解](https://blog.csdn.net/fuzhongmin05/article/details/71425191)，[visualvm thread states](https://stackoverflow.com/questions/27406200/visualvm-thread-states)
+
 
 # wait()、sleep()、notify()区别 
 
@@ -115,7 +115,7 @@ enum {
   }
   ```
 
-参考：[difference between wait and sleep](https://stackoverflow.com/questions/1036754/difference-between-wait-and-sleep)
+需要理解为什么wait或者notify需要获得锁才能调用。
 
 # ThreadPoolExecutor原理 
 
@@ -217,8 +217,6 @@ private final class Worker
 
 线程池线程数量的规划需要根据任务的性质决定。如果是CPU密集型任务，应配置尽可能小的线程数，一般配置Ncpu+1个线程的线程池；如果是IO密集型任务，由于IO密集型任务线程并不是一直在执行任务，则应配置尽可能多的线程，如2*Ncpu。混合型的任务，如果可以拆分，将其拆分成一个CPU密集型任务  和一个IO密集型任务，只要这两个任务执行的时间相差不是太大，那么分解后执行的吞吐量将高于串行执行的吞吐量。如果这两个任务执行时间相差太大，则没必要进行分解。
 
-参考：[线程池的实现原理](https://blog.csdn.net/wzq6578702/article/details/68926320)，[ThreadPoolExecutor线程池解析与BlockingQueue的三种实现](https://blog.csdn.net/a837199685/article/details/50619311)
-
 # ThreadLocal实现方式 
 
 在多线程环境中，如果多个线程并发操作同一个共享变量，由于Java内存模型的原因，存在脏读、丢失更新等内存数据不一致的情况，解决该问题的方式是使用互斥锁。但是使用互斥锁时会降低线程执行的效率，因此在某些情况下可以不使用共享变量，而是使用局部变量。对于方法级别的局部变量，不存在`race condition`（竟态条件），因为该变量只能被该线程访问，但是如果方法调用频繁会造成对象创建过多，导致垃圾回收效率慢。如果可以将变量与某个线程绑定，该变量同样只能被该线程访问，不存在`race condition`，而且对象创建的数量也不会太多，这样线程的执行的效率将会大大提高。
@@ -242,8 +240,6 @@ static class Entry extends WeakReference<ThreadLocal> {
 调用`ThreadLocal.get()`方法时，首先获取当前线程的`threadLocals`变量，类型是`ThreadLocal.ThreadLocalMap`，如果为`null`，则调用`createMap`创建（`t.threadLocals = new ThreadLocalMap(this, firstValue);`），然后返回初始值。如果`threadLocals`不为`null`，则调用`ThreadLocal.ThreadLocalMap.getEntry(ThreadLocal)`方法，根据`ThreadLocal`的哈希值获取`Entry`，如果`Entry.get()`（由于`Entry`继承了`WeakReference`，`Entry.get()`实际上是调用了`WeakReference.get()`方法，由于`Entry`在构造函数中调用了`super(k)`，将键作为弱引用对象，所以`Entry.get()`返回的是键的引用）返回为`null`，表示垃圾收集器回收了键对象，为避免**内存泄漏**，需要调用`ThreadLocal.ThreadLocalMap.expungeStaleEntry`方法回收`Entry`所占用的`slot`，将`value`清空，然后再重哈希。
 
 `ThreadLocal.set()`方法类似`ThreadLocal.get()`方法。
-
-参考：[Java进阶（七）正确理解Thread Local的原理与适用场景](http://www.jasongj.com/java/threadlocal/)
 
 # 中断机制 
 
@@ -269,8 +265,6 @@ try {
 
 一般来说，当方法声明了要跑出`InterruptedException`则暗示该方法可中断，即方法内部会检查中断标记位，然后抛出异常，并且清除中断标记位。Java中很多阻塞方法如`BlockingQueue.put`、`BlockingQueue.take`、`Object.wait`、`Thread.sleep`都支持中断。
 
-参考：[详细分析Java中断机制](http://www.infoq.com/cn/articles/java-interrupt-mechanism)
-
 # 活跃性
 
 - 死锁
@@ -289,9 +283,7 @@ try {
 
   当出现活跃性故障时，除了终止应用程序之外没有其他任何机制可以帮助从这种故障恢复过来。
 
-参考：[java并发编程中的活跃性问题](http://study-a-j8.iteye.com/blog/2366489)
-
-# GO Routine
+# 协程
 
 [Analysis of the Go runtime scheduler](http://www.cs.columbia.edu/~aho/cs6998/reports/12-12-11_DeshpandeSponslerWeiss_GO.pdf)
 

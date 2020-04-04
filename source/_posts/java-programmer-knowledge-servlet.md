@@ -24,15 +24,11 @@ Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下
 
 Servlet中的过滤器Filter是实现了javax.servlet.Filter接口的服务器端程序，只要你在web.xml 文件配置好要拦截的客户端请求，它都会帮你拦截到请求。Filter可认为是Servlet的一种“变种”，它主要用于对用户请求进行预处理，也可以对HttpServletResponse进行后处理，是个典型的处理链。它与Servlet的区别在于：它不能直接向用户生成响应。完整的流程是：Filter对用户请求进行预处理，接着将请求交给Servlet进行处理并生成响应，最后Filter再对服务器响应进行后处理。
 
-参考：[Servlet 生命周期](http://www.runoob.com/servlet/servlet-life-cycle.html)，[Servlet,Filter,Listener,Interceptor的作用和区别](https://my.oschina.net/hapier/blog/699193)
-
 # Session和Cookie的区别
 
 Session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群、数据库、文件中；
 
 Cookie是客户端保存用户信息的一种机制，用来记录用户的一些信息，也是实现Session的一种方式。
-
-参考：[看完就彻底懂了session和cookie](https://www.jianshu.com/p/25802021be63)
 
 # Servlet的异步请求
 
@@ -43,8 +39,6 @@ Cookie是客户端保存用户信息的一种机制，用来记录用户的一�
 - Servlet3.1的NIO
 
   [Servlet3.1规范](https://javaee.github.io/servlet-spec/downloads/servlet-3.1/Final/servlet-3_1-final.pdf)第3.7节“Non Blocking IO”讲述了非阻塞IO。Servlet 3.0对请求的处理虽然是异步的，但是对InputStream和OutputStream的IO操作却依然是阻塞的，对于数据量大的请求体或者返回体，阻塞IO也将导致不必要的等待，因此在Servlet 3.1中引入了非阻塞IO。
-
-参考：[使用异步Servlet改进应用性能](http://www.infoq.com/cn/news/2013/11/use-asynchronous-servlet-improve)，[servlet3异步原理与实践](https://www.jianshu.com/p/c23ca9d26f64)
 
 # Tomcat架构
 
@@ -144,4 +138,8 @@ Tomcat的启动类是[Bootstrap](https://github.com/apache/tomcat/blob/TOMCAT_8_
 
 `StandardHost`实例使用`HostConfig`对象作为一个生命周期监听器，当`StandardHost`对象启动时，它的`start()`方法会触发一个`START`事件。为了响应`START`事件，[HostConfig](https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/startup/HostConfig.java)中的lifecycleEvent方法和`HostConfig`中的事件处理程序调用`start()`方法。`HostConfig`类的`deployApps()`会完成`Host`下各个`Context`的部署工作。
 
-参考：[Tomcat 系统架构与设计模式，第 1 部分 工作原理](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/index.html)，[Tomcat 系统架构与设计模式，第 2 部分 设计模式分析](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat2/)，[深入剖析Tomcat](https://book.douban.com/subject/10426640/)，[Tomcat源码debug环境](https://www.jianshu.com/p/d05ef74694f7)
+延伸阅读
+
+* [Tomcat 系统架构与设计模式，第 1 部分 工作原理](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/index.html)，
+* [Tomcat 系统架构与设计模式，第 2 部分 设计模式分析](https://www.ibm.com/developerworks/cn/java/j-lo-tomcat2/)
+* [深入剖析Tomcat](https://book.douban.com/subject/10426640/)

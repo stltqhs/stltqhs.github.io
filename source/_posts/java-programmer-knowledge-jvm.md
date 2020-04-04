@@ -56,7 +56,7 @@ tags: java
 
 这些类加载器组成一个层级关系，称为**双亲委派模型**，将类加载器的职责分开。而且这种层级关系一般通过组合关系来实现，而不是通过继承。层级关系如下图：
 
-![双亲委派模型](https://upload-images.jianshu.io/upload_images/4491294-8edc15f60a58bd0b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/468/format/webp "双亲委派模型")
+![双亲委派模型](/images/class_loader_pattern.webp "双亲委派模型")
 
 **双亲委派模型**的过程是首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。使用双亲委派模型的好处在于Java类随着它的类加载器一起具备了一种带有优先级的层次关系。**双亲委派模型**的实现代码是`java.lang.ClassLoader`的`loadClass()`方法，如下：
 
@@ -89,13 +89,11 @@ protected synchronized Class<?> loadClass(String name,boolean resolve)throws Cla
 
 线程上下文类加载器（Thread Context Class Loader）可以通过`java.lang.Thread`类的`setContextClassLoader()`方法进行设置，如果创建线程时还未设置，它将会从父线程中继承一个；如果在应用程序的全局范围内都没有设置过，那么这个类加载器默认就是应用程序类加载器。这种行为实际上是打破了**双亲委派模型**的层次结构。
 
-参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[【深入Java虚拟机】之四：类加载机制](https://blog.csdn.net/ns_code/article/details/17881581)，[【深入理解JVM】：类加载器与双亲委派模型](https://blog.csdn.net/u011080472/article/details/51332866)
-
 # Java内存模型和运行时数据区
 
 Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存或工作内存（local memory），本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化的内存重排序。JMM如下图所示：
 
-![Java内存模型](https://img-blog.csdn.net/20160921182337904 "Java内存模型")
+![Java内存模型](/images/java_mem_model.jpg "Java内存模型")
 
 运行时数据区包括：**程序计数器**、**方法区**、**堆**、**虚拟机栈**、**本地方法栈**。
 
@@ -122,8 +120,6 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 
 **直接内存**不是虚拟机运行时数据区的一部分，在Java1.4引入的NIO中新增了`DirectByteBuffer`对象作为这块内存的引用。该部分的内存大小不受Java堆大小限制，而是受操作系统内存限制。
-
-参考：[全面理解Java内存模型](https://blog.csdn.net/suifeng3051/article/details/52611310)，[JVM内存区域分析](http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/)，[深入探究 JVM | 探秘 Metaspace](https://www.sczyh30.com/posts/Java/jvm-metaspace/)
 
 # 垃圾收集
 
@@ -187,8 +183,6 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 
 内存泄漏是指无用对象（不再使用的对象）持续占有内存或无用对象的内存得不到及时释放，从而造成内存空间的浪费称为内存泄漏。长生命周期的对象持有短生命周期对象的引用就很可能发生内存泄漏，尽管短生命周期对象已经不再需要，但是**因为长生命周期持有它的引用而导致不能被回收，这就是Java中内存泄漏的发生场景**。
 
-参考：[深入理解Java虚拟机](https://book.douban.com/subject/6522893/)，[java7和java8的垃圾回收](https://blog.csdn.net/high2011/article/details/53138202)，[Java内存泄漏分析和解决](https://www.jianshu.com/p/54b5da7c6816)，[Garbage First G1收集器 理解和原理分析](https://liuzhengyang.github.io/2017/06/07/garbage-first-collector/)
-
 # JVM关闭钩子
 
 首先JVM的关闭方式可以分为三种：
@@ -198,8 +192,6 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 - 异常关闭：运行中遇到RuntimeException异常等。
 
 JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删除临时文件、停止日志服务以及内存数据写到磁盘等，为此JVM提供了关闭钩子（shutdown hooks）来做这些事情。关闭钩子本质上是一个线程（也称为Hook线程），用来监听JVM的关闭。通过使用`Runtime`的`addShutdownHook(Thread hook)`可以向JVM注册一个关闭钩子。Hook线程在JVM **正常关闭**才会执行，在强制关闭时不会执行。对于一个JVM中注册的多个关闭钩子它们将会并发执行，所以JVM并不能保证它的执行顺行。当所有的Hook线程执行完毕后，如果此时runFinalizersOnExit为true，那么JVM将先运行终结器，然后停止。
-
-参考：[深入JVM关闭与关闭钩子](https://blog.csdn.net/dd864140130/article/details/49155179)
 
 # Java Agent
 
@@ -237,8 +229,6 @@ JVMTIAgent在开发过程中经常会使用到，比如调试功能（使用`-ag
 instrument实现了JVMTIAgent（动态库为`libinstrument.so`），它称为javaagent，别名JPLISAgent(Java Programming Language Instrumentation Services Agent)。instrument的使用方式是通过在启动命令上添加`-javaagent:xxx.jar`的方式加载一个被称为agent的jar包，jar包的META-INF/MANIFEST.MF中应当声明Premain-Class或Main-Class。启动时JVM会寻找这个类中的`public static void premain(String agentArgs, Instrumentation instrumentation)`, `Instrumentation`对象中可以添加自己的类修改逻辑进行字节码修改。另外当通过attach到一个运行中的JVM的方式时，可以调用`agentmain()`方法来获取`Instrumentation`对象进行类的重定义。
 
 使用javagent实现的一些知名的库有[Btrace](https://github.com/btraceio/btrace)，[HotswapAgent](https://github.com/HotswapProjects/HotswapAgent)。
-
-参考：[javaagent](https://liuzhengyang.github.io/2017/03/15/javaagent/)，[如何在生产环境使用Btrace进行调试](https://www.jianshu.com/p/dbb3a8b5c92f)，[JVM源码分析之javaagent原理完全解读](http://www.infoq.com/cn/articles/javaagent-illustrated)，[JVM CPU Profiler技术原理及源码深度解析](https://mp.weixin.qq.com/s/RKqmy8dw7B7WtQc6Xy2CLA)
 
 # Hotswap
 
@@ -321,8 +311,6 @@ private WebappClassLoader createClassLoader()
 ```
 
 Context每次reload后，`WebappLoader`都会创建一个新的`ClassLoader`，这个`ClassLoader`会重新加载Servlet相关组件的类，完成热部署的效果。
-
-参考：[深入探索 Java 热部署](https://www.ibm.com/developerworks/cn/java/j-lo-hotdeploy/index.html)，[Tomcat 热部署实现方式源码分析总结](https://my.oschina.net/heroShane/blog/198492)，[Tomcat源码debug环境](https://www.jianshu.com/p/d05ef74694f7)
 
 # Hotspot VM致命错误处理
 
@@ -431,9 +419,7 @@ Total time for which application threads were stopped: 0.0197290 seconds
 Total time for which application threads were stopped: 0.0087590 seconds 
 ```
 
-其中有一次应用程序停顿的时间非常长，可能的问题是应用程序设计不当，导致某个或者某些线程在垃圾回收期间无法立即进入到GC Safepoint，不当的情况有：1.大循环体导致JVM不能插入check safepoint代码，2.大IO时，操作系统需要读取或者写入文件时，线程需要等待操作系统完成才能继续执行代码，才能执行check safepoint代码。打印停顿实现时还需要配合`-XX:+PrintSafepointStatistics`和`-XX:PrintSafepointStatisticsCount=1`两个参数以便查看停顿时系统正在执行什么VM操作。相关案例可参考 [ParNew 应用暂停时间偶尔会出现好几秒的情况](https://hllvm-group.iteye.com/group/topic/38836)和[Eliminating Large JVM GC Pauses Caused by Background IO Traffic](https://engineering.linkedin.com/blog/2016/02/eliminating-large-jvm-gc-pauses-caused-by-background-io-traffic)
-
-参考：[Java性能优化权威指南](https://book.douban.com/subject/25828043/)，[Arthas](https://github.com/alibaba/arthas)，[JVM 优化经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html)，[如何合理的规划一次jvm性能调优](https://juejin.im/post/59f02f406fb9a0451869f01c)，[做JAVA开发的同学一定遇到过的爆表问题，看这里解决](https://juejin.im/post/5bbf18a2f265da0adb30f3b5)，[Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning](https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html)，[Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
+其中有一次应用程序停顿的时间非常长，可能的问题是应用程序设计不当，导致某个或者某些线程在垃圾回收期间无法立即进入到GC Safepoint，不当的情况有：1.大循环体导致JVM不能插入check safepoint代码，2.大IO时，操作系统需要读取或者写入文件时，线程需要等待操作系统完成才能继续执行代码，才能执行check safepoint代码。打印停顿实现时还需要配合`-XX:+PrintSafepointStatistics`和`-XX:PrintSafepointStatisticsCount=1`两个参数以便查看停顿时系统正在执行什么VM操作。相关案例可参考 [ParNew 应用暂停时间偶尔会出现好几秒的情况](https://hllvm-group.iteye.com/group/topic/38836)和[Eliminating Large JVM GC Pauses Caused by Background IO Traffic](https://engineering.linkedin.com/blog/2016/02/eliminating-large-jvm-gc-pauses-caused-by-background-io-traffic)。
 
 # Safepoint
 

@@ -105,7 +105,7 @@ public class FinalFieldExample {
 * [深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)
 * [深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)
 * [深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)
-* [深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)
+* [深入理解Java内存模型（六）——final](http://www.infoq.com/cn/articles/java-memory-model-6)
 
 # volatile作用 
 
