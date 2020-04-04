@@ -8,11 +8,14 @@ tags: java
 
 - `Error`和`Exception`都是`Throwable`接口的子类
 - Java分为“受检查异常”（或`Checked Exception`，这类异常编译器会检查，如果对这类异常既没有`try...catch`也没`throws`时编译将不通过）和“未检查异常”（或`Unchecked Exception`，这类异常编译器不检查），`RuntimeException`及其子类都是“未检查异常”，如`NullPointException`，其他为“受检查异常”，如`IOException`。
-- `Error`一般是指与虚拟机相关的错误，程序一般无法自身恢复，比如各种内存溢出（如`OutOfMemoryError`，`StackOverflowError`，注意：断言失败是抛出`AssertionError`）；`Exception`则表示程序级别的异常，程序可以处理并恢复。
+- `Error`一般是指与虚拟机相关的错误，程序一般无法自身恢复（堆内存溢出属于特殊情况），比如各种内存溢出（如`OutOfMemoryError`，`StackOverflowError`，注意：断言失败是抛出`AssertionError`）；`Exception`则表示程序级别的异常，程序可以处理并恢复。
+
+对于OutOfMemoryError的堆内存溢出，程序不一定无法自身回复，有几点需要注意：
+
+* 如果堆内存溢出，表示无法再分配新的对象，而OutOfMemoryError本来也是一个对象，需要分配内存，是否意味着OutOfMemoryError也存在无法分配在内存导致该Error不能抛出。其实JVM的设计者已经考虑到这个问题，所以OutOfMemoryError是JVM启动时就已经分配，并且该错误信息的调用栈是没有意义的[ [1] ](http://lovestblog.cn/blog/2016/08/29/oom/)。
+* 当线程抛出OutOfMemoryError异常时，线程栈会层层弹出，此时有些对象不会被GC Roots引用，会被GC回收，堆空间会释放部分内存。
 
 
-
-参考：[谈一谈Java中的Error和Exception](https://blog.csdn.net/goodlixueyong/article/details/47122487)
 
 # 对象克隆 
 
@@ -36,10 +39,6 @@ protected native Object clone() throws CloneNotSupportedException;
 
 由于`Object.clone()`方法是复制内存数据来克隆对象的，因此，同样可以使用Java序列化机制来复制内存数据达到克隆的效果，而且是`深克隆`。
 
-
-
-参考：[详解Java中的clone方法 -- 原型模式](https://blog.csdn.net/zhangjg_blog/article/details/18369201)，[Java对象克隆（Clone）及Cloneable接口、Serializable接口的深入探讨](https://blog.csdn.net/kenthong/article/details/5758884)
-
 # 强引用与弱引用 
 
 在`java.lang.ref`包中存在三种类型的引用类，分别是`SoftReference`（软引用），`WeakReference`（弱引用），`PhantomReference`（虚引用），Java的引用类型除了这三个，还有一个就是强引用（即Java程序中使用等号赋值的引用），它们的级别由高到低分别为强引用、软引用、弱引用、虚引用，引用类型可以控制JVM回收对象的时机。
@@ -59,62 +58,17 @@ protected native Object clone() throws CloneNotSupportedException;
 
 
 
-参考：[Java四种引用---强、软、弱、虚的知识点总结](https://blog.csdn.net/l540675759/article/details/73733763)
-
-# 断言 
-
-断言用于程序调试，Java使用`assert`关键字来支持断言操作，且使用`java`命令运行时必须加上`-ea`参数才会执行断言语句。断言有两种表达方式，如下：
-
-
-
-```java
-assert condition; // 第一种方式
-assert condition : expression // 第二种方式
-```
-
-
-
-当`condition`为`false`时会抛出`AssertionError`错误，`expression`作为`AssertionError`构造函数的参数用来构造`AssertionError`对象。
-
-断言也可以作为一种设计模式，在很多开源框架中都存在使用此类方法来提高代码可读性和安全性，比如Spring中的代码：
-
-```java
-public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-	Assert.notNull(beanFactory, "BeanFactory must not be null");
-	this.beanFactory = beanFactory;
-	if (this.resourceFactory == null) {
-		this.resourceFactory = beanFactory;
-	}
-}
-```
-
-`Assert.notNull`是一个方法，方法的实现方式为：
-
-```java
-public static void notNull(Object object, String message) {
-	if (object == null) {
-		throw new IllegalArgumentException(message);
-	}
-}
-```
-
-
-
 # 静态初始化和实例初始化 
 
 - 静态初始化
 
-  静态初始化是指`<cinit>`方法的调用，该方法是编译器自动生成，代码是静态语句块和静态变量（或者类变量）。JVM会保证在调用某类的`<cinit>`方法时先调用其父类的`<cinit>`方法。`<cinit>`方法只会被JVM调用一次。
+  静态初始化是指`<cinit>`方法的调用，该方法是编译器自动生成，代码由静态语句块和静态变量（或者类变量）组成。JVM会保证在调用某类的`<cinit>`方法时先调用其父类的`<cinit>`方法。`<cinit>`方法只会被JVM调用一次。
 
 - 实例初始化
 
   实例创建的方式有：`new`、`Class.newInstance()`、`Constructor.newInstance()`、`Object.clone()`、`ObjectInputStream.readObject()`等，从Java虚拟机层面来说是两种：`new`、`invokevirtual`。
 
   实例初始化是指`<init>`方法的调用，该方法由构造函数、实例代码块和实力变量组成，`<init>`方法的第一行总是会调用父类的`<init>`方法。
-
-
-
-参考：[深入理解Java对象的创建过程：类的初始化与实例化](https://blog.csdn.net/justloveyou_/article/details/72466416)，[JVM类生命周期概述：加载时机与加载过程](https://blog.csdn.net/justloveyou_/article/details/72466105)
 
 # Java8新特性
 
@@ -219,27 +173,33 @@ public static void notNull(Object object, String message) {
 
 - JVM新特性
 
-  使用Metaspace替代PermGen Space
+  使用Metaspace替代PermGen Space，G1垃圾收集器作为默认收集器。
 
-Java9新特性见[Java 9 新特性概述](https://www.ibm.com/developerworks/cn/java/the-new-features-of-Java-9/index.html)。
+# 序列化与反序列化
 
-参考：[Java 8的新特性—终极版](https://www.jianshu.com/p/5b800057f2d8)
+序列化与反序列化的作用是运行允许对象的数据通过一个JVM进程传到另一个JVM进程。Java世界里可以分为JDK序列化（或称内部序列化）和外部序列化。选择序列化工具时，需要考虑前后兼容问题和序列化效率问题。向前兼容的意思是指旧代码可以反序列化新代码序列化的记录，向后兼容是指新代码可以反序列化旧代码序列化的记录。序列化效率问题指序列化后的字节大小，越小效率越高。
 
-# Java序列化与反序列化
+### JDK序列化
 
-Java序列化允许将Java对象保存为一组字节，之后可以读取这组字节组建一个新的对象（该操作为反序列化），对象序列化不会关注类中的静态变量，被`transient`修饰的变量不会被序列化存储。在RMI和RPC中经常使用到Java序列化和反序列化。
+JDK序列化规则：
 
+* 类实现了`java.io.Serializable`接口时，其对象就可以序列化；
+* `java.io.Externalizable`优先级高于`java.io.Serializable`，
+* 对象序列化不会关注类中的静态变量，被`transient`修饰的变量不会被序列化存储，当反序列化时需要负责初始化`transient`变量，比如[java.util.ArrayList](https://hg.openjdk.java.net/jdk8/jdk8/jdk/file/tip/src/share/classes/java/util/ArrayList.java)对成员变量`elementData`的初始化工作；
+* `java.io.ObjectInputStream`处理反序列化工作；
+* `java.io.ObjectOutputStream`处理序列化工作；
+* 自定义反序列化的方式是通过定义`readObject(ObjectInputStream in)`；
+* 自定义序列化的方式是通过定义`writeObject(ObjectOutputSteam out)`；
+* `serialVersionUID`控制对象序列化和反序列化的版本是否兼容，缺省时编译器会自动生成，只要类改变，即便是方法体少了一行代码，`serialVersionUID`都会变化；
+* 对象序列化为字节数组时，类名和字段名都会保留，当反序列化时，不允许少字段，可以多字段；
 
+`serialVersionUID`是唯一控制着能否反序列化成功的标志，只要这个值不一样，就无法反序列化成功。但只要这个值相同，无论如何都将反序列化，在这个过程中，对于向前兼容性，新数据流中的多余的内容将会被忽略；对于向后兼容性而言，旧的数据流中所包含的所有内容都将会被恢复，新版本的类中没有涉及到的部分将保持默认值。一旦将新版本中的老的内容拿掉，即使UID保持不变，也会引发异常。比如当我们重写`writeObject`和`readObject`时，写入或读取的字段是按照顺序操作，一旦顺序更改，反序列化失败。因此可以总结为只要新版本不减少字段，不更改字段类型，仅增加字段，JDK序列化支持前后兼容。
 
-只要类实现了`java.io.Serializable`接口时，其对象就可以序列化，需要用到的流对象是`java.io.ObjectInputStream`（反序列化）和`java.io.ObjectOutputStream`（序列化）。
+由于JDK序列化时需要将类名，字段名写入到序列化结果中，因此序列化效率不高。
 
+### 其他序列化工具
 
-
-虚拟机是否允许反序列化，不仅取决于类路径和功能代码是否一致，一个非常重要的一点是两个类的序列化 ID 是否一致（就是 `private static final long serialVersionUID`）。
-
-
-
-参考：[深入分析Java的序列化与反序列化](http://www.hollischuang.com/archives/1140)，[java序列化和反序列化](https://www.jianshu.com/p/5a85011de960)，[Java 序列化机制（二） -- 控制序列化的兼容性](https://blog.csdn.net/y874961524/article/details/51412585)
+Thrift、Protobuf、Avro在序列化效率上远高于JDK序列化，它们只需要写入字段序号、用特定的位来表示类型，前后兼容略灵活[ [2] ](https://vonng.gitbooks.io/ddia-cn/content/ch4.html)。
 
 # 反射
 
@@ -411,7 +371,7 @@ JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0
 
 当执行命令`java JavaApplication`时，JVM内部也是通过反射获取`JavaApplication`的`main`方法的`Method`对象，然后调用`Method.invoke`方法执行`main`方法的代码。
 
-参考：[深入解析Java反射（1） - 基础](https://www.sczyh30.com/posts/Java/java-reflection-1/#%E4%B8%80%E3%80%81%E5%9B%9E%E9%A1%BE%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%B0%84%EF%BC%9F)，[sun.misc.Unsafe的后启示录](http://www.infoq.com/cn/articles/A-Post-Apocalyptic-sun.misc.Unsafe-World)，[从一起GC血案谈到反射原理](https://mp.weixin.qq.com/s/5H6UHcP6kvR2X5hTj_SBjA)
+对反射使用不当，会造成反射类加载器导致Perm溢出[ [3] ](https://mp.weixin.qq.com/s/5H6UHcP6kvR2X5hTj_SBjA)。
 
 # Statement和PreparedStatement的区别，如何防止SQL注入
 
@@ -422,8 +382,6 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 | Statement         | 通用查询                                                     |
 | PreparedStatemnt  | 预编译语句查询，可以解决SQL注入问题，由于是预编译，所以可以减少数据库对SQL代码的解析操作，提高效率 |
 | CallableStatement | 存储过程查询                                                 |
-
-参考：[JDBC为什么要使用PreparedStatement而不是Statement](http://www.importnew.com/5006.html)
 
 # Java命令
 
@@ -499,9 +457,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
   RMI相关工具。
 
-
-
-参考：[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)
+详细见[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)。
 
 # NoClassDefFoundError和ClassNotFoundException
 
@@ -511,9 +467,7 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
 - `NoClassDefFoundError`是JVM链接时找不到类时抛出的错误，如`new`一个实例或者调用静态方法等。
 
-
-
-  参考：[NoClassDefFoundError和ClassNotFoundException的不同](https://www.jianshu.com/p/93d0db07d2e3)
+可以简言之：如果找不到类要抛异常时，ClassNotFoundException是类名作为字符串，而NoClassDefFoundError是类名作为符号。
 
 # 方法动态绑定原理
 
@@ -593,11 +547,9 @@ void LinkResolver::resolve_invoke(CallInfo& result, Handle recv, constantPoolHan
 
 在样例代码中，当执行`new Son()`时，先创建`Father`的虚方法表，假设`print`方法在虚方法表位置为`n`，父类初始化完成后，开始初始化子类`Son`，然后创建`Son`的虚方法表。创建`Son`的虚方法表时，先将父类的虚方法表复制到子类的虚方法表中，此时子类虚方法表位置为`n`的方法是`Father.print`。当执行`update_inherited_vtable`方法时会将子类的`print`方法入口写入到虚方法表位置为`n`的地方，此时虚方法表位置为`n`的方法是`Son.print`。所有类信息构造完成后，开始执行`Son`的构造函数，它首先调用`Father`的构造函数，在此函数中，会调用`print`方法，实际上是`invokevirtual print`指令。通过`instanceKlass::uncached_lookup_method`方法在`Father`类中查询`print`方法，可以找到该方法，该方法使用[methodOopDesc*](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/methodOop.cpp)表示，即`methodOop`指针，指向`Father.print`，它记录了通过`klassVtable::put_method_at(Method* m, int index)`放入虚方法表的位置`n`。然后在`LinkResolver::runtime_resolve_virtual_method`方法中通过位置`n`在`Son`的虚方法表中找到真正要执行的方法，即`Son.print`。最后调用`Son.print`方法。
 
-参考：[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/Introduction-to-HotSpot)，[從虛擬機角度看Java多態->（重寫override）的實現原理](https://hk.saowen.com/a/1e9e6f8665515e390f8338884a78aba61a91d1efb7ffcdf9d11aad3524c5083e)
-
 # 异常处理原理
 
-当使用`javac`编译java源码时，会为方法内的`try/catch/finally`语句块生成一个异常表（`exception_table`），异常表指定了当出现异常时代码需要跳转到何处执行。
+当使用`javac`编译java源码时，会为方法内的`try/catch/finally`语句块生成一个异常表（`exception_table`），异常表指定了当出现异常时代码需要跳转到何处执行[ [4] ]([https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)。
 
 以如下代码为例：
 
@@ -653,8 +605,6 @@ from  to  target type
 - type 异常类型
 
 异常表内容的第一行表示如果在第0行（此处的行指程序地址，比如第3行是指程序地址为3的指令，即`dup`）和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理器时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理器，则线程结束。
-
-参考：[The secret life of Java exceptions and JVM internals: Level up your Java knowledge](https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)
 
 # 泛型原理
 
@@ -732,9 +682,3 @@ Constant pool:
 ```
 
 从反编译代码中可以看到，字段`t`的类型是`Object`，而代码`Generic<String> g = new Generic<String>();`的泛型信息被擦除，变为`Generic g = new Generic();`，此时已经看不到泛型信息。对于类型元信息，即类、字段和方法（包括参数和返回值）不会擦除泛型信息，因此可以通过反射来获取泛型信息。上述代码`Generic<T>`变编译后，泛型信息是`Generic<T extends java.lang.Object>`，而变量`g`由于泛型类型被擦除，无法通过反射获取其泛型类型。可以通过`new Generic<String>(){}`构造一个子类，此时可以通过反射获取泛型信息。这种方式使用的比较多的是在json解析中，当要解析一串json文本为带有泛型的类型时使用如fastjson的用法`JSONObject.parseObject(json, new TypeReference<List<Person>>(){})`。
-
-参考：[java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题](https://blog.csdn.net/lonelyroamer/article/details/7868820)，[Generics](https://docs.oracle.com/javase/tutorial/java/generics/index.html)
-
-# 线程栈
-
-参考：[JVM Internals](http://blog.jamesdbloom.com/)
