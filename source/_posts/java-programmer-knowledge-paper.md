@@ -4,6 +4,16 @@ date: 2019-05-16 09:24:25
 tags:
 ---
 
+# 分布式一致性算法
+
+[Paxos Made Simple](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)
+
+[Zab](https://marcoserafini.github.io/papers/zab.pdf)
+
+[Raft](https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14)
+
+[Gossip](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf)（[Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
+
 # ACM SIGOPS名人堂系列
 
 [ACM SIGOPS名人堂（第一期）](https://mp.weixin.qq.com/s/vwDz3JB_erocP9drwc7IEA)
@@ -168,27 +178,11 @@ tags:
 
 # 大数据系列
 
-理论知识
+## 基础
 
-[The Datacenter as a Computer:An Introduction to the Design of Warehouse-Scale Machines Second Edition](https://www.morganclaypool.com/doi/pdf/10.2200/S00516ED2V01Y201306CAC024)
+[LSMTree](https://www.cs.umb.edu/~poneil/lsmtree.pdf)
 
-[Scalable SQL and NoSQL Data Stores](http://www.cattell.net/datastores/Datastores.pdf)
-
-[NoSQL Databases](https://www.christof-strauch.de/nosqldbs.pdf)
-
-[Querying Big Data: Bridging Theory and Practice](http://homepages.inf.ed.ac.uk/wenfei/papers/JCST14.pdf)
-
-[Eventually Consistent](https://cs.brown.edu/courses/cs227/archives/2012/papers/weaker/p40-vogels.pdf)
-
-[Eventual Consistent Databases:State of the Art](http://www.ronpub.com/publications/OJDB-v1i1n03_Elbushra.pdf)
-
-[Rethinking Eventual Consistency ](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/sigtt611-bernstein.pdf)
-
-[CAP Theorem](https://fenix.tecnico.ulisboa.pt/downloadFile/1126518382178117/10.e-CAP-3.pdf)
-
-[CAP Twelve years later: How the "Rules" have Changed](https://www.researchgate.net/publication/220476881_CAP_Twelve_years_later_How_the_Rules_have_Changed)
-
-文件存储
+## 文件存储
 
 [The Google File System](http://static.googleusercontent.com/media/research.google.com/en/us/archive/gfs-sosp2003.pdf)
 
@@ -202,7 +196,7 @@ tags:
 
 [RCFile: A Fast and Space-efficient Data Placement Structure in MapReduce-based Warehouse Systems](http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf)
 
-数据存储
+## 数据存储
 
 [Dynamo: Amazon’s Highly Available Key-value Store](https://sites.cs.ucsb.edu/~agrawal/fall2009/dynamo.pdf)
 
@@ -214,8 +208,6 @@ tags:
 
 [Hypertable Architecture Overview](http://www.hypertable.com/collateral/whitepaper-hypertable-architecture.pdf)
 
-数据处理
+## 数据处理
 
 [MapReduce: Simplified Data Processing on Large Clusters](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf)
-
-内容来自[papers we love](https://github.com/papers-we-love/papers-we-love)，[100-open-source-big-data-architecture-papers-anil-madan](https://www.linkedin.com/pulse/100-open-source-big-data-architecture-papers-anil-madan)和[bigdatapaper](https://github.com/stevenlii/bigdatapaper)
