@@ -48,6 +48,8 @@ tags:
 
 [Numerical Recipes 3rd Edition](https://book.douban.com/subject/2173399/)（豆瓣9.3分）
 
+[Kubernetes in Action中文版](https://book.douban.com/subject/30418855/)（豆瓣9.3分）
+
 [Head First 设计模式（中文版）](https://book.douban.com/subject/2243615/)（豆瓣9.2分）
 
 [操作系统设计与实现（上册）](https://book.douban.com/subject/2044818/)（豆瓣9.2分）
@@ -86,6 +88,8 @@ tags:
 
 [大数据技术原理与应用（第2版）](https://book.douban.com/subject/27606713/)（豆瓣8.9分）
 
+[Streaming Systems](https://book.douban.com/subject/27080632/)（豆瓣8.9分）
+
 [深入理解Nginx（第2版）](https://book.douban.com/subject/26745255/)（豆瓣8.8分）
 
 [Orange'S:一个操作系统的实现](https://book.douban.com/subject/3735649/)（豆瓣8.7分）
@@ -94,17 +98,15 @@ tags:
 
 [Streaming Systems](https://book.douban.com/subject/27080632/)（豆瓣8.7分）
 
+[Stream Processing with Apache Flink](https://book.douban.com/subject/30152777/)（豆瓣8.7分）
+
 [Systems Performance](https://book.douban.com/subject/24840375/)（豆瓣8.6分）
 
 [Linux内核源代码情景分析（上册）](https://book.douban.com/subject/1231584/)（豆瓣8.6分）
 
-[海量数据库解决方案](https://book.douban.com/subject/5346169//)（豆瓣8.6分）
-
 [Redis设计与实现](https://book.douban.com/subject/25900156/)（豆瓣8.5分）
 
 [企业IT架构转型之道：阿里巴巴中台战略思想与架构实战](https://book.douban.com/subject/27039508/)（豆瓣8.5分）
-
-[海量数据库解决方案](https://book.douban.com/subject/5346169/)（豆瓣8.4分）
 
 [自己动手写Java虚拟机](https://book.douban.com/subject/26802084/)（豆瓣8.2分）
 
@@ -127,3 +129,9 @@ tags:
 [吴恩达机器学习](https://study.163.com/course/introduction/1004570029.htm)
 
 [机器学习](https://study.163.com/course/introduction/1004570029.htm)（豆瓣8.7分）
+
+
+
+# 知乎专栏
+
+[用谁都能看懂的方法解释分布式系统](https://zhuanlan.zhihu.com/c_158208519)
