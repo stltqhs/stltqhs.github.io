@@ -170,6 +170,4 @@ n后问题
 
 5.HyperLogLog
 
-6.RingBuffer
-
-7.[GeoHash](https://github.com/GongDexing/Geohash)
+6.[GeoHash](https://github.com/GongDexing/Geohash)
