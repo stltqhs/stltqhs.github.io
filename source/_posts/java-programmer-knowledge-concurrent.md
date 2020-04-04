@@ -68,7 +68,14 @@ public class FinalFieldExample {
 
 由于指令重排序的原因，对于[“双重检查加锁“（double check lock）](https://blog.csdn.net/jiankunking/article/details/73012648)也是不安全的操作。
 
-参考：[深入理解Java内存模型（一）——基础](http://www.infoq.com/cn/articles/java-memory-model-1)，[深入理解Java内存模型（二）——重排序](http://www.infoq.com/cn/articles/java-memory-model-2)，[深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)，[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)，[深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)，[深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)，[Java并发编程实战](https://book.douban.com/subject/10484692/)
+延伸阅读：
+
+* [深入理解Java内存模型（一）——基础](http://www.infoq.com/cn/articles/java-memory-model-1)
+* [深入理解Java内存模型（二）——重排序](http://www.infoq.com/cn/articles/java-memory-model-2)
+* [深入理解Java内存模型（三）——顺序一致性](http://www.infoq.com/cn/articles/java-memory-model-3)
+* [深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)
+* [深入理解Java内存模型（五）——锁](http://www.infoq.com/cn/articles/java-memory-model-5)
+* [深入理解Java内存模型(六)——final](http://www.infoq.com/cn/articles/java-memory-model-6)
 
 # volatile作用 
 
@@ -77,8 +84,6 @@ volatile有两个作用，一个是将long和double类型的读取和写入操�
 
 
 如果一个int类型变量i被volatile修饰，那么`i++`操作并不是线程安全的操作。`volatile`只能保证变量读取和写入是原子性，且读取变量时会刷新缓存，保证线程间的可见性。而`i++`操作包含3个操作，首先是读取变量到临时变量中，然后临时变量加1，再将临时变量写入，这3个操作合起来并不是原子操作，所以不是线程安全的。
-
-参考：[深入理解Java内存模型（四）——volatile](http://www.infoq.com/cn/articles/java-memory-model-4)
 
 # CAS 
 
@@ -163,8 +168,6 @@ private boolean casPair(Pair<V> cmp, Pair<V> val) {
 ```
 
 
-
-参考：[深入浅出CAS](https://www.jianshu.com/p/fb6e91b013cc)，[比较并交换](https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2)，[JAVA中CAS-ABA的问题解决方案AtomicStampedReference](https://juejin.im/entry/5a7288645188255a8817fe26)
 
 # LockSupport原理
 
@@ -387,8 +390,6 @@ class ThreadBlockInVM : public ThreadStateTransition {
 `Parker::park`方法会调用`pthread_mutex_trylock`函数尝试获取`_mutex`的锁，该函数并非阻塞模式，因此如果无法获取锁，`Parker::park`方法会立即返回。此时调用`LockSupport.park(this)`的循环体会一直执行，要么该线程能够获得资源，否则继续调用`LockSupport.park(this)`方法，`Parker::park`将再次尝试获取`_mutex`的锁。如果`_mutex`的锁获取成功，检查许可`_counter`的值，如果大于0，表示该线程执行了`Parker::unpark`方法将许可`_counter`置为1，函数释放锁后立即返回，在下次循环中将许可`_counter`置为0；如果小于0，则调用`pthread_cond_wait`函数阻塞该线程，此时完成了线程阻塞操作。
 
 `unpark`方法可以先于`park`调用。使用`os::Linux::safe_cond_timedwait`方法可以设置等待一个互斥变量的超时时间。
-
-参考： [浅谈Java并发编程系列（八）—— LockSupport原理剖析](https://segmentfault.com/a/1190000008420938)，[Java的LockSupport.park()实现分析](https://blog.csdn.net/hengyunabc/article/details/28126139)
 
 # AQS原理 
 
@@ -700,8 +701,6 @@ final boolean transferForSignal(Node node) {
 
 
 
-参考：[AQS 和 高级同步器](http://novoland.github.io/%E5%B9%B6%E5%8F%91/2014/07/26/AQS%20%E5%92%8C%20%E9%AB%98%E7%BA%A7%E5%90%8C%E6%AD%A5%E5%99%A8.html)
-
 # ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理 
 
 **1).ReentrantLock**
@@ -782,7 +781,13 @@ private int count;
 
 `lock`用于保护屏障信息，`trip`用于阻塞线程，`parties`表示屏障数量，`count`表示当前消耗的屏障数量。当调用`wait`方法时，`lock`需要调用`lock()`方法获取锁，然后将count减少，如果count不为0，则当前线程进入trip的Condition等待队列。如果count为0，需要生成一个新的`generation`对象，表示新的一轮循环屏障，同时会调用`condition.signalAll()`方法通知所有等待线程。
 
-参考：[Java并发之ReentrantLock详解](https://blog.csdn.net/lipeng_bigdata/article/details/52154637)，[什么时候使用CountDownLatch](http://www.importnew.com/15731.html)，[JAVA多线程--信号量(Semaphore)](https://my.oschina.net/cloudcoder/blog/362974)，[深入浅出java CyclicBarrier](https://www.jianshu.com/p/424374d71b67)，[Java多线程（十）之ReentrantReadWriteLock深入分析](https://my.oschina.net/adan1/blog/158107)
+**6).StampedLock**
+
+`ReadWriteLock`是基于悲观锁的设计，如果有线程正在读，写线程需要等待读线程释放锁后才能获取写锁，即读的过程中不允许写。
+
+乐观锁的意思就是乐观地估计读的过程中大概率不会有写入，因此被称为乐观锁。反过来，悲观锁则是读的过程中拒绝有写入，也就是写入必须等待。显然乐观锁的并发效率更高，但一旦有小概率的写入导致读取的数据不一致，需要能检测出来，再读一遍就行。
+
+JDK8对`ReadWriteLock`的优化是`StampedLock`，它将读锁分为乐观读锁和悲观读锁，获取乐观读锁时，实际上是获取版本号，使用者最后还需要验证在访问受保护资源时版本号是否变更，如果有变更，则获取悲观读锁，悲观读锁与写锁互斥，使用`StampedLock`时还需要注意与线程中断带来的CPU使用率高的问题[ [1] ](https://blog.csdn.net/zcl_love_wx/article/details/94856005)。
 
 # BlockingQueue原理
 
@@ -855,8 +860,6 @@ private E dequeue() {
 
 从上可以看到`take`方法使用`ReentrantLock`来实现线程安全操作，当数组元素数量为0时，表示队列已经为空，需要等待队列不为空，所以`take`方法也是阻塞方法。当取出元素成功时，需要通知`notFull`表示线程不是满的。
 
-参考：[Java并发编程-阻塞队列(BlockingQueue)的实现原理](https://blog.csdn.net/chenchaofuck1/article/details/51660119)
-
 # synchronized原理 
 
 Java同步机制使用`synchronized`关键字实现。`synchronized`有两种用法，第一种是修饰方法，即同步方法块，第二种是同步代码块，同步代码块和同步方法块被称为临界区。
@@ -879,7 +882,7 @@ void syncCodeBlock() {
 hash:25 —>| age:4 biased_lock:1 lock:2
 ```
 
-hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示标志位。`Mark Word`是JVM实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。JVM对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为JVM同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁<sup>[[java重量锁，轻量锁，偏向锁]](https://focusvirtualization.blogspot.com/2017/02/linux-85-java.html)</sup>。
+hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示标志位。`Mark Word`是JVM实现同步机制的基础。程序进入临界区时需要获取的锁的结构是[ObjectMonitor](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp)，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。JVM对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁。`ObjectMonitor`的3个重要字段为`_count`，它是记录获取锁的数量，因为JVM同步锁机制支持重入，每次重入，该计数器都要加1；`_WaitSet`，它是等待线程的集合，调用`Object.wait()`时线程被放入该集合中；`_cxq`，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；`_EntryList`，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁。
 
 各种锁状态的变化过程如下：
 
@@ -1013,8 +1016,6 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
 除了上面JVM对锁的优化，在程序端还可以使用锁分段（如ConcurrentHashMap实现）和锁分离（ReadWriteLock实现）的技术提高并发。
 
-参考：[深入理解Java并发之synchronized实现原理](https://blog.csdn.net/javazejian/article/details/72828483)，[Getting Started with HotSpot and OpenJDK](https://www.infoq.com/articles/introduction-to-hotspot)，[Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）](https://www.cnblogs.com/paddix/p/5405678.html)，[JVM源码分析之synchronized实现](https://www.jianshu.com/p/c5058b6fe8e5)
-
 # 锁的升级和降级
 
 锁降级在`ReentrantReadWriteLock`中的意思是从写锁降级为读锁，但是`ReentrantReadWriteLock`不能从读锁升级为写锁。
@@ -1037,4 +1038,6 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 
   该方法不是基于线程同步完成，因此只能满足于一个生产者和一个消费者。原理是先创建一个管道输入流和管道输出流，然后将输入流和输出流进行连接，用生产者线程往管道输出流中写入数据，消费者在管道输入流中读取数据，这样就可以实现了不同线程间的相互通讯，但是这种方式在生产者和生产者、消费者和消费者之间不能保证同步，也就是说在一个生产者和一个消费者的情况下是可以生产者和消费者之间交替运行的，多个生成者和多个消费者者之间则不行
 
-参考：[Java实现生产者和消费者的5种方式](https://juejin.im/entry/596343686fb9a06bbd6f888c)
+延伸阅读：
+
+* [Java实现生产者和消费者的5种方式](https://juejin.im/entry/596343686fb9a06bbd6f888c)
