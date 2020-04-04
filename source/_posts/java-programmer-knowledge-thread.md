@@ -285,7 +285,21 @@ try {
 
 # 协程
 
-[Analysis of the Go runtime scheduler](http://www.cs.columbia.edu/~aho/cs6998/reports/12-12-11_DeshpandeSponslerWeiss_GO.pdf)
+在Linux操作系统中，进程或者线程都称为任务，使用[task_struct](https://github.com/torvalds/linux/blob/master/include/linux/sched.h)表示，操作系统的进程或者线程调度器都是抢占类型，上下文切换相比协程调度器属于重量级操作，且用户程序不能干预。
 
-[The Go scheduler](http://morsmachine.dk/go-scheduler)
+协程将所有子程序（或者子任务）线性执行，多个子程序由协程调度器负责调度执行。协程的有点有：
 
+* 协程调度器调度子程序时属于轻量级操作
+* 由于是线性执行，不存在并发访问共享资源的情况，即不存在锁等待、加锁操作，CPU资源可充分利用；
+* 协程是单线程执行，可以使用多进程来跑协程任务，充分利用CPU资源；
+* 协程非常适合运用在网络编程；
+
+协程的执行流程如下：
+
+```text
+---subprogram1---|----subprogram2-----|-----subprogram1-----|----subprogram3-----|
+```
+
+JDK不支持协程。
+
+[libco](https://github.com/Tencent/libco)是开源的C++协程框架。
