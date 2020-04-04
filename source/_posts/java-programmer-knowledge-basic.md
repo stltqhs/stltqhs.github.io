@@ -175,11 +175,13 @@ protected native Object clone() throws CloneNotSupportedException;
 
   使用Metaspace替代PermGen Space，G1垃圾收集器作为默认收集器。
 
+
+
 # 序列化与反序列化
 
 序列化与反序列化的作用是运行允许对象的数据通过一个JVM进程传到另一个JVM进程。Java世界里可以分为JDK序列化（或称内部序列化）和外部序列化。选择序列化工具时，需要考虑前后兼容问题和序列化效率问题。向前兼容的意思是指旧代码可以反序列化新代码序列化的记录，向后兼容是指新代码可以反序列化旧代码序列化的记录。序列化效率问题指序列化后的字节大小，越小效率越高。
 
-### JDK序列化
+## JDK序列化
 
 JDK序列化规则：
 
@@ -197,7 +199,7 @@ JDK序列化规则：
 
 由于JDK序列化时需要将类名，字段名写入到序列化结果中，因此序列化效率不高。
 
-### 其他序列化工具
+## 其他序列化工具
 
 Thrift、Protobuf、Avro在序列化效率上远高于JDK序列化，它们只需要写入字段序号、用特定的位来表示类型，前后兼容略灵活[ [2] ](https://vonng.gitbooks.io/ddia-cn/content/ch4.html)。
 
@@ -373,6 +375,8 @@ JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0
 
 对反射使用不当，会造成反射类加载器导致Perm溢出[ [3] ](https://mp.weixin.qq.com/s/5H6UHcP6kvR2X5hTj_SBjA)。
 
+
+
 # Statement和PreparedStatement的区别，如何防止SQL注入
 
 JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedStatement`、`CallableStatement`，描述如下表：
@@ -382,6 +386,8 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 | Statement         | 通用查询                                                     |
 | PreparedStatemnt  | 预编译语句查询，可以解决SQL注入问题，由于是预编译，所以可以减少数据库对SQL代码的解析操作，提高效率 |
 | CallableStatement | 存储过程查询                                                 |
+
+
 
 # Java命令
 
@@ -459,15 +465,18 @@ JDBC执行SQL语句可以使用三个类，分别是`Statement`、`PreparedState
 
 详细见[JDK Tools and Utilities](https://docs.oracle.com/javase/7/docs/technotes/tools/index.html)。
 
+
+
 # NoClassDefFoundError和ClassNotFoundException
 
 `NoClassDefFoundError`和`ClassNotFoundException`都是由于在`CLASSPATH`下找不到对应的类而引起的，通常是缺少对应的jar包或者jar包冲突导致，具体如下：
 
 - `ClassNotFoundException`是在代码中显示调用加载类的方法导致，如`Class.forName`、`ClassLoader.findSystemClass()`和`ClassLoader.loadClass()`等；
-
 - `NoClassDefFoundError`是JVM链接时找不到类时抛出的错误，如`new`一个实例或者调用静态方法等。
 
 可以简言之：如果找不到类要抛异常时，ClassNotFoundException是类名作为字符串，而NoClassDefFoundError是类名作为符号。
+
+
 
 # 方法动态绑定原理
 
@@ -547,6 +556,8 @@ void LinkResolver::resolve_invoke(CallInfo& result, Handle recv, constantPoolHan
 
 在样例代码中，当执行`new Son()`时，先创建`Father`的虚方法表，假设`print`方法在虚方法表位置为`n`，父类初始化完成后，开始初始化子类`Son`，然后创建`Son`的虚方法表。创建`Son`的虚方法表时，先将父类的虚方法表复制到子类的虚方法表中，此时子类虚方法表位置为`n`的方法是`Father.print`。当执行`update_inherited_vtable`方法时会将子类的`print`方法入口写入到虚方法表位置为`n`的地方，此时虚方法表位置为`n`的方法是`Son.print`。所有类信息构造完成后，开始执行`Son`的构造函数，它首先调用`Father`的构造函数，在此函数中，会调用`print`方法，实际上是`invokevirtual print`指令。通过`instanceKlass::uncached_lookup_method`方法在`Father`类中查询`print`方法，可以找到该方法，该方法使用[methodOopDesc*](https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/methodOop.cpp)表示，即`methodOop`指针，指向`Father.print`，它记录了通过`klassVtable::put_method_at(Method* m, int index)`放入虚方法表的位置`n`。然后在`LinkResolver::runtime_resolve_virtual_method`方法中通过位置`n`在`Son`的虚方法表中找到真正要执行的方法，即`Son.print`。最后调用`Son.print`方法。
 
+
+
 # 异常处理原理
 
 当使用`javac`编译java源码时，会为方法内的`try/catch/finally`语句块生成一个异常表（`exception_table`），异常表指定了当出现异常时代码需要跳转到何处执行[ [4] ]([https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/)。
@@ -605,6 +616,8 @@ from  to  target type
 - type 异常类型
 
 异常表内容的第一行表示如果在第0行（此处的行指程序地址，比如第3行是指程序地址为3的指令，即`dup`）和第8行抛出`java.lang.Exception`异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理器时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理器，则线程结束。
+
+
 
 # 泛型原理
 

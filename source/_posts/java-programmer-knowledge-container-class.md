@@ -6,23 +6,15 @@ tags: java
 
 # HashMap，LinkedHashMap，TreeMap，Hashtable的实现方式 
 
-- HashMap
+## HashMap
 
-  HashMap由数组和链表组成，元素的类型是Map.Entry，其`table[]`字段就是数组类型，而Map.Entry.next字段组成链表。使用链表的原因是存在hash碰撞，即不同key计算出来的hash值一样。HashMap不是线程安全的，也不保证元素插入的顺序。HashMap可以接受`null`键。
-
-
+HashMap由数组和链表组成，元素的类型是Map.Entry，其`table[]`字段就是数组类型，而Map.Entry.next字段组成链表。使用链表的原因是存在hash碰撞，即不同key计算出来的hash值一样。HashMap不是线程安全的，也不保证元素插入的顺序。HashMap可以接受`null`键。
 
   当调用`HashMap.put()`方法时，会先判断`key`是否为`null`，如果是，`value`需要放在`table[0]`的链表中。如果`key`已经存在，替换旧值，否则放在链表头部（代码：`table[indexFor(hash,table.length)] = new Entry<>(hash, key, value, e);size++`）。
 
-
-
   当调用`HashMap.get()`方法时，根据`key`的hash值，通过`indexFor(hash,table.length)`计算索引位置（如果key为`null`，索引位置是0），从链表头部开始搜索，当元素e与`key`满足：`e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))`时返回e.value，否则通过`e.next`获取下一个元素继续比较。
 
-
-
   每次调用`addEntry`添加一个新元素时，都会通过`(size >= threshold) && (null != table[bucketIndex])`（其中`threshold = (int) Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + 1);`）来判断是否需要扩容，如果需要，则调用`resize(2 * table.length)`创建一个新的table，大小为原来的两倍，通过`transfer`方法将旧数据移动到新的table上来，此时会重新计算这些元素的索引位置，称为重hash。
-
-
 
   当构造一个HashMap时可以指定table数组大小（默认为16），但HashMap要求table数组实际大小必须是2的幂次，即必须是偶数，而不是奇数，原因是计算hash索引的`indexFor()`方法使用的是位运算，而不是模运算，代码是`h & (length-1)`。当length为偶数时，length-1就是奇数，最低位恒为1，与h按位与运算后，值可以是偶数，也可以是奇数。而当length为奇数时length-1就是偶数，最低位恒为0，与h按位与运算后，值是偶数，不可能存在奇数的可能，此时碰撞的概率增加。
 
@@ -30,111 +22,63 @@ tags: java
 
   最坏情况下，所有的key通过`indexFor()`计算的值都相同，此时HashMap退化成链表，时间复杂度从O(1)提高到O(n)，Java8对此进行优化，将最坏情况下的时间复杂度降低到O(logn)。原理是当链表长度大于TREEIFY_THRESHOLD时（默认为8），会将链表转换为二叉树，此时查找时间复杂度就是O(logn)。
 
+## LinkedHashMap
 
-
-  参考：[HashMap 的实现原理](http://wiki.jikexueyuan.com/project/java-collection/hashmap.html)，[Java 8：HashMap的性能提升](http://www.importnew.com/14417.html)
-
-- LinkedHashMap
-
-  LinkedHashMap解决HashMap不保证插入顺序的问题。实现方式是在HashMap的基础上添加一个双向链表（`Entry.after`和`Entry.before`组成双向链表），用来记录插入顺序。LinkedHashMap与HashMap一样可以接受`null`键。
-
-
+LinkedHashMap解决HashMap不保证插入顺序的问题。实现方式是在HashMap的基础上添加一个双向链表（`Entry.after`和`Entry.before`组成双向链表），用来记录插入顺序。LinkedHashMap与HashMap一样可以接受`null`键。
 
   `LinkedHashMap.put`基本与`HashMap.put`操作一致，只是`LinkedHashMap.put`多了一个将新元素添加到双向链表的尾部（`Entry.addBefore(header)`），如果不是新元素，则调用`Entry.recordAccess()`方法记录访问操作（如果`accessOrder`为`false`则什么也不做，默认为`false`）。
 
-
-
   `LinkedHashMap.get`基本与`HashMap.get`操作一致，如果能找到元素，则调用`Entry.recordAccess`方法记录访问操作。
-
-
 
   `accessOrder`可以用来控制是按照插入顺序还是访问顺序迭代元素，默认是插入顺序，当`accessOrder`为`true`时表示按照访问顺序迭代元素，此时`Entry.recordAcess()`的操作就是将元素添加到双向链表的尾部，表示该元素刚刚被访问过。在`addEntry`方法中添加一个新元素时，会调用`removeEldestEntry(header.after)`来判断是否进行删除长时间未被访问的记录，如果是长时间未被访问则调用`removeEntryForKey(header.after.key)`删除这些记录。不过`removeEldestEntry()`默认返回`false`，该方法可以被重写，用来实现简单的`LRU`算法。
 
-
-
   `LinkedHashMap.resize()`与`HashMap.resize()`一致，但是`LinkedHashMap.transfer()`重写了`HashMap.transfer`方法，重hash时直接遍历双向链表即可。
 
+## TreeMap
 
-
-  参考：[Map 综述（二）：彻头彻尾理解 LinkedHashMap](https://blog.csdn.net/justloveyou_/article/details/71713781)
-
-- TreeMap
-
-  TreeMap按照key的顺序排序存储，使用的数据结构时“红黑树”。由于是按照key的顺序排序，所以如果没有通过构造函数指定`Comparator`时，key就需要实现`Comparable`接口。TreeMap不接受`null`键。
+TreeMap按照key的顺序排序存储，使用的数据结构时“红黑树”。由于是按照key的顺序排序，所以如果没有通过构造函数指定`Comparator`时，key就需要实现`Comparable`接口。TreeMap不接受`null`键。
 
 
 
   当调用`TreeMap.put()`时，以跟节点开始寻找与key相等的节点，如果找到，设置新值，如果不存在，添加新节点，调整树结构。
 
-  参考：[Java提高篇（二七）-----TreeMap](https://blog.csdn.net/chenssy/article/details/26668941)
+## Hashtable
 
-- Hashtable
-
-  Hashtable与HashMap基本一样，出来Hashtable不接受`null`键也不接受`null`值，且是线程安全的（因为put和get方法都是同步方法）。
-
-
-
-  参考：[Map 综述（四）：彻头彻尾理解 HashTable](https://blog.csdn.net/justloveyou_/article/details/72862373)
+Hashtable与HashMap基本一样，出来Hashtable不接受`null`键也不接受`null`值，且是线程安全的（因为put和get方法都是同步方法）。
 
 # ArrayList和LinkedList实现方式以及SubList实现方式 
 
-- ArrayList
+## ArrayList
 
-  ArrayList是一个动态数组实现的线性表，其容量可以自动增长，新容量为`(原始容量*3)/2 + 1`。`elementData`是用来存放新增的元素，`size`记录元素个数。ArrayList查找元素使用`indexOf(E)`，原理是遍历所有元素，所以效率比较低。由于其为数组，可以使用索引快速访问（实现了`RandomAccess`接口）。当删除元素时，需要将后面的元素全部向前移动，效率比较低。ArrayList不是线程安全的。
+ArrayList是一个动态数组实现的线性表，其容量可以自动增长，新容量为`(原始容量*3)/2 + 1`。`elementData`是用来存放新增的元素，`size`记录元素个数。ArrayList查找元素使用`indexOf(E)`，原理是遍历所有元素，所以效率比较低。由于其为数组，可以使用索引快速访问（实现了`RandomAccess`接口）。当删除元素时，需要将后面的元素全部向前移动，效率比较低。ArrayList不是线程安全的。
 
+## CopyOnWriteArrayList
 
+CopyOnWriteArrayList是线程安全的ArrayList，通过“写时复制”来提高“读多写少”的并发操作场景。每次对`array`（定义为`private volatile transient Object[] array;`）修改时，首先获取独占锁（`ReentrantLock`），复制数组，新数组的大小为`len+1`，然后赋值给`array`，最后释放锁。它的迭代器也是通过将`array`赋值给`snopshot`，然后迭代`snopshot`的内容，而且`snopshot`被定义为`final`类型。迭代器不支持`remove`操作，或者说所有修改操作都不支持。
 
-  参考：[Java 集合系列03之 ArrayList详细介绍(源码解析)和使用示例](https://www.cnblogs.com/skywang12345/p/3308556.html)
+## LinkedList
 
-- CopyOnWriteArrayList
+LinkedList是一个双向链表实现的线性表。使用索引访问时需要从header开始查找索引位置，效率比较低。插入元素时只需要修改元素`next`和`previous`指针即可，不需要移动元素，效率高。
 
-  CopyOnWriteArrayList是线程安全的ArrayList，通过“写时复制”来提高“读多写少”的并发操作场景。每次对`array`（定义为`private volatile transient Object[] array;`）修改时，首先获取独占锁（`ReentrantLock`），复制数组，新数组的大小为`len+1`，然后赋值给`array`，最后释放锁。它的迭代器也是通过将`array`赋值给`snopshot`，然后迭代`snopshot`的内容，而且`snopshot`被定义为`final`类型。迭代器不支持`remove`操作，或者说所有修改操作都不支持。
+## ArrayList.subList
 
+ArrayList.subList的返回值类型是ArrayList内部类SubList，该对象表示ArrayList的一个视图，所以修改SubList会影响到ArrayList。如果ArrayList被修改（`modCount`值改变）时，SubList就无效了，因为SubList记录的`modCount`和ArrayList的`modCount`不一致，任何操作都会报`ConcurrentModificationException`。
 
-
-  参考：[Java 7之多线程并发容器 - CopyOnWriteArrayList](https://blog.csdn.net/mazhimazh/article/details/19210547)
-
-- LinkedList
-
-  LinkedList是一个双向链表实现的线性表。使用索引访问时需要从header开始查找索引位置，效率比较低。插入元素时只需要修改元素`next`和`previous`指针即可，不需要移动元素，效率高。
-
-
-
-  参考：[LinkedList - Java提高篇](http://wiki.jikexueyuan.com/project/java-enhancement/java-twentytwo.html)
-
-- ArrayList.subList和Arrays.asList(T...a)
-
-  ArrayList.subList的返回值类型是ArrayList内部类SubList，该对象表示ArrayList的一个视图，所以修改SubList会影响到ArrayList。如果ArrayList被修改（`modCount`值改变）时，SubList就无效了，因为SubList记录的`modCount`和ArrayList的`modCount`不一致，任何操作都会报`ConcurrentModificationException`。
-
-
+## Arrays.asList(T...a)
 
   Arrays.asList使用适配器模式构建一个Arrays.ArrayList类型的数据，不支持添加、删除调整，原数组的修改将会影响到该Arrays.ArrayList。
 
+## Vector
 
-
-  参考：[使用ArrayList.subList()和Arrays.asList()方法要注意的地方](https://www.jianshu.com/p/d2a69f7dc563)，[新手程序员觉得自己代码很溜！阿里P6:你别再乱用Arrays.asList了](https://www.toutiao.com/a6699409617690034700/?tt_from=weixin&utm_campaign=client_share&wxshare_count=1×tamp=1559872988&app=news_article&utm_source=weixin&utm_medium=toutiao_android&req_id=201906071003080101520192005646A3C&group_id=6699409617690034700)
-
-- Vector
-
-  与ArrayList基本一致，但是Vector是线程安全的（方法为`synchronized`），而且扩容时新容量的大小与`capacityIncrement`有关，如果`capacityIncrement`大于0，则新容量的大小为`oldCapacity + capacityIncrement`，否则为`oldCapacity * 2`。
-
-
-
-  参考：[Java 集合系列06之 Vector详细介绍(源码解析)和使用示例](https://www.cnblogs.com/skywang12345/p/3308833.html)
+与ArrayList基本一致，但是Vector是线程安全的（方法为`synchronized`），而且扩容时新容量的大小与`capacityIncrement`有关，如果`capacityIncrement`大于0，则新容量的大小为`oldCapacity + capacityIncrement`，否则为`oldCapacity * 2`。
 
 # HashSet实现方式 
 
 HashSet是基于HashMap实现的，`HashSet.add(E e)`内部是通过`map.put(e, PRESENT)`实现，map是HashMap类型，PRESENT为一个Object类型，用来作为HashMap的值对象。
 
-
-
-参考：[HashSet 的实现原理](http://wiki.jikexueyuan.com/project/java-collection/hashset.html)
-
 # TreeSet实现
 
 TreeSet基于TreeMap实现。
-
-参考：[通过分析 JDK 源代码研究 TreeMap 红黑树算法实现](https://www.ibm.com/developerworks/cn/java/j-lo-tree/index.html)
 
 # Set,Queue,List,Map,Stack 
 
@@ -205,8 +149,6 @@ HashEntry<K,V> node = tryLock() ? null :
 
 JDK1.8的ConcurrentHashMap的实现抛弃了1.7使用的分段锁，改用“CAS+synchronized“，`Node.next`字段为`volatile`类型，而不是1.7的`final`类型。
 
-参考：[探索 ConcurrentHashMap 高并发性的实现机制](https://www.ibm.com/developerworks/cn/java/java-lo-concurrenthashmap/index.html)，[Map 综述（三）：彻头彻尾理解 ConcurrentHashMap](https://blog.csdn.net/justloveyou_/article/details/72783008)，[HashMap? ConcurrentHashMap? 相信看完这篇没人能难住你！](https://crossoverjie.top/2018/07/23/java-senior/ConcurrentHashMap/)，[为并发而生的 ConcurrentHashMap（Java 8）](https://www.cnblogs.com/yangming1996/p/8031199.html)
-
 # Collections.synchronizedMap实现方式 
 
 使用`装饰模式`封装相关方法，且方法为同步方法。相关代码如下：
@@ -245,8 +187,6 @@ private static class SynchronizedMap<K,V>
 
 
 
-参考：[Wrapper Implementations](https://docs.oracle.com/javase/tutorial/collections/implementations/wrapper.html)
-
 # hashCode()和equals()方法的作用 
 
 `hashCode`和`equals`方法在`Object`类中定义，其中`hashCode`方法为`native`方法，`equals`方法定义如下：
@@ -279,8 +219,6 @@ public boolean equals(Object obj) {
 
   基于上述两个性质，一般是重写`equals`方法就要重写`hashCode`方法。
 
-参考：[Java hashCode() 和 equals()的若干问题解答](https://www.cnblogs.com/skywang12345/p/3324958.html)，[Java提高篇——equals()与hashCode()方法详解](https://www.cnblogs.com/Qian123/p/5703507.html)
-
 # Arrays.sort()和Collections.sort()的实现方式
 
 `Arrays.sort(int[])`排序算法使用`DualPivotQuicksort.sort`方法，称为“双轴快速排序“，该方法会根据数组长度和数值的连续性来使用不同的排序算法。如果数组长度大于等于286且连续性好的话，就用归并排序，如果大于等于286且连续性不好的话就用双轴快速排序。如果长度小于286且大于等于47的话就用双轴快速排序，如果长度小于47的话就用插入排序。
@@ -305,5 +243,3 @@ public static <T> void sort(T[] a, Comparator<? super T> c) {
 
 
 注意：如果没有实现好`Comparator`接口时可能存在问题，详情见[JDK7中的排序算法详解--Collections.sort和Arrays.sort](http://blog.sina.com.cn/s/blog_8e6f1b330101h7fa.html)。
-
-参考：[Collections.sort()和Arrays.sort()排序算法选择](https://blog.csdn.net/TimHeath/article/details/68930482)
