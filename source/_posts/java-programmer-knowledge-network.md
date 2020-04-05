@@ -371,3 +371,32 @@ Netty是Reactor模式的开源框架。
 
 Proactor称为被动模式，应用程序把read和write函数操作全部交给操作系统或者网络框架，实际的IO操作由操作系统或者网络框架完成，之后再回调应用程序。[asio](https://think-async.com/Asio/)库就是典型的Proactor模式。
 
+## 服务器编程中的1+N+M模型
+
+在服务器的编程中，epoll编程的三个步骤是由不同的线程负责的，即服务器编程中的1+N+M模型。
+
+![1+N+M模型](/images/network_io_1_n_m.jpg "1+N+M模型")
+
+N的数量通知等于CPU个数，M数量一般大于N的数量，比如上百个。
+
+### Tomcat
+
+Tomcat的NIO线程模型分为：
+
+* Acceptor线程：接收客户端连接的线程，通过`ServerSocket.accept()`获得`SocketChannel`对象，将该对象封装在`org.apache.tomcat.util.net.NioChannel`对象中，继续将`NioChannel`对象封装在`PollerEvent`对象中，并将`PollerEvent`对象压入events queue里。Acceptor与Poller线程之间通过events queue通信，Acceptor是events queue的生产者，Poller是events queue的消费者。
+* Poller线程：Poller线程中维护了一个`Selector`对象，是NIO实现的主要线程。首先作为events queue的消费者，从queue中取出`PollerEvent`对象，然后将此对象中的channel以`OP_READ`事件注册到`Selector`中，然后`Selector`执行`select`操作，遍历出可以读数据的socket，并从Worker线程池中拿到可用的Worker线程，将socket传递给Worker。
+* Worker线程：Worker线程拿到Poller传过来的socket后，将socket封装在`SocketProcessor`对象中。然后从`Http11ConnectionHandler`中取出`Http11NioProcessor`对象，从`Http11NioProcessor`中调用`CoyoteAdapter`的逻辑。在Worker线程中，会完成从socket中读取http request，解析成`HttpServletRequest`对象，分派到相应的servlet并完成逻辑，然后将response通过socket发回client。在从socket中读数据和往socket中写数据的过程，并没有像典型的非阻塞的NIO的那样，注册`OP_READ`或`OP_WRITE`事件到`Selector`，而是直接通过socket完成读写，这时是阻塞完成的。
+
+![Tomcat NIO线程模型](/images/tomcat_thread_model.jpg "Tomcat NIO线程模型")
+
+Tomcat的线程模型详细见[tomcat 线程模型](https://blog.csdn.net/qq_16681169/article/details/75003640)。
+
+### Nginx
+
+Nginx的多进程模型可分为：
+
+* Master进程：
+* Worker进程：
+
+### Redis
+
