@@ -395,8 +395,6 @@ Tomcat的线程模型详细见[tomcat 线程模型](https://blog.csdn.net/qq_166
 
 Nginx的多进程模型可分为：
 
-* Master进程：
-* Worker进程：
-
-### Redis
+* Master进程：Master进程启动时调用listen创建监听端口，然后使用fork创建Worker进程，通过信号控制Worker进程。
+* Worker进程：Worker进程由于是Master进程fork而来，继承了Master进程监听端口的fd，使用`accept_mutex`控制“惊群效应”，接收客户端请求。每个Worker进程都使用epoll实现IO多路复用。
 
