@@ -1077,3 +1077,5 @@ hash就是`Object.hashCode()`的返回值，age表示对象在垃圾收集过程
 # RingBuffer
 
 RingBuffer是一种更高效的数据并发访问的保护机制，它不使用CAS实现锁机制，而是使用CPU缓存一致性来实现高效的一个线程读一个线程写的并发操作。CAS低效的原因是除了存在CPU缓存失效还有一个活锁的问题，即当CAS会放在一个循环内，重试去设置期望的值。
+
+高性能消息框架[Disruptor](https://github.com/LMAX-Exchange/disruptor)使用的就是RingBuffer。
