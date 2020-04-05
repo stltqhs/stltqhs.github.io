@@ -279,19 +279,97 @@ epoll里面有两种模式：LT（水平触发）和ET（边缘触发）。水�
 
 在事件开发中，一般倾向于用LT，这也是默认的模式，Java NIO用的也是epoll的LT模式。因为ET容易漏事件，一次触发如果没有处理好，就没有第二次机会了。虽然LT重复触发可能有少许性能损耗，但更安全。
 
-### nio
+
+
+基于IO多路复用的高并发学习框架[handy](https://github.com/yedf/handy)。
+
+### NIO
+
+Java NIO的4个重要抽象API是
+
+* Buffers，数据缓冲区
+* Charsets，表示字符到字节的编码和解码
+* Channels，表示可执行IO操作的网络连接，或者称其为数据流，可执行读写操作
+* Selectors，表示epoll的IO多路复用
+
+Java NIO可以使用一个Selector线程处理所有的Channel连接。Channel和Buffer使用直接缓冲区实现“零拷贝”[ [2] ](https://en.wikipedia.org/wiki/Zero-copy)。
+
+![Java NIO模型](/images/java_nio_abstract.jpg "Java NIO模型")
+
+Selector举例：
+
+```java
+Selector selector = Selector.open();
+
+channel.configureBlocking(false);
+
+SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
+
+
+while(true) {
+
+  int readyChannels = selector.selectNow();
+
+  if(readyChannels == 0) continue;
+
+
+  Set<SelectionKey> selectedKeys = selector.selectedKeys();
+
+  Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+  while(keyIterator.hasNext()) {
+
+    SelectionKey key = keyIterator.next();
+
+    if(key.isAcceptable()) {
+        // a connection was accepted by a ServerSocketChannel.
+
+    } else if (key.isConnectable()) {
+        // a connection was established with a remote server.
+
+    } else if (key.isReadable()) {
+        // a channel is ready for reading
+
+    } else if (key.isWritable()) {
+        // a channel is ready for writing
+    }
+
+    keyIterator.remove();
+  }
+}
+```
+
+
 
 ## Reactor模式
 
+Reactor模式称为主动模式。所谓主动，是指应用程序不断地轮询，访问操作系统或网络框架、IO是否就绪。Linux系统下的select、poll、epoll就属于主动模式，需要应用程序中有一个循环一直轮询；Java中的NIO也属于这种模式。在这种模式下，实际的IO操作还是应用程序执行的。
 
+Reactor的组件：
+
+* Reactor：Reactor是IO事件的派发者
+* Acceptor：Acceptor接受client连接，建立对应client的Handler，并向Reactor注册此Handler
+* Handler：和一个client通讯的实体，相当于Java NIO中的Channel。
+
+单线程的Reactor模型：
+
+![单线程的Reactor模型](/images/reactor_single_thread.webp "单线程的Reactor模型")
+
+多线程的Reactor模型：
+
+![多线程的Reactor模型](/images/reactor_multiple_thread.webp "多线程的Reactor模型")
+
+主从Reactor模型：
+
+![主从Reactor模型](/images/reactor_master_slave.webp "主从Reactor模型")
+
+多线程的Reactor模型将线程分为IO线程和工作线程。
+
+Netty是Reactor模式的开源框架。
+
+详细说明见[高性能Server---Reactor模型](https://www.jianshu.com/p/2461535c38f3)。
 
 ## Proactor模式
 
-
-
-## Disruptor模式
-
-
-
-基于IO多路复用的高并发学习框架[handy](https://github.com/yedf/handy)
+Proactor称为被动模式，应用程序把read和write函数操作全部交给操作系统或者网络框架，实际的IO操作由操作系统或者网络框架完成，之后再回调应用程序。[asio](https://think-async.com/Asio/)库就是典型的Proactor模式。
 
