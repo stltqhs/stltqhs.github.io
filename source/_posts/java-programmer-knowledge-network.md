@@ -199,11 +199,87 @@ QUIC（Quick UDP Internet Connection）是由Google公司提出的基于UDP协�
 * 更少的RTT
 * 连接迁移
 
-# IO模型
+# 网络IO模型
 
 ## IO多路复用
 
+早起服务端网络编程模型中，使用一个线程启动一个连接LISTEN，等待新的客户端连接请求，当收到请求后，创建一个新线程，该线程阻塞式的读取客户端发送来的消息和发送消息到客户端。这种方式存在严重的性能问题，由于线程数量太多时，操作系统将会花大部分时间在线程上线文切换中，系统资源很容易耗光，不能有效处理客户端请求，造成著名的[C10K](http://www.kegel.com/c10k.html)问题。
 
+为了解决上面的问题，使用IO多路复用，用一个线程监听所有的客户端连接状态，检查是否有数据请求。IO多路复用也称为事件驱动IO。
+
+### select/poll
+
+[select](http://man7.org/linux/man-pages/man2/select.2.html)函数声明：
+
+```c
+ int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+```
+
+* 因为fd是一个int值，所以fd_set其实是一个bit数组，每一位表示一个fd是否有读事件或者写事件
+* 第一个参数表示fd个数，是readfds或者writefds的下标的最大值+1.因为fd从0开始，+1才表示个数
+* 返回结果还在readfds和writefds里面，操作系统会重置所有的bit位，告知应用程序到底哪个fd上面有事件，应用程序需要自己从0到maxfds-1遍历所有的fd，然后执行响应的read/write操作
+* 每次当select调用返回后，在下一次调用之前，要重新维护readfds和writefds
+
+**select受FD_SETSIZE的限制**。
+
+[poll](http://man7.org/linux/man-pages/man2/poll.2.html)函数声明：
+
+```c
+int poll (struct pollfd *fds, unsigned int nfds, int timeout);
+struct pollfd {
+    int fd; /* file descriptor */
+    short events; /* requested events to watch */
+    short revents; /* returned events witnessed */
+};
+```
+
+通过上面的函数会发现，select、poll每次调用都需要应用程序把fd的数组传进去，这个fd的数组每次都要在用户态和内核态之间传递，影响效率。为此，epoll设计了“逻辑上的epfd”，epfd是一个数字，把fd数组关联到上面，然后每次向内核传递的是epfd这个数字。
+
+select/poll的使用举例见[LINUX – IO MULTIPLEXING – SELECT VS POLL VS EPOLL](https://devarea.com/linux-io-multiplexing-select-vs-poll-vs-epoll/)。
+
+### epoll
+
+[epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)相关函数的声明：
+
+```c
+// 创建一个epoll句柄，size用来告诉内核监听的数目一共有多少。
+// 其中的size并不要求是准确的数字，只是告诉内核，计划监听多少个fd。
+// 实际通过epoll_ctl添加的fd数目可能大于这个值。
+int epoll_create(int size);
+
+// 将一个fd增/删/改到epfd里，对应的事件也即读/写
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+
+// 其中的maxevents也是可以自定义的。假如有100个fd，而maxevents只设置为64，
+// 则其他fd，上面的事件会在下次调用epoll_wait时返回
+int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+```
+
+整个epoll过程分成三个步骤：
+
+* 事件注册：通过函数epoll_ctl实现。对于服务器而言，是accept、read、write三种事件；对于客户端而言，是connect、read、write三种事件。
+* 轮询这三个事件是否就绪：通过函数epoll_wait实现。有事件发生，该函数返回。
+* 事件就绪，执行实际的IO操作：通过函数accept、read、write实现。
+
+事件就绪的说明：
+
+* read事件就绪：指远程有新数据来了，socket读取缓冲区里有数据，需要调用read函数处理
+* write事件就绪：指本地的socket写缓冲区是否可写。如果写缓冲区没有满，则一直都是可写的，write事件一直是就绪的，可以调用write函数。只有当遇到发送大文件的场景时，socket写缓冲区被占满时，write事件才不是就绪状态
+* accept事件就绪：有新的连接你如，需要调用accept函数处理
+
+epoll里面有两种模式：LT（水平触发）和ET（边缘触发）。水平触发又称条件触发，边缘触发又称状态触发。
+
+* 水平触发：读缓冲区只要不为空，就会一直触发读事件；写缓冲区只要不满，就会一直触发写事件
+* 边缘触发：读缓冲区的状态，从空转为非空的时候触发一次；写缓冲区的状态从满转为非满时触发一次。
+
+关于LT和ET，有两点需要注意的问题：
+
+* 对于LT模式，要避免“写的死循环”问题：写缓冲区为满的概率很小，即“写的条件”会一直满足，所以当用户注册了写事件却没有数据要写时，它会一直触发，因此在LT模式下写完数据一定要取消写事件
+* 对于ET模式，要避免“short read”问题：例如用户收到100个字节，它触发1次，用户只读到了50个字节，剩下的50字节不读，它也不会再次触发。因此在ET模式下，一定要把“读缓冲区”的数据一次性全部读完
+
+在事件开发中，一般倾向于用LT，这也是默认的模式，Java NIO用的也是epoll的LT模式。因为ET容易漏事件，一次触发如果没有处理好，就没有第二次机会了。虽然LT重复触发可能有少许性能损耗，但更安全。
+
+### nio
 
 ## Reactor模式
 
@@ -216,8 +292,6 @@ QUIC（Quick UDP Internet Connection）是由Google公司提出的基于UDP协�
 ## Disruptor模式
 
 
-
-[C10K](http://www.kegel.com/c10k.html)问题
 
 基于IO多路复用的高并发学习框架[handy](https://github.com/yedf/handy)
 
