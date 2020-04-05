@@ -363,11 +363,9 @@ Reactor的组件：
 
 ![主从Reactor模型](/images/reactor_master_slave.webp "主从Reactor模型")
 
-多线程的Reactor模型将线程分为IO线程和工作线程。
+多线程的Reactor模型将线程分为IO线程和工作线程，详细说明见[高性能Server---Reactor模型](https://www.jianshu.com/p/2461535c38f3)。
 
 Netty是Reactor模式的开源框架。
-
-详细说明见[高性能Server---Reactor模型](https://www.jianshu.com/p/2461535c38f3)。
 
 ## Proactor模式
 
