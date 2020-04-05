@@ -128,7 +128,7 @@
 <meta property="og:image" content="http://yoursite.com/images/reactor_single_thread.webp">
 <meta property="og:image" content="http://yoursite.com/images/reactor_multiple_thread.webp">
 <meta property="og:image" content="http://yoursite.com/images/reactor_master_slave.webp">
-<meta property="og:updated_time" content="2020-04-05T07:37:26.561Z">
+<meta property="og:updated_time" content="2020-04-05T10:19:48.247Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java后端开发 - 网络">
 <meta name="twitter:description" content="HTTPHTTP协议规范：  1996年的HTTP1.0的RFC1945 1999年的HTTP1.1的RFC2616 2015年的HTTP/2的RFC7540和RFC7541  HTTP1.0的问题HTTP协议的基本特点是“一来一回”，客户端发起一个TCP连接，在连接上面发一个HTTP Request到服务器，服务器返回一个HTTP Response，然后关闭连接。每个请求都要重复这样的操作，存在">
@@ -353,7 +353,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-04-05 15:37:26" itemprop="dateModified" datetime="2020-04-05T15:37:26+08:00">2020-04-05</time>
+                <time title="Modified: 2020-04-05 18:19:48" itemprop="dateModified" datetime="2020-04-05T18:19:48+08:00">2020-04-05</time>
               
             
           </span>
@@ -512,9 +512,8 @@
 <p><img src="/images/reactor_multiple_thread.webp" alt="多线程的Reactor模型" title="多线程的Reactor模型"></p>
 <p>主从Reactor模型：</p>
 <p><img src="/images/reactor_master_slave.webp" alt="主从Reactor模型" title="主从Reactor模型"></p>
-<p>多线程的Reactor模型将线程分为IO线程和工作线程。</p>
+<p>多线程的Reactor模型将线程分为IO线程和工作线程，详细说明见<a href="https://www.jianshu.com/p/2461535c38f3" target="_blank" rel="noopener">高性能Server—Reactor模型</a>。</p>
 <p>Netty是Reactor模式的开源框架。</p>
-<p>详细说明见<a href="https://www.jianshu.com/p/2461535c38f3" target="_blank" rel="noopener">高性能Server—Reactor模型</a>。</p>
 <h2 id="Proactor模式"><a href="#Proactor模式" class="headerlink" title="Proactor模式"></a>Proactor模式</h2><p>Proactor称为被动模式，应用程序把read和write函数操作全部交给操作系统或者网络框架，实际的IO操作由操作系统或者网络框架完成，之后再回调应用程序。<a href="https://think-async.com/Asio/" target="_blank" rel="noopener">asio</a>库就是典型的Proactor模式。</p>
 
       
