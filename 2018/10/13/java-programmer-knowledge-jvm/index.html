@@ -108,21 +108,18 @@
 
 
 
-  <meta name="description" content="类加载机制和双亲委派模型类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流">
+  <meta name="description" content="类加载机制类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字">
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java后端开发 - JVM">
 <meta property="og:url" content="http://yoursite.com/2018/10/13/java-programmer-knowledge-jvm/index.html">
 <meta property="og:site_name" content="海东青">
-<meta property="og:description" content="类加载机制和双亲委派模型类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流">
+<meta property="og:description" content="类加载机制类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4491294-8edc15f60a58bd0b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/468/format/webp">
-<meta property="og:image" content="http://yoursite.com/2018/10/13/java-programmer-knowledge-jvm/%22Java内存模型%22">
-<meta property="og:updated_time" content="2018-10-25T15:01:24.711Z">
+<meta property="og:updated_time" content="2020-04-04T06:11:35.278Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java后端开发 - JVM">
-<meta name="twitter:description" content="类加载机制和双亲委派模型类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流">
-<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/4491294-8edc15f60a58bd0b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/468/format/webp">
+<meta name="twitter:description" content="类加载机制类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字">
 
 
 
@@ -287,7 +284,7 @@
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/10/13/java-programmer-knowledge-jvm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Gyrfalcon,stltqhs@163.com">
+      <meta itemprop="name" content="海东青">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
@@ -343,7 +340,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-10-25 23:01:24" itemprop="dateModified" datetime="2018-10-25T23:01:24+08:00">2018-10-25</time>
+                <time title="Modified: 2020-04-04 14:11:35" itemprop="dateModified" datetime="2020-04-04T14:11:35+08:00">2020-04-04</time>
               
             
           </span>
@@ -376,7 +373,7 @@
       
 
       
-        <h1 id="类加载机制和双亲委派模型"><a href="#类加载机制和双亲委派模型" class="headerlink" title="类加载机制和双亲委派模型"></a>类加载机制和双亲委派模型</h1><p>类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括<strong>加载</strong>、<strong>验证</strong>、<strong>准备</strong>、<strong>解析</strong>、<strong>初始化</strong>、<strong>使用</strong>、<strong>卸载</strong>七个阶段，其中类加载过程包括<strong>加载</strong>、<strong>验证</strong>、<strong>准备</strong>、<strong>解析</strong>、<strong>初始化</strong>五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。</p>
+        <h1 id="类加载机制"><a href="#类加载机制" class="headerlink" title="类加载机制"></a>类加载机制</h1><p>类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括<strong>加载</strong>、<strong>验证</strong>、<strong>准备</strong>、<strong>解析</strong>、<strong>初始化</strong>、<strong>使用</strong>、<strong>卸载</strong>七个阶段，其中类加载过程包括<strong>加载</strong>、<strong>验证</strong>、<strong>准备</strong>、<strong>解析</strong>、<strong>初始化</strong>五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。</p>
 <ul>
 <li>加载</li>
 </ul>
@@ -388,25 +385,24 @@
 <ul>
 <li>准备</li>
 </ul>
-<p>准备阶段是正式为类变量分配内存并设置类变量初始值的阶段，这些内存都将在方法区中分配。为类变量分配内存时，会将内存清零，所以，对于<code>public static int value = 3</code>中的变量<code>value</code>，在准备阶段的值是0。如果类字段的字段属性表中存在ConstantValue属性，即同时被final和static修饰（对于同时被static和final修饰的常量，必须在声明的时候就为其显式地赋值，否则编译时不通过），那么在准备阶段变量value就会被初始化为ConstValue属性所指定的值。解析阶段包括四种类型的解析，分别是<strong>类或接口解析</strong>、<strong>字段解析</strong>、<strong>类方法解析</strong>、<strong>接口方法解析</strong>。</p>
+<p>准备阶段是正式为类变量分配内存并设置类变量初始值的阶段，这些内存都将在方法区中分配。为类变量分配内存时，会将内存清零，所以，对于<code>public static int value = 3</code>中的变量<code>value</code>，在准备阶段的值是0。如果类字段的字段属性表中存在ConstantValue属性，即同时被final和static修饰（对于同时被static和final修饰的常量，必须在声明的时候就为其显式地赋值，否则编译时不通过），那么在准备阶段变量value就会被初始化为ConstValue属性所指定的值。</p>
 <ul>
 <li>解析</li>
 </ul>
-<p>解析阶段是虚拟机将常量池中的符号引用转化为直接引用的过程。所谓符号引用，是指以一组符号来描述所引用的目标，符号可以是任何形式的字面量，只要使用时能无歧义地定位到目标即可，符号引用与虚拟机实现的内存布局无关，引用的目标并不一定已经加载到了内存中。而直接引用是指直接引用可以是直接指向目标的指针、相对偏移量或是一个能间接定位到目标的句柄，直接引用是与虚拟机实现的内存布局相关的，同一个符号引用在不同虚拟机实例上翻译出来的直接引用一般不会相同，如果有了直接引用，那说明引用的目标必定已经存在于内存之中了。</p>
+<p>解析阶段是虚拟机将常量池中的符号引用转化为直接引用的过程，它包括四种类型的解析，分别是<strong>类或接口解析</strong>、<strong>字段解析</strong>、<strong>类方法解析</strong>、<strong>接口方法解析</strong>。所谓符号引用，是指以一组符号来描述所引用的目标，符号可以是任何形式的字面量，只要使用时能无歧义地定位到目标即可，符号引用与虚拟机实现的内存布局无关，引用的目标并不一定已经加载到了内存中。而直接引用是直接指向目标的指针、相对偏移量或是一个能间接定位到目标的句柄，直接引用是与虚拟机实现的内存布局相关的，同一个符号引用在不同虚拟机实例上翻译出来的直接引用一般不会相同，如果有了直接引用，那说明引用的目标必定已经存在于内存之中了。</p>
 <ul>
 <li>初始化</li>
 </ul>
-<p>初始化阶段是执行类构造器<code>&lt;clinit&gt;()</code>方法的过程。<code>&lt;clinit&gt;（）</code>方法是由编译器自动收集类中的所有类变量的赋值动作和静态语句块中的语句合并产生的，编译器收集的顺序是由语句在源文件中出现的顺序所决定的，静态语句块中只能访问到定义在静态语句块之前的变量，定义在它之后的变量，在前面的静态语句中可以赋值，但是不能访问。</p>
-<hr>
-<p>类加载器包括：</p>
+<p>初始化阶段是执行类构造器<code>&lt;clinit&gt;()</code>方法的过程。<code>&lt;clinit&gt;（）</code>方法是由编译器自动收集类中的所有类变量的赋值动作和静态语句块中的语句合并产生的，编译器收集的顺序是由语句在源代码中出现的顺序所决定的，静态语句块中只能访问到定义在静态语句块之前的变量，定义在它之后的变量，在前面的静态语句中可以赋值，但是不能访问。</p>
+<h1 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h1><p>类加载器包括：</p>
 <ul>
 <li>启动（Bootstrap）类加载器</li>
 </ul>
-<p>负责将 Java_Home/lib下面的类库加载到内存中（比如rt.jar）。由于引导类加载器涉及到虚拟机本地实现细节，开发者无法直接获取到启动类加载器的引用，所以不允许直接通过引用进行操作。该加载器由C++代码实现。</p>
+<p>负责将 JAVA_HOME/lib下面的类库加载到内存中（比如rt.jar）。由于引导类加载器涉及到虚拟机本地实现细节，开发者无法直接获取到启动类加载器的引用，所以不允许直接通过引用进行操作。该加载器由C++代码实现。</p>
 <ul>
 <li>标准扩展（Extension）类加载器</li>
 </ul>
-<p>是由 Oracle 的 ExtClassLoader（sun.misc.Launcher$ExtClassLoader）实现的。它负责将Java_Home /lib/ext或者由系统变量 java.ext.dir指定位置中的类库加载到内存中。开发者可以直接使用标准扩展类加载器</p>
+<p>是由 Oracle 的 ExtClassLoader（sun.misc.Launcher$ExtClassLoader）实现的。它负责将JAVA_HOME/lib/ext或者由系统变量 java.ext.dir指定位置中的类库加载到内存中。开发者可以直接使用标准扩展类加载器</p>
 <ul>
 <li>应用程序（Application）类加载器</li>
 </ul>
@@ -415,15 +411,12 @@
 <li>自定义类加载器</li>
 </ul>
 <p>开发人员自定义的类加载器。</p>
-<p>这些类加载器组成一个层级关系，称为<strong>双亲委派模型</strong>，将类加载器的职责分开。而且这种层级关系一般通过组合关系来实现，而不是通过继承。层级关系如下图：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/4491294-8edc15f60a58bd0b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/468/format/webp" alt="双亲委派模型" title="双亲委派模型"></p>
+<p>这些类加载器组成一个层级关系，称为<strong>双亲委派模型</strong>，将类加载器的职责分开。而且这种层级关系一般通过组合关系来实现，而不是通过继承。</p>
 <p><strong>双亲委派模型</strong>的过程是首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。使用双亲委派模型的好处在于Java类随着它的类加载器一起具备了一种带有优先级的层次关系。<strong>双亲委派模型</strong>的实现代码是<code>java.lang.ClassLoader</code>的<code>loadClass()</code>方法，如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">synchronized</span> Class&lt;?&gt; loadClass(String name,<span class="keyword">boolean</span> resolve)<span class="keyword">throws</span> ClassNotFoundException&#123;</span><br><span class="line">    <span class="comment">//check the class has been loaded or not</span></span><br><span class="line">    Class c = findLoadedClass(name);</span><br><span class="line">    <span class="keyword">if</span>(c == <span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(parent != <span class="keyword">null</span>)&#123;</span><br><span class="line">                c = parent.loadClass(name,<span class="keyword">false</span>);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                c = findBootstrapClassOrNull(name);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span>(ClassNotFoundException e)&#123;</span><br><span class="line">            <span class="comment">//if throws the exception ,the father can not complete the load</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(c == <span class="keyword">null</span>)&#123;</span><br><span class="line">            c = findClass(name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(resolve)&#123;</span><br><span class="line">        resolveClass(c);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>自定义类加载器时只需要重写<code>findClass()</code>方法即可。</p>
 <p>线程上下文类加载器（Thread Context Class Loader）可以通过<code>java.lang.Thread</code>类的<code>setContextClassLoader()</code>方法进行设置，如果创建线程时还未设置，它将会从父线程中继承一个；如果在应用程序的全局范围内都没有设置过，那么这个类加载器默认就是应用程序类加载器。这种行为实际上是打破了<strong>双亲委派模型</strong>的层次结构。</p>
-<p>参考：<a href="https://book.douban.com/subject/6522893/" target="_blank" rel="noopener">深入理解Java虚拟机</a>，<a href="https://blog.csdn.net/ns_code/article/details/17881581" target="_blank" rel="noopener">【深入Java虚拟机】之四：类加载机制</a>，<a href="https://blog.csdn.net/u011080472/article/details/51332866" target="_blank" rel="noopener">【深入理解JVM】：类加载器与双亲委派模型</a></p>
-<h1 id="Java内存模型和运行时数据区"><a href="#Java内存模型和运行时数据区" class="headerlink" title="Java内存模型和运行时数据区"></a>Java内存模型和运行时数据区</h1><p>Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存或工作内存（local memory），本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，并不真实存在，它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化。JMM如下图所示：</p>
-<p><img src="&quot;Java内存模型&quot;" alt="Java内存模型"></p>
+<h1 id="Java内存模型和运行时数据区"><a href="#Java内存模型和运行时数据区" class="headerlink" title="Java内存模型和运行时数据区"></a>Java内存模型和运行时数据区</h1><p>Java内存模型（Java Memory Model，简称JMM）定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存或工作内存（local memory），本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化的内存重排序。</p>
 <p>运行时数据区包括：<strong>程序计数器</strong>、<strong>方法区</strong>、<strong>堆</strong>、<strong>虚拟机栈</strong>、<strong>本地方法栈</strong>。</p>
 <ul>
 <li>程序计数器</li>
@@ -432,11 +425,11 @@
 <ul>
 <li>方法区</li>
 </ul>
-<p>方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用<code>-XX:MaxPermSize</code>调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。<strong>运行时常量池</strong>（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。在Java8中，方法区已被移除，引进了Metaspace（本地堆内存）来存放类信息，字符串常量池移至堆区。</p>
+<p>方法区（Method Area）与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。方法区又称“永久代”(Permanent Generation) ，使用<code>-XX:MaxPermSize</code>调整最大值，当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。<strong>运行时常量池</strong>（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池表（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后存放在方法区的运行时常量池中。在Java8中，方法区已被移除，引进了Metaspace（本地堆内存）来存放类信息，字符串常量池移至堆区。</p>
 <ul>
 <li>堆</li>
 </ul>
-<p>Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定，Java堆可以处于物理上不连续的内存空间中，只要逻辑上是连续的即可，就像我们的磁盘空间一样。在实现时，既可以实现成固定大小的，也可以是可扩展的，不过当前主流的虚拟机都是按照可扩展来实现的。可 通过<code>-Xmx</code>和<code>-Xms</code>控制Heap大小，如果在堆中没有内存完成实例分配，并且堆也无法再扩展时，将会抛出OutOfMemoryError异常。</p>
+<p>Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定，Java堆可以处于物理上不连续的内存空间中，只要逻辑上是连续的即可，就像我们的磁盘空间一样。在实现时，既可以实现成固定大小的，也可以是可扩展的，不过当前主流的虚拟机都是按照可扩展来实现的。可通过<code>-Xmx</code>和<code>-Xms</code>控制Heap大小，如果在堆中没有内存完成实例分配，并且堆也无法再扩展时，将会抛出OutOfMemoryError异常。</p>
 <ul>
 <li>虚拟机栈</li>
 </ul>
@@ -446,7 +439,6 @@
 </ul>
 <p>本地方法栈（Native Method Stacks）与虚拟机栈所发挥的作用非常类似，区别在于虚拟机栈为虚拟机执行Java方法服务，而本地方法栈则是为虚拟机使用到的Native方法服务。</p>
 <p><strong>直接内存</strong>不是虚拟机运行时数据区的一部分，在Java1.4引入的NIO中新增了<code>DirectByteBuffer</code>对象作为这块内存的引用。该部分的内存大小不受Java堆大小限制，而是受操作系统内存限制。</p>
-<p>参考：<a href="https://blog.csdn.net/suifeng3051/article/details/52611310" target="_blank" rel="noopener">全面理解Java内存模型</a>，<a href="http://sparkyuan.me/2016/04/22/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/" target="_blank" rel="noopener">JVM内存区域分析</a>，<a href="https://www.sczyh30.com/posts/Java/jvm-metaspace/" target="_blank" rel="noopener">深入探究 JVM | 探秘 Metaspace</a></p>
 <h1 id="垃圾收集"><a href="#垃圾收集" class="headerlink" title="垃圾收集"></a>垃圾收集</h1><p>判断对象是否存活的算法有两种，一种是<strong>引用计数器算法</strong>，另一种是<strong>根搜索算法</strong>。</p>
 <p>引用计数器算法的基本思路是给对象添加一个引用计数器，每当有一个地方引用它时，计数器的值就加1；当引用失效时，计数器的值减1；任何时刻计数器为0的对象就是不可能再被使用。引用计数器算法实现简单、效率高（微软的COM即Componet Object Model就是使用该算法），但存在一个缺点，对于对象之间的相互循环引用的问题无法解决，所以JVM并未使用该算法。</p>
 <p>根搜索算法（RC Roots Tracing）的基本思路就是通过一系列的名为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称为引用链（Reference Chain），当一个对象到“GC Roots”没有任何引用链相连（用图论的话来说就是从“GC Roots”到这个对象不可达）时，则证明此对象是不可用的。在Java语言里，可作为“GC Roots”的对象包括：虚拟机栈（栈帧中的本地变量表）中的引用的对象、方法区中的类静态属性引用的对象、方法区中的常量引用对象、本地方法栈中JNI引用的对象。</p>
@@ -493,13 +485,12 @@
 <ul>
 <li>CMS收集器</li>
 </ul>
-<p>CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器，使用“标记-清除”算法实现。它的运作过程分为4个阶段：初始标记、并发标记、重新标记、并发清除。其中初始标记和重新标记需要“Stop the world”，并发标记和并发清除可以与用户线程并发执行。耗时最长的也是并发标记和并发清除，而这两个阶段可以与用户线程一起执行，减少了停顿时间。CMS收集器有3个缺点：对CPU资源敏感（并发阶段会占用一部分线程导致应用线程变慢，总吞吐量会降低）、无法处理浮动垃圾（并发清理阶段用户线程还在运行，此时会产生新的垃圾）、存在空间碎片（由于“标记-清除算法“）。当可用空间不足或者垃圾碎片太多没有足够空间容纳晋升对象时会发生并发模式失败，此时老年代将进行垃圾收集以释放可用空间，同时也会以整理压缩以消除碎片，这个操作需要停止所有的Java应用进程，并且需要执行相当长时间。与Parallel Scavenge收集器相比，CMS老年代停顿变短了，但代价是新生代停顿略微拉长、吞吐量有所降低，堆的大小有所增加，并且由于并发，垃圾收集还会占用应用的CPU周期。</p>
+<p>CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器，使用“标记-清除”算法实现。它的运作过程分为4个阶段：初始标记、并发标记、重新标记、并发清除。其中初始标记和重新标记需要“Stop The World”，并发标记和并发清除可以与用户线程并发执行。耗时最长的也是并发标记和并发清除，而这两个阶段可以与用户线程一起执行，减少了停顿时间。CMS收集器有3个缺点：对CPU资源敏感（并发阶段会占用一部分线程导致应用线程变慢，总吞吐量会降低）、无法处理浮动垃圾（并发清理阶段用户线程还在运行，此时会产生新的垃圾）、存在空间碎片（由于“标记-清除算法”）。当可用空间不足或者垃圾碎片太多没有足够空间容纳晋升对象时会发生并发模式失败，此时老年代将进行垃圾收集以释放可用空间，同时也会以整理压缩以消除碎片，这个操作需要停止所有的Java应用进程，并且需要执行相当长时间。与Parallel Scavenge收集器相比，CMS老年代停顿变短了，但代价是新生代停顿略微拉长、吞吐量有所降低，堆的大小有所增加，并且由于并发，垃圾收集还会占用应用的CPU周期。</p>
 <ul>
 <li>G1收集器</li>
 </ul>
 <p><strong>G1收集器</strong>的设计目标是取代CMS收集器，不会产生很多内存碎片，Stop The World(STW)更可控，G1在停顿时间上添加了预测机制，用户可以指定期望停顿时间，使用复制算法实现。G1收集器将堆划分为多个内存区域（Region），每一块区域都可以作为Eden或者Survivor或者Tenured或者是大对象区域。内存区域大小可以通过参数<code>-XX:G1HeapRegionSize</code>设定，取值范围从1M到32M，且是2的指数。一次收集其中一部分，这样的方式又叫做增量收集(incremental collection)，分代收集也可以看成一种特殊的增量收集。</p>
 <p>内存泄漏是指无用对象（不再使用的对象）持续占有内存或无用对象的内存得不到及时释放，从而造成内存空间的浪费称为内存泄漏。长生命周期的对象持有短生命周期对象的引用就很可能发生内存泄漏，尽管短生命周期对象已经不再需要，但是<strong>因为长生命周期持有它的引用而导致不能被回收，这就是Java中内存泄漏的发生场景</strong>。</p>
-<p>参考：<a href="https://book.douban.com/subject/6522893/" target="_blank" rel="noopener">深入理解Java虚拟机</a>，<a href="https://blog.csdn.net/high2011/article/details/53138202" target="_blank" rel="noopener">java7和java8的垃圾回收</a>，<a href="https://www.jianshu.com/p/54b5da7c6816" target="_blank" rel="noopener">Java内存泄漏分析和解决</a>，<a href="https://liuzhengyang.github.io/2017/06/07/garbage-first-collector/" target="_blank" rel="noopener">Garbage First G1收集器 理解和原理分析</a></p>
 <h1 id="JVM关闭钩子"><a href="#JVM关闭钩子" class="headerlink" title="JVM关闭钩子"></a>JVM关闭钩子</h1><p>首先JVM的关闭方式可以分为三种：</p>
 <ul>
 <li>正常关闭：当最后一个非守护线程结束或者调用了System.exit或者通过其他特定平台的方法关闭（发送SIGINT，SIGTERM信号等）</li>
@@ -507,7 +498,6 @@
 <li>异常关闭：运行中遇到RuntimeException异常等。</li>
 </ul>
 <p>JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删除临时文件、停止日志服务以及内存数据写到磁盘等，为此JVM提供了关闭钩子（shutdown hooks）来做这些事情。关闭钩子本质上是一个线程（也称为Hook线程），用来监听JVM的关闭。通过使用<code>Runtime</code>的<code>addShutdownHook(Thread hook)</code>可以向JVM注册一个关闭钩子。Hook线程在JVM <strong>正常关闭</strong>才会执行，在强制关闭时不会执行。对于一个JVM中注册的多个关闭钩子它们将会并发执行，所以JVM并不能保证它的执行顺行。当所有的Hook线程执行完毕后，如果此时runFinalizersOnExit为true，那么JVM将先运行终结器，然后停止。</p>
-<p>参考：<a href="https://blog.csdn.net/dd864140130/article/details/49155179" target="_blank" rel="noopener">深入JVM关闭与关闭钩子</a></p>
 <h1 id="Java-Agent"><a href="#Java-Agent" class="headerlink" title="Java Agent"></a>Java Agent</h1><p>javaagent的主要功能如下：</p>
 <ul>
 <li>可以在加载class文件之前做拦截，对字节码做修改</li>
@@ -522,7 +512,7 @@
 </ul>
 </li>
 </ul>
-<p><a href="http://docs.oracle.com/javase/7/docs/platform/jvmti/jvmti.html" target="_blank" rel="noopener">JVMTI</a>全称JVM Tool Interface，是JVM暴露出来的一些供用户扩展的接口集合。JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口（如果有的话），这些接口可以供开发者扩展自己的逻辑。JVMTIAgent其实就是一个动态库，利用JVMTI暴露出来的一些接口来干一些我们想做、但是正常情况下又做不到的事情。，不过为了和普通的动态库进行区分，它一般会实现如下的一个或者多个函数：</p>
+<p><a href="http://docs.oracle.com/javase/7/docs/platform/jvmti/jvmti.html" target="_blank" rel="noopener">JVMTI</a>全称JVM Tool Interface，是JVM暴露出来的一些供用户扩展的接口集合。JVMTI是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口（如果有的话），这些接口可以供开发者扩展自己的逻辑。JVMTIAgent其实就是一个动态库，利用JVMTI暴露出来的一些接口来干一些我们想做、但是正常情况下又做不到的事情。不过为了和普通的动态库进行区分，它一般会实现如下的一个或者多个函数：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">JNIEXPORT jint JNICALL</span><br><span class="line">Agent_OnLoad(JavaVM *vm, <span class="keyword">char</span> *options, <span class="keyword">void</span> *reserved);</span><br><span class="line"></span><br><span class="line">JNIEXPORT jint JNICALL</span><br><span class="line">Agent_OnAttach(JavaVM* vm, <span class="keyword">char</span>* options, <span class="keyword">void</span>* reserved);</span><br><span class="line"></span><br><span class="line">JNIEXPORT <span class="keyword">void</span> JNICALL</span><br><span class="line">Agent_OnUnload(JavaVM *vm);</span><br></pre></td></tr></table></figure>
 <ul>
 <li>Agent_OnLoad函数，如果agent是在启动时加载的，也就是在vm参数里通过-agentlib来指定的，那在启动过程中就会去执行这个agent里的Agent_OnLoad函数。</li>
@@ -532,7 +522,6 @@
 <p>JVMTIAgent在开发过程中经常会使用到，比如调试功能（使用<code>-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:61349</code>来设置），它会查找一个动态库（Linux系统下为<code>libjdwp.so</code>）并加载（调用<code>Agent_OnLoad</code>方法）。</p>
 <p>instrument实现了JVMTIAgent（动态库为<code>libinstrument.so</code>），它称为javaagent，别名JPLISAgent(Java Programming Language Instrumentation Services Agent)。instrument的使用方式是通过在启动命令上添加<code>-javaagent:xxx.jar</code>的方式加载一个被称为agent的jar包，jar包的META-INF/MANIFEST.MF中应当声明Premain-Class或Main-Class。启动时JVM会寻找这个类中的<code>public static void premain(String agentArgs, Instrumentation instrumentation)</code>, <code>Instrumentation</code>对象中可以添加自己的类修改逻辑进行字节码修改。另外当通过attach到一个运行中的JVM的方式时，可以调用<code>agentmain()</code>方法来获取<code>Instrumentation</code>对象进行类的重定义。</p>
 <p>使用javagent实现的一些知名的库有<a href="https://github.com/btraceio/btrace" target="_blank" rel="noopener">Btrace</a>，<a href="https://github.com/HotswapProjects/HotswapAgent" target="_blank" rel="noopener">HotswapAgent</a>。</p>
-<p>参考：<a href="https://liuzhengyang.github.io/2017/03/15/javaagent/" target="_blank" rel="noopener">javaagent</a>，<a href="https://www.jianshu.com/p/dbb3a8b5c92f" target="_blank" rel="noopener">如何在生产环境使用Btrace进行调试</a>，<a href="http://www.infoq.com/cn/articles/javaagent-illustrated" target="_blank" rel="noopener">JVM源码分析之javaagent原理完全解读</a></p>
 <h1 id="Hotswap"><a href="#Hotswap" class="headerlink" title="Hotswap"></a>Hotswap</h1><p>热部署（Hotswap）是在不重启 Java 虚拟机的前提下，能自动侦测到 class 文件的变化，更新运行时 class 的行为。目前的 Java 虚拟机只能实现方法体的修改热部署（只有在Debug模式下才能使用），对于整个类的结构修改，仍然需要重启虚拟机，对类重新加载才能完成更新操作。默认的虚拟机行为只会在启动时加载类，如果后期有一个类需要更新的话，单纯替换编译的 class 文件，Java 虚拟机是不会更新正在运行的 class。为了实现热部署，可以使用自定义的 classloader 来加载需要监听的 class，这样就能控制类加载的时机，从而实现热部署。由于同一个类加载器无法同时加载两个相同名称的类，不论类的结构如何发生变化，生成的类名不会变，而 classloader 只能在虚拟机停止前销毁已经加载的类，这样 classloader 就无法加载更新后的类了。解决的办法是让每次加载的类都保存成一个带有版本信息的 class，比如加载 Test.class 时，保存在内存中的类是 Test_v1.class，当类发生改变时，重新加载的类名是 Test_v2.class，使用该方法后，实例化对象的方式都需要使用反射，不能使用<code>new</code>关键字。</p>
 <p>Tomcat支持热部署，通过配置Context的<code>realodable</code>为<code>true</code>告知Tomcat某个Context支持重新加载被修改的类，这里以Tomcat的Context的reload功能为例说明Tomcat的热部署的实现方式。Tomcat的Context标准实现类是<code>org.apache.catalina.core.StandardContext</code>，在<code>org.apache.catalina.loader.WebappLoader</code>的<code>backgroundProcess()</code>方法会周期性地检查是否存在被修改的类，该方法定义如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">backgroundProcess</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (reloadable &amp;&amp; modified()) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.currentThread().setContextClassLoader</span><br><span class="line">                (WebappLoader.class.getClassLoader());</span><br><span class="line">            <span class="keyword">if</span> (context != <span class="keyword">null</span>) &#123;</span><br><span class="line">                context.reload();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (context != <span class="keyword">null</span> &amp;&amp; context.getLoader() != <span class="keyword">null</span>) &#123;</span><br><span class="line">                Thread.currentThread().setContextClassLoader</span><br><span class="line">                    (context.getLoader().getClassLoader());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -542,18 +531,17 @@
 <p>它先调用<code>stop()</code>方法，然后再调用<code>start()</code>方法。<code>StandardContext.start()</code>之后的调用链会是<code>StandardContext.startInternal()</code>，<code>WebappLoader.start()</code>，<code>WebappLoader.startInternal()</code>。<code>WebappLoader</code>封装了<code>ClassLoader</code>，<code>StandardContext</code>将要使用到的类加载器就是<code>WebppLoader.classLoader</code>，它在<code>WebappLoader.startInternal()</code>方法内调用<code>createClassLoader()</code>方法实例化一个<code>ClassLoader</code>，代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> WebappClassLoader <span class="title">createClassLoader</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    Class&lt;?&gt; clazz = Class.forName(loaderClass);</span><br><span class="line">    WebappClassLoader classLoader = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (parentClassLoader == <span class="keyword">null</span>) &#123;</span><br><span class="line">        parentClassLoader = context.getParentClassLoader();</span><br><span class="line">    &#125;</span><br><span class="line">    Class&lt;?&gt;[] argTypes = &#123; ClassLoader.class &#125;;</span><br><span class="line">    Object[] args = &#123; parentClassLoader &#125;;</span><br><span class="line">    Constructor&lt;?&gt; constr = clazz.getConstructor(argTypes);</span><br><span class="line">    classLoader = (WebappClassLoader) constr.newInstance(args);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> classLoader;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>Context每次reload后，<code>WebappLoader</code>都会创建一个新的<code>ClassLoader</code>，这个<code>ClassLoader</code>会重新加载Servlet相关组件的类，完成热部署的效果。</p>
-<p>参考：<a href="https://www.ibm.com/developerworks/cn/java/j-lo-hotdeploy/index.html" target="_blank" rel="noopener">深入探索 Java 热部署</a>，<a href="https://my.oschina.net/heroShane/blog/198492" target="_blank" rel="noopener">Tomcat 热部署实现方式源码分析总结</a>，<a href="https://www.jianshu.com/p/d05ef74694f7" target="_blank" rel="noopener">Tomcat源码debug环境</a></p>
 <h1 id="Hotspot-VM致命错误处理"><a href="#Hotspot-VM致命错误处理" class="headerlink" title="Hotspot VM致命错误处理"></a>Hotspot VM致命错误处理</h1><p>Hotspot VM是Oracle JVM的实现，<code>OutOfMemoryError</code>是常见的Hotspot VM致命错误，在Linux平台存在段错误（Segmentation Fault），在Windows平台存在访问冲突（Access Violation）。当Hotspot VM因为致命错误而崩溃时，会生产Hotspot错误日志文件，名为<code>hs_err_pid&lt;pid&gt;.log</code>，这里<code>&lt;pid&gt;</code>是崩溃Hotspot VM进程的id，<code>hs_err_pid&lt;pid&gt;.log</code>文件生成在Hotspot VM的启动目录下。<code>hs_err_pid&lt;pid&gt;.log</code>错误日志文件包括内存镜像、操作系统级别动态库调用栈等数据，可以根据这些信息定位是哪个库方法调用时导致了Hotspot VM崩溃。<code>hs_err_pid&lt;pid&gt;.log</code>错误日志文件名可以使用<code>-XX:ErrorFile</code>配置。当发生<code>OutOfMemoryError</code>时，可以通过配置<code>-XX:+HeapDumpOnOutOfMemory</code>将堆信息导出到文件中。</p>
-<h1 id="调优方法"><a href="#调优方法" class="headerlink" title="调优方法"></a>调优方法</h1><p>对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数<code>-XX:+PrintGCDetails</code>），结合系统业务特征，设置新生代大小（<code>-Xmn</code>），设置堆大小（<code>-Xms</code>和<code>-Xmx</code>），设置不同的垃圾收集器。</p>
+<h1 id="调优方法"><a href="#调优方法" class="headerlink" title="调优方法"></a>调优方法</h1><p>对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数<code>-XX:+PrintGCDetails</code>），结合系统业务特征，设置新生代大小（<code>-Xmn</code>），设置堆大小（<code>-Xms</code>和<code>-Xmx</code>），设置不同的垃圾收集器。通过打印应用程序停顿时间（使用参赛<code>-XX:+PrintGCApplicationStoppedTime</code>）检查应用程序代码问题，该部分内容涉及到GC Safepoint，将在下节介绍。</p>
 <p>对JVM性能调优前，首先需要对应用进行必要的监控，然后根据监控信息来调整相关配置，继续监控调整配置后的应用运行性能。由于JVM调优主要在垃圾收集方面，因此需要对JVM的垃圾收集进行监控，可以使用参数<code>-XX:+PrintGCDetails</code>让JVM输出垃圾收集日志，可以使用参数<code>-Xloggc</code>指定垃圾收集日志输出到文件。其他参数还包括：<code>-verbose:gc</code>（基本垃圾收集日志）、<code>-XX:+PrintGCTimeStamps</code>（打印垃圾收集触发时间戳）、<code>-XX:+PrintGCApplicationConcurrentTime</code>（垃圾收集时应用线程并发执行的时间）、<code>-XX:+PrintGCApplicationStoppedTime</code>（垃圾收集时应用线程停止执行的时间）、<code>-XX:+PrintTenuringDistribution</code>（输出每次Minor GC时晋升分布情况）。可以使用GUI工具<a href="https://github.com/jewes/gchisto" target="_blank" rel="noopener">GCHisto</a>分析垃圾收集日志文件。垃圾收集日志中重点需要关注这些数据指标：当前使用的垃圾收集器、Java堆大小、新生代和老年代的大小、永久代的大小、Minor GC的频率、Minor GC的空间回收量、Full GC的执行时间、Full GC的频率、每个并发垃圾收集周期内的空间回收量、垃圾收集前后Java堆的占用量、垃圾收集前后新生代和老年代的占用量、垃圾收集前后永久代的占用量、是否老年代或永久代的占用触发了Full GC、应用是否显示调用了<code>System.gc()</code>。每种收集器打印的垃圾收集日志会有差异，可以参考<a href="https://www.oracle.com/technetwork/java/example-141412.html" target="_blank" rel="noopener">Diagnosing a Garbage Collection problem</a>说明的日志格式，分析日志文件。</p>
-<p>除了设置JVM输出垃圾收集日志外，在测试环境中（注意不是生产环境），还可以使用<a href="https://www.oracle.com/technetwork/cn/server-storage/developerstudio/features/performance-analyzer-2292312-zhs.html" target="_blank" rel="noopener">Oracle Solaris Studio Performance Analyzer</a>和<a href="https://profiler.netbeans.org/" target="_blank" rel="noopener">NetBeans profiler</a>收集应用运行的数据性能，包括方法执行时间、耗时最长的方法系统态CPU时间和用户态CPU时间。</p>
+<p>除了设置JVM输出垃圾收集日志外，在测试环境中（注意不是生产环境），还可以使用<a href="https://www.oracle.com/technetwork/cn/server-storage/developerstudio/features/performance-analyzer-2292312-zhs.html" target="_blank" rel="noopener">Oracle Solaris Studio Performance Analyzer</a>和<a href="https://profiler.netbeans.org/" target="_blank" rel="noopener">NetBeans profiler</a>收集应用运行的性能数据，包括方法执行时间、耗时最长的方法系统态CPU时间和用户态CPU时间。</p>
 <p>JVM运行模式分为Client模式和Server模式，Client模式的特点是启动快、占用内存少、JIT编译器生成代码的速度也快，Server模式则提供了更复杂的生成代码优化功能。使用32位JVM还是64位JVM是由应用程序的内存占用决定的，同时需要考虑应用程序中的第三方库是否支持64位JVM、Java应用程序中是否使用了本地组件。早期的64位JVM会占用太多内存，原因是指针是有64位存储，而且性能也比32位JVM差，之后，JVM引入了指针压缩（<code>-XX:+UseCompressdOops</code>）的方式解决该问题。</p>
 <p>调整年轻代、老年代空间容量大小可以控制垃圾收集次数，影响垃圾收集效率。当使用<code>-XX:+PrintTenuringDistribution</code>参数观察到对象提前进入老年代，说明Survivor空间不足，此时需要增大Survivor空间。调整Survivor空间容量的一个重要原则是：调整Survivor空间容量时，如果新生代空间大小不变，增大Survivor空间会减少Eden空间；而减少Eden空间会增加Minor GC的频率。为了同时满足应用程序Minor GC频率的要求，就需要增大当前新生代空间的大小；即增大Survivor空间大小时，Eden空间大小应该保持不变。所以当增加Survivor空间时，新生代也要增大，新生代使用<code>-Xmn</code>参数设置，可以根据如下公式计算：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">survivor空间大小 = -Xmn&lt;value&gt; / (-XX:SurvivorRatio=&lt;ratio&gt; + 2)</span><br></pre></td></tr></table></figure>
-<p>如果发现Minor GC持续的时间过长，就应该减少新生代空间的大小，持续调整，知道满足Minor GC的持续时间要求。</p>
-<p>CMS垃圾收集器是最复杂（除了替换CMS的G1垃圾收集器）的垃圾收集器，对其优化过程极为复杂和困难。成功的CMS收集器调优要能以对象从新生代提升到老年代的同等速度对老年代中的对象进行垃圾收集，达不到这个标准则称为“失速”（Lost the Race），“失速”的结果就会发生Stop-the-world压缩式垃圾收集，避免“失速”的关键是要结合足够大的老年代空间和足够快的初始化CMS垃圾收集周期，让它以比提升速率更快的速度回收空间。如果出现并发模式失效就会发生Stop-the-world压缩式垃圾收集，此时可以使用参数<code>-XX:CMSInitiatingOccupancyFraction=&lt;percent&gt;</code>设置CMS垃圾收集周期在老年代空间占用达到多少百分比时启动。并发模式失效可以通过<code>-XX:+PrintGCDetails</code>打印的日志：</p>
+<p>如果发现Minor GC持续的时间过长，就应该减少新生代空间的大小，持续调整，直到满足Minor GC的持续时间要求。</p>
+<p>CMS垃圾收集器是最复杂（除了替换CMS的G1垃圾收集器）的垃圾收集器，对其优化过程极为复杂和困难。成功的CMS收集器调优要能以对象从新生代提升到老年代的同等速度对老年代中的对象进行垃圾收集，达不到这个标准则称为“失速”（Lost the Race），“失速”的结果是发生Stop The World压缩式垃圾收集，避免“失速”的关键是要结合足够大的老年代空间和足够快的初始化CMS垃圾收集周期，让它以比提升速率更快的速度回收空间。如果出现并发模式失效就会发生Stop The World压缩式垃圾收集，此时可以使用参数<code>-XX:CMSInitiatingOccupancyFraction=&lt;percent&gt;</code>设置CMS垃圾收集周期在老年代空间占用达到多少百分比时启动。并发模式失效可以通过<code>-XX:+PrintGCDetails</code>打印的日志：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">174.445: [GC 174.446: [ParNew: 66408K-&gt;66408K(66416K), 0.0000618 secs]174.446: [CMS(concurrent mode failure):161928K-&gt;162118K(175104K), 4.0975124 secs] 228336K-&gt;162118K(241520K)]</span><br></pre></td></tr></table></figure>
-<p>其中关键字<code>concurrent mode failure</code>表示并发模式失效。可以使用<code>-XX:+UseCMSInitiatingOccupancyOnly</code>告知Hotspot VM总是使用<code>-XX:CMSInitiatingOccupancyFraction</code>设定的值作为启动CMS周期的老年代空间占用阈值。如果不使用<code>-XX:+UseCMSInitiatingOccupancyOnly</code>，Hotspot VM仅在第一个CMS周期里使用<code>-XX:CMSInitiatingOccupancyFraction</code>设定的值作为占用比率，之后的周期中又转向自适应地启动CMS周期。<code>-XX:CMSInitiatingOccupancyFraction</code>设置的一个通用原则是老年代占用百分比应该至少是活跃数据大小的1.5倍，活跃数据大小是应用程序运行于稳定态时，长期存活的对象在Java堆中占用的空间大小，也就是Full GC后Java堆中老年代和年轻代（《Java性能优化权威指南》说是永久代，应该是书中的错误，因为Java堆使用<code>-Xms</code>或者<code>-Xmx</code>设置，而永久代使用<code>-XX:MaxPermSize</code>设置，且永久代也不属于Java堆）。CMS周期中有两个阶段是Stop-The-World，处于这两个阶段的应用程序会被阻塞，这两个阶段分别是初始标记阶段和重新标记阶段。虽然初始标记阶段是单线程的，却极少占用很长的时间，通常情况下远小于其他的垃圾收集停顿时间。重新标记阶段是多线程的，通过<code>-XX:ParallelGCThreads=&lt;n&gt;</code>可以控制重新标记阶段使用的线程数。使用<code>-XX:+CMSScavengeBeforeRemark</code>强制Hotspot VM在进入CMS重新标记阶段之前先进行一次Minor GC，Minor GC可以减少引用老年代空间的新生代对象数目，将重新标记阶段的工作量减到最少。CMS收集器与ParNew收集器是结合使用，以如下垃圾收集日志为例，说明CMS收集器的工作方式：</p>
+<p>其中关键字<code>concurrent mode failure</code>表示并发模式失效。可以使用<code>-XX:+UseCMSInitiatingOccupancyOnly</code>告知Hotspot VM总是使用<code>-XX:CMSInitiatingOccupancyFraction</code>设定的值作为启动CMS周期的老年代空间占用阈值。如果不使用<code>-XX:+UseCMSInitiatingOccupancyOnly</code>，Hotspot VM仅在第一个CMS周期里使用<code>-XX:CMSInitiatingOccupancyFraction</code>设定的值作为占用比率，之后的周期中又转向自适应地启动CMS周期。<code>-XX:CMSInitiatingOccupancyFraction</code>设置的一个通用原则是老年代占用百分比应该至少是活跃数据大小的1.5倍，活跃数据大小是应用程序运行于稳定态时，长期存活的对象在Java堆中占用的空间大小，也就是Full GC后Java堆中老年代和年轻代（《Java性能优化权威指南》说是永久代，应该是书中的错误，因为Java堆使用<code>-Xms</code>或者<code>-Xmx</code>设置，而永久代使用<code>-XX:MaxPermSize</code>设置，且永久代也不属于Java堆）。CMS周期中有两个阶段是Stop The World，处于这两个阶段的应用程序会被阻塞，这两个阶段分别是初始标记阶段和重新标记阶段。虽然初始标记阶段是单线程的，却极少占用很长的时间，通常情况下远小于其他的垃圾收集停顿时间。重新标记阶段是多线程的，通过<code>-XX:ParallelGCThreads=&lt;n&gt;</code>可以控制重新标记阶段使用的线程数。使用<code>-XX:+CMSScavengeBeforeRemark</code>强制Hotspot VM在进入CMS重新标记阶段之前先进行一次Minor GC，Minor GC可以减少引用老年代空间的新生代对象数目，将重新标记阶段的工作量减到最少。CMS收集器与ParNew收集器是结合使用，以如下垃圾收集日志为例，说明CMS收集器的工作方式：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[GC [ParNew: 64576K-&gt;960K(64576K), 0.0377639 secs] 140122K-&gt;78078K(261184K), 0.0379598 secs]</span><br><span class="line">[GC [ParNew: 64576K-&gt;960K(64576K), 0.0329313 secs] 141694K-&gt;79533K(261184K), 0.0331324 secs]</span><br><span class="line">[GC [ParNew: 64576K-&gt;960K(64576K), 0.0413880 secs] 143149K-&gt;81128K(261184K), 0.0416101 secs]</span><br><span class="line">[GC [1 CMS-initial-mark: 80168K(196608K)] 81144K(261184K), 0.0059036 secs]</span><br><span class="line">[CMS-concurrent-mark: 0.129/0.129 secs]</span><br><span class="line">[CMS-concurrent-preclean: 0.007/0.007 secs]</span><br><span class="line">[GC[ Rescan (non-parallel) [ grey object rescan, 0.0020879 secs][root rescan, 0.0144199 secs], 0.016</span><br><span class="line">6258 secs][weak refs processing, 0.0000411 secs] [1 CMS-remark: 80168K(196608K)] 82493K(261184K),</span><br><span class="line">0.0168943 secs]</span><br><span class="line">[CMS-concurrent-sweep: 1.208/1.208 secs]</span><br><span class="line">[CMS-concurrent-reset: 0.036/0.036 secs]</span><br><span class="line">[GC [ParNew: 64576K-&gt;960K(64576K), 0.0311520 secs] 66308K-&gt;4171K(261184K), 0.0313513 secs]</span><br><span class="line">[GC [ParNew: 64576K-&gt;960K(64576K), 0.0348341 secs] 67787K-&gt;5695K(261184K), 0.0350776 secs]</span><br><span class="line">[GC [ParNew: 64576K-&gt;960K(64576K), 0.0359806 secs] 69311K-&gt;7154K(261184K), 0.0362064 secs]</span><br></pre></td></tr></table></figure>
 <p>CMS收集器的垃圾收集周期以<code>CMS-initial-mark</code>开始，到<code>CMS-concurrent-reset</code>结束。在上面的日志中，<code>CMS-initial-mark</code>开始时老年代占用80168K，最后一次ParNew Minor GC显示堆占用81128K，可以确定数据都在老年代，年轻代的数据基本被回收。当<code>CMS-concurrent-reset</code>结束时的第一次ParNew Minor GC显示堆占用4171K，说明运行一次CMS老年代垃圾收集回收了非常多的对象，内存释放了将近74M（(81128 - 4171) / 1024）。</p>
 <p>对Parallel Old收集器进行吞吐量性能调优的目标是尽可能避免发生Full GC，或者更理想的情况下在稳定态时永远不发生Full GC。Parallel Old收集器使用<code>-XX:+UseParallelOldGC</code>和<code>-XX:+UseParallelGC</code>选项开启，它提供的吞吐量性能是Hotspot VM诸多垃圾收集器中最好的。Parallel Old收集器默认使用自适应大小调整Eden和Survivor空间，可以使用<code>-XX:-UseAdaptiveSizePolicy</code>禁用自适应大小调整。使用<code>-XX:+PrintAdaptiveSizePolicy</code>可以打印自适应大小调整的日志，日志内容如下：</p>
@@ -588,7 +576,16 @@
 <li>并行性优化</li>
 </ul>
 <p>现代CPU都是多核多线程架构，应用程序可以使用该特点尽可能地使用更多的CPU资源。比如在一个大集合排序中，可以将集合划分多个区域，使用多个CPU资源（就是使用多线程）排序，然后使用归并排序算法完成整个大集合的排序。</p>
-<p>参考：<a href="https://book.douban.com/subject/25828043/" target="_blank" rel="noopener">Java性能优化权威指南</a>，<a href="https://github.com/alibaba/arthas" target="_blank" rel="noopener">Arthas</a>，<a href="https://www.ibm.com/developerworks/cn/java/j-lo-jvm-optimize-experience/index.html" target="_blank" rel="noopener">JVM 优化经验总结</a>，<a href="https://juejin.im/post/59f02f406fb9a0451869f01c" target="_blank" rel="noopener">如何合理的规划一次jvm性能调优</a>，<a href="https://juejin.im/post/5bbf18a2f265da0adb30f3b5" target="_blank" rel="noopener">做JAVA开发的同学一定遇到过的爆表问题，看这里解决</a>，<a href="https://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html" target="_blank" rel="noopener">Java SE 6 HotSpot[tm] Virtual Machine Garbage Collection Tuning</a>，<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html" target="_blank" rel="noopener">Java Platform, Standard Edition HotSpot Virtual Machine Garbage Collection Tuning Guide</a></p>
+<p>使用<code>-XX:+PrintGCApplicationStoppedTime</code>打印的日志如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Total time for which application threads were stopped: 0.0051000 seconds  </span><br><span class="line">Total time for which application threads were stopped: 0.0041930 seconds  </span><br><span class="line">Total time for which application threads were stopped: 0.0051210 seconds  </span><br><span class="line">Total time for which application threads were stopped: 0.0050940 seconds  </span><br><span class="line">Total time for which application threads were stopped: 0.0058720 seconds  </span><br><span class="line">Total time for which application threads were stopped: 5.1298200 seconds</span><br><span class="line">Total time for which application threads were stopped: 0.0197290 seconds  </span><br><span class="line">Total time for which application threads were stopped: 0.0087590 seconds</span><br></pre></td></tr></table></figure>
+<p>其中有一次应用程序停顿的时间非常长，可能的问题是应用程序设计不当，导致某个或者某些线程在垃圾回收期间无法立即进入到GC Safepoint，不当的情况有：1.大循环体导致JVM不能插入check safepoint代码，2.大IO时，操作系统需要读取或者写入文件时，线程需要等待操作系统完成才能继续执行代码，才能执行check safepoint代码。打印停顿实现时还需要配合<code>-XX:+PrintSafepointStatistics</code>和<code>-XX:PrintSafepointStatisticsCount=1</code>两个参数以便查看停顿时系统正在执行什么VM操作。相关案例可参考 <a href="https://hllvm-group.iteye.com/group/topic/38836" target="_blank" rel="noopener">ParNew 应用暂停时间偶尔会出现好几秒的情况</a>和<a href="https://engineering.linkedin.com/blog/2016/02/eliminating-large-jvm-gc-pauses-caused-by-background-io-traffic" target="_blank" rel="noopener">Eliminating Large JVM GC Pauses Caused by Background IO Traffic</a>。</p>
+<h1 id="Safepoint"><a href="#Safepoint" class="headerlink" title="Safepoint"></a>Safepoint</h1><p><a href="https://www.jianshu.com/p/c79c5e02ebe6" target="_blank" rel="noopener">JVM源码分析之安全点safepoint</a></p>
+<p><a href="https://blog.csdn.net/raintungli/article/details/7162468" target="_blank" rel="noopener">Java 工具（jmap,jstack）在linux上的源码分析（四）safe point</a></p>
+<h1 id="动态追踪技术"><a href="#动态追踪技术" class="headerlink" title="动态追踪技术"></a>动态追踪技术</h1><p>DTrace</p>
+<p>SystemTap</p>
+<p>Strace</p>
+<p><a href="https://github.com/btraceio/btrace" target="_blank" rel="noopener">BTrace</a></p>
+<p>相关文章：<a href="http://openresty.org/posts/dynamic-tracing/" target="_blank" rel="noopener">动态追踪技术漫谈</a>，<a href="https://www.rowkey.me/blog/2016/09/20/btrace/" target="_blank" rel="noopener">BTrace原理浅析</a></p>
 
       
     </div>
@@ -631,6 +628,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/13/java-programmer-knowledge-design-pattern/" rel="prev" title="Java后端开发 - 设计模式">
+                Java后端开发 - 设计模式 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -689,7 +690,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">Gyrfalcon,stltqhs@163.com</p>
+              <p class="site-author-name" itemprop="name">海东青</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -700,7 +701,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -717,9 +718,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-count">1</span>
                     <span class="site-state-item-name">tags</span>
                   
                 </div>
@@ -755,7 +754,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载机制和双亲委派模型"><span class="nav-number">1.</span> <span class="nav-text">类加载机制和双亲委派模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java内存模型和运行时数据区"><span class="nav-number">2.</span> <span class="nav-text">Java内存模型和运行时数据区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#垃圾收集"><span class="nav-number">3.</span> <span class="nav-text">垃圾收集</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM关闭钩子"><span class="nav-number">4.</span> <span class="nav-text">JVM关闭钩子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-Agent"><span class="nav-number">5.</span> <span class="nav-text">Java Agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hotswap"><span class="nav-number">6.</span> <span class="nav-text">Hotswap</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hotspot-VM致命错误处理"><span class="nav-number">7.</span> <span class="nav-text">Hotspot VM致命错误处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调优方法"><span class="nav-number">8.</span> <span class="nav-text">调优方法</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载机制"><span class="nav-number">1.</span> <span class="nav-text">类加载机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#双亲委派模型"><span class="nav-number">2.</span> <span class="nav-text">双亲委派模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java内存模型和运行时数据区"><span class="nav-number">3.</span> <span class="nav-text">Java内存模型和运行时数据区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#垃圾收集"><span class="nav-number">4.</span> <span class="nav-text">垃圾收集</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM关闭钩子"><span class="nav-number">5.</span> <span class="nav-text">JVM关闭钩子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-Agent"><span class="nav-number">6.</span> <span class="nav-text">Java Agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hotswap"><span class="nav-number">7.</span> <span class="nav-text">Hotswap</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hotspot-VM致命错误处理"><span class="nav-number">8.</span> <span class="nav-text">Hotspot VM致命错误处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调优方法"><span class="nav-number">9.</span> <span class="nav-text">调优方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Safepoint"><span class="nav-number">10.</span> <span class="nav-text">Safepoint</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态追踪技术"><span class="nav-number">11.</span> <span class="nav-text">动态追踪技术</span></a></li></ol></div>
             
 
           </div>
@@ -775,11 +774,11 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">Gyrfalcon,stltqhs@163.com</span>
+  <span class="author" itemprop="copyrightHolder">海东青</span>
 
   
 
