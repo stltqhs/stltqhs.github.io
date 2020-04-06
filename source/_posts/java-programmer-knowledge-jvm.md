@@ -115,6 +115,8 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 
 # 垃圾收集
 
+## 收集算法
+
 判断对象是否存活的算法有两种，一种是**引用计数器算法**，另一种是**根搜索算法**。
 
 引用计数器算法的基本思路是给对象添加一个引用计数器，每当有一个地方引用它时，计数器的值就加1；当引用失效时，计数器的值减1；任何时刻计数器为0的对象就是不可能再被使用。引用计数器算法实现简单、效率高（微软的COM即Componet Object Model就是使用该算法），但存在一个缺点，对于对象之间的相互循环引用的问题无法解决，所以JVM并未使用该算法。
@@ -142,6 +144,8 @@ Java堆是垃圾收集管理的主要战场。根据Java虚拟机规范的规定
 - 分代收集算法
 
 根据对象存活周期不同将内存划分为几块，一般是将Java堆划分为新生代和老年代，其中，新生代使用复制算法，老年代使用标记整理算法。
+
+## 收集器
 
 JVM垃圾收集器分为串行和并行两类，新生代可用的垃圾收集器有**Serial**、**ParNew**、**Parallel Scavenge**，老年代可用的垃圾收集器有**CMS**、**Serial Old**、**Parallel Old**。
 
@@ -175,6 +179,10 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 
 内存泄漏是指无用对象（不再使用的对象）持续占有内存或无用对象的内存得不到及时释放，从而造成内存空间的浪费称为内存泄漏。长生命周期的对象持有短生命周期对象的引用就很可能发生内存泄漏，尽管短生命周期对象已经不再需要，但是**因为长生命周期持有它的引用而导致不能被回收，这就是Java中内存泄漏的发生场景**。
 
+## JVM异常退出
+
+`OutOfMemoryError`是常见的JVM致命错误。当JVM因为致命错误而崩溃时，会生产Hotspot错误日志文件，名为`hs_err_pid<pid>.log`，这里`<pid>`是崩溃JVM进程的id，`hs_err_pid<pid>.log`文件生成在JVM的启动目录下。`hs_err_pid<pid>.log`错误日志文件包括内存镜像、操作系统级别动态库调用栈等数据，可以根据这些信息定位是哪个库方法调用时导致了JVM崩溃。`hs_err_pid<pid>.log`错误日志文件名可以使用`-XX:ErrorFile`配置。当发生`OutOfMemoryError`时，可以通过配置`-XX:+HeapDumpOnOutOfMemory`将堆信息导出到文件中。
+
 # JVM关闭钩子
 
 首先JVM的关闭方式可以分为三种：
@@ -185,7 +193,7 @@ CMS（Conccurrent Mark Sweep）收集器是一种以获取最短回收停顿时�
 
 JVM提供了关闭钩子（shutdown hooks）来做些扫尾的工作，比如删除临时文件、停止日志服务以及内存数据写到磁盘等，为此JVM提供了关闭钩子（shutdown hooks）来做这些事情。关闭钩子本质上是一个线程（也称为Hook线程），用来监听JVM的关闭。通过使用`Runtime`的`addShutdownHook(Thread hook)`可以向JVM注册一个关闭钩子。Hook线程在JVM **正常关闭**才会执行，在强制关闭时不会执行。对于一个JVM中注册的多个关闭钩子它们将会并发执行，所以JVM并不能保证它的执行顺行。当所有的Hook线程执行完毕后，如果此时runFinalizersOnExit为true，那么JVM将先运行终结器，然后停止。
 
-# Java Agent
+# Agent
 
 javaagent的主要功能如下：
 
@@ -304,10 +312,6 @@ private WebappClassLoader createClassLoader()
 
 Context每次reload后，`WebappLoader`都会创建一个新的`ClassLoader`，这个`ClassLoader`会重新加载Servlet相关组件的类，完成热部署的效果。
 
-# Hotspot VM致命错误处理
-
-Hotspot VM是Oracle JVM的实现，`OutOfMemoryError`是常见的Hotspot VM致命错误，在Linux平台存在段错误（Segmentation Fault），在Windows平台存在访问冲突（Access Violation）。当Hotspot VM因为致命错误而崩溃时，会生产Hotspot错误日志文件，名为`hs_err_pid<pid>.log`，这里`<pid>`是崩溃Hotspot VM进程的id，`hs_err_pid<pid>.log`文件生成在Hotspot VM的启动目录下。`hs_err_pid<pid>.log`错误日志文件包括内存镜像、操作系统级别动态库调用栈等数据，可以根据这些信息定位是哪个库方法调用时导致了Hotspot VM崩溃。`hs_err_pid<pid>.log`错误日志文件名可以使用`-XX:ErrorFile`配置。当发生`OutOfMemoryError`时，可以通过配置`-XX:+HeapDumpOnOutOfMemory`将堆信息导出到文件中。
-
 # 调优方法
 
 对于一套应用系统来说，性能优化的内容有：架构调优、代码调优（算法和数据结构）、JVM调优、数据库调优（结构优化和SQL优化）、操作系统调优，而JVM调优主要在垃圾收集方面。通过打印GC日志（使用参数`-XX:+PrintGCDetails`），结合系统业务特征，设置新生代大小（`-Xmn`），设置堆大小（`-Xms`和`-Xmx`），设置不同的垃圾收集器。通过打印应用程序停顿时间（使用参赛`-XX:+PrintGCApplicationStoppedTime`）检查应用程序代码问题，该部分内容涉及到GC Safepoint，将在下节介绍。
@@ -415,9 +419,64 @@ Total time for which application threads were stopped: 0.0087590 seconds
 
 # Safepoint
 
-[JVM源码分析之安全点safepoint](https://www.jianshu.com/p/c79c5e02ebe6)
+当JVM执行垃圾收集时，需要所有的用户线程暂停，不要操作堆内存，只有这样，才能让GC安全的访问堆内存对象。除了GC时需要暂停用户线程，包括jstack和jmap这样的使用JVMTI的工具也需要访问堆内存对象，同样需要暂停用户线程。
 
-[Java 工具（jmap,jstack）在linux上的源码分析（四）safe point](https://blog.csdn.net/raintungli/article/details/7162468)
+OpenJDK对Safepoint的描述是“A point during program execution at which all GC roots are known and all heap object contents are consistent. ”[ [1] ](https://openjdk.java.net/groups/hotspot/docs/HotSpotGlossary.html)。
+
+`VMOperationQueue`队列存放的是操作JVM的请求，当需要GC、jstack、jmap时，需要向`VMOperationQueue`队列添加一个消息。`VMThread`线程在`loop`循环内不停地取出`VMOperationQueue`队列的消息，设置Safepoint标记，让用户线程去检查这个标记，然后用户线程暂停[ [2] ](https://openjdk.java.net/groups/hotspot/docs/RuntimeOverview.html)。
+
+那么`VMThread`做了哪些操作，用户线程又该如何检查Safepoint标记？
+
+[vmThread.cpp](http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/f03d0a26bf83/src/share/vm/runtime/vmThread.cpp)定义了`VMOperationQueue`为环形的双向链表，`VMThread`在`loop`方法的`while`语句中循环的取出`VMOperation`类型的消息。当取出一个`VMOperation`对象时，使用`_cur_vm_operation->evaluate_at_safepoint()`判断处理此VM操作请求时是否需要进入Safepoint状态。如果需要进入Safepoint状态，则调用`SafepointSynchronize::begin()`方法为用户线程进入Safepoint做准备。`begin`方法定义在[safepoint.cpp](http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/runtime/safepoint.cpp)中。根据`SafepointSynchronize::begin()`方法的源码注释，可以知道JVM需要在五个地方检查标记，注释原文如下：
+
+```java
+  // Begin the process of bringing the system to a safepoint.
+  // Java threads can be in several different states and are
+  // stopped by different mechanisms:
+  //
+  //  1. Running interpreted
+  //     The interpeter dispatch table is changed to force it to
+  //     check for a safepoint condition between bytecodes.
+  //  2. Running in native code
+  //     When returning from the native code, a Java thread must check
+  //     the safepoint _state to see if we must block.  If the
+  //     VM thread sees a Java thread in native, it does
+  //     not wait for this thread to block.  The order of the memory
+  //     writes and reads of both the safepoint state and the Java
+  //     threads state is critical.  In order to guarantee that the
+  //     memory writes are serialized with respect to each other,
+  //     the VM thread issues a memory barrier instruction
+  //     (on MP systems).  In order to avoid the overhead of issuing
+  //     a memory barrier for each Java thread making native calls, each Java
+  //     thread performs a write to a single memory page after changing
+  //     the thread state.  The VM thread performs a sequence of
+  //     mprotect OS calls which forces all previous writes from all
+  //     Java threads to be serialized.  This is done in the
+  //     os::serialize_thread_states() call.  This has proven to be
+  //     much more efficient than executing a membar instruction
+  //     on every call to native code.
+  //  3. Running compiled Code
+  //     Compiled code reads a global (Safepoint Polling) page that
+  //     is set to fault if we are trying to get to a safepoint.
+  //  4. Blocked
+  //     A thread which is blocked will not be allowed to return from the
+  //     block condition until the safepoint operation is complete.
+  //  5. In VM or Transitioning between states
+  //     If a Java thread is currently running in the VM or transitioning
+  //     between states, the safepointing code will wait for the thread to
+  //     block itself when it attempts transitions to a new state.
+  //
+```
+
+Safepoint的准备和处理：
+
+* Java字节码解释器：调用`TemplateInterpreter::notice_safepoints()`修改dispatch table。dispatch table用来记录方法地址，类型是`DispatchTable`，TemplateInterpreter定义了三个dispatch table，分别是`_active_table`、 `_normal_table`和 `_safept_table`。`_active_table`是正在解释运行的线程使用的dispatch table，`_normal_table`就是正常运行的初始化的dispatch table，`_safept_table`是safe point需要的dispatch table。解释运行的线程一直都在使用`_active_table`，在进入saftpoint 的时候，用`_safept_table`替换`_active_table`, 在退出saftpoint 的时候，使用`_normal_table`来替换`_active_table`。`notice_safepoints`方法内部调用`copy_table`来处理dispatch table替换的操作。当新的dispatch table被访问时，就会访问到进入Safepoint。[ [3] ](https://yemablog.com/posts/safepoint-on-interpreter-mode)
+* 当执行流程从JNI返回到JVM时，也会因为dispatch table被替换的原因进入到Safepoint。
+* 对于C1/C2编译器编译的代码，编译器会在无限循环体内插入访问Safepoint页的代码，被插入的代码实际就是`test   %eax,PAGE_ADDRESS`[ [4] ](https://www.jianshu.com/p/c79c5e02ebe6)，被称为poll操作。`SafepointSynchronize::begin()`会调用`os::make_polling_page_unreadable()`方法使得Safepoint页不可读，`test`访问到不能读的内存时，操作系统将执行流程陷入到中断处理，JVM的`JVM_handle_linux_signal`方法处理中断请求，进入到Safepoint[ [5] ](https://blog.csdn.net/raintungli/article/details/7162468)。注意，由于是无限循环体，如果是在一个大循环内，即多层for循环，此时会出现GC时间过长的问题[ [6] ](http://psy-lob-saw.blogspot.com/2015/12/safepoints.html)。
+* 如果线程处于Blocked状态，继续让其处于Blocked状态，直到Safepoint处理结束。
+* 线程状态发生改变时，也会检查Safepoint标记并且进入Safepoint。
+
+
 
 # 动态追踪技术
 
