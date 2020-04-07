@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="海东青">
 <meta property="og:description" content="类加载机制类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2020-04-06T12:11:16.501Z">
+<meta property="og:updated_time" content="2020-04-06T12:30:49.793Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java后端开发 - JVM">
 <meta name="twitter:description" content="类加载机制类从被加载到虚拟机内存到从内存中卸载，它的整个生命周期包括加载、验证、准备、解析、初始化、使用、卸载七个阶段，其中类加载过程包括加载、验证、准备、解析、初始化五个阶段。五个阶段中只有解析阶段是不确定的，因为它可以发生在准备阶段后，也可以发生在初始化阶段后。  加载  加载是类加载的第一个阶段，在该阶段，虚拟机需要完成三件事，1、通过一个类的全限定名来获取其定义的二进制字节流；2、将这个字">
@@ -340,7 +340,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-04-06 20:11:16" itemprop="dateModified" datetime="2020-04-06T20:11:16+08:00">2020-04-06</time>
+                <time title="Modified: 2020-04-06 20:30:49" itemprop="dateModified" datetime="2020-04-06T20:30:49+08:00">2020-04-06</time>
               
             
           </span>
@@ -593,10 +593,7 @@
 <li>如果线程处于Blocked状态，继续让其处于Blocked状态，直到Safepoint处理结束。</li>
 <li>线程状态发生改变时，也会检查Safepoint标记并且进入Safepoint。</li>
 </ul>
-<h1 id="动态追踪技术"><a href="#动态追踪技术" class="headerlink" title="动态追踪技术"></a>动态追踪技术</h1><p>DTrace</p>
-<p>SystemTap</p>
-<p>Strace</p>
-<p><a href="https://github.com/btraceio/btrace" target="_blank" rel="noopener">BTrace</a></p>
+<h1 id="动态追踪"><a href="#动态追踪" class="headerlink" title="动态追踪"></a>动态追踪</h1><p><a href="https://github.com/btraceio/btrace" target="_blank" rel="noopener">BTrace</a>是</p>
 <p>相关文章：<a href="http://openresty.org/posts/dynamic-tracing/" target="_blank" rel="noopener">动态追踪技术漫谈</a>，<a href="https://www.rowkey.me/blog/2016/09/20/btrace/" target="_blank" rel="noopener">BTrace原理浅析</a></p>
 
       
@@ -766,7 +763,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载机制"><span class="nav-number">1.</span> <span class="nav-text">类加载机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#双亲委派模型"><span class="nav-number">2.</span> <span class="nav-text">双亲委派模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java内存模型和运行时数据区"><span class="nav-number">3.</span> <span class="nav-text">Java内存模型和运行时数据区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#垃圾收集"><span class="nav-number">4.</span> <span class="nav-text">垃圾收集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#收集算法"><span class="nav-number">4.1.</span> <span class="nav-text">收集算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#收集器"><span class="nav-number">4.2.</span> <span class="nav-text">收集器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM异常退出"><span class="nav-number">4.3.</span> <span class="nav-text">JVM异常退出</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM关闭钩子"><span class="nav-number">5.</span> <span class="nav-text">JVM关闭钩子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Agent"><span class="nav-number">6.</span> <span class="nav-text">Agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hotswap"><span class="nav-number">7.</span> <span class="nav-text">Hotswap</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调优方法"><span class="nav-number">8.</span> <span class="nav-text">调优方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Safepoint"><span class="nav-number">9.</span> <span class="nav-text">Safepoint</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态追踪技术"><span class="nav-number">10.</span> <span class="nav-text">动态追踪技术</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载机制"><span class="nav-number">1.</span> <span class="nav-text">类加载机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#双亲委派模型"><span class="nav-number">2.</span> <span class="nav-text">双亲委派模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java内存模型和运行时数据区"><span class="nav-number">3.</span> <span class="nav-text">Java内存模型和运行时数据区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#垃圾收集"><span class="nav-number">4.</span> <span class="nav-text">垃圾收集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#收集算法"><span class="nav-number">4.1.</span> <span class="nav-text">收集算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#收集器"><span class="nav-number">4.2.</span> <span class="nav-text">收集器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM异常退出"><span class="nav-number">4.3.</span> <span class="nav-text">JVM异常退出</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM关闭钩子"><span class="nav-number">5.</span> <span class="nav-text">JVM关闭钩子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Agent"><span class="nav-number">6.</span> <span class="nav-text">Agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hotswap"><span class="nav-number">7.</span> <span class="nav-text">Hotswap</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调优方法"><span class="nav-number">8.</span> <span class="nav-text">调优方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Safepoint"><span class="nav-number">9.</span> <span class="nav-text">Safepoint</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态追踪"><span class="nav-number">10.</span> <span class="nav-text">动态追踪</span></a></li></ol></div>
             
 
           </div>
