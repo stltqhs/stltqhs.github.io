@@ -478,14 +478,8 @@ Safepoint的准备和处理：
 
 
 
-# 动态追踪技术
+# 动态追踪
 
-DTrace
-
-SystemTap
-
-Strace
-
-[BTrace](https://github.com/btraceio/btrace)
+[BTrace](https://github.com/btraceio/btrace)是
 
 相关文章：[动态追踪技术漫谈](http://openresty.org/posts/dynamic-tracing/)，[BTrace原理浅析](https://www.rowkey.me/blog/2016/09/20/btrace/)
