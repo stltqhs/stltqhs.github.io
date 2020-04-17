@@ -28,7 +28,10 @@ tags: java
 专栏：
 
 * [InnoDB](https://blog.jcole.us/innodb/)
-
 * [吴恩达机器学习](https://study.163.com/course/courseMain.htm?courseId=1004570029)
 * [学习Flink](https://github.com/zhisheng17/flink-learning)
+
+其他：
+
+* [音频图像算法研究员cpuimage](https://www.cnblogs.com/cpuimage/)
 

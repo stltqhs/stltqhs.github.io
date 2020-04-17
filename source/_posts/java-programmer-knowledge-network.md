@@ -199,6 +199,10 @@ QUIC（Quick UDP Internet Connection）是由Google公司提出的基于UDP协�
 * 更少的RTT
 * 连接迁移
 
+# TCP流量控制、拥塞控制
+
+参考[TCP流量控制、拥塞控制](https://zhuanlan.zhihu.com/p/37379780)。
+
 # 网络IO模型
 
 ## IO多路复用
