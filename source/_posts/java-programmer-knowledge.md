@@ -17,7 +17,7 @@ tags: java
 * [你假笨](http://lovestblog.cn/)
 * [江南白衣](http://calvin1978.blogcn.com/)
 * [占小狼](https://www.jianshu.com/u/90ab66c248e6)
-* [R大](https://www.zhihu.com/people/rednaxelafx)
+* [RednaxelaFx](https://www.zhihu.com/people/rednaxelafx)
 * [David](https://www.cnblogs.com/davidwang456/)
 * [王垠](https://link.zhihu.com/?target=http%3A//www.yinwang.org/)
 * [Tim Yang](https://timyang.net/)
