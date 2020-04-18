@@ -206,6 +206,8 @@ tags:
 
 [Bigtable: A Distributed Storage System for Structured Data](http://static.googleusercontent.com/media/research.google.com/en/us/archive/bigtable-osdi06.pdf)
 
+[Spanner: Google’s Globally-Distributed Database](https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/spanner-osdi2012.pdf)
+
 [Hypertable Architecture Overview](http://www.hypertable.com/collateral/whitepaper-hypertable-architecture.pdf)
 
 ## 数据处理
