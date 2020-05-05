@@ -4,16 +4,6 @@ date: 2019-05-16 09:24:25
 tags:
 ---
 
-# 分布式一致性算法
-
-[Paxos Made Simple](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)
-
-[Zab](https://marcoserafini.github.io/papers/zab.pdf)
-
-[Raft](https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14)
-
-[Gossip](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf)（[Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
-
 # ACM SIGOPS名人堂系列
 
 [ACM SIGOPS名人堂（第一期）](https://mp.weixin.qq.com/s/vwDz3JB_erocP9drwc7IEA)
@@ -176,11 +166,29 @@ tags:
 
 
 
+# 分布式
+
+[Paxos Made Simple](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)
+
+[Zab](https://marcoserafini.github.io/papers/zab.pdf)
+
+[Raft](https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14)
+
+[Viewstamped Replication: A New Primary Copy Method to Support Highly-Available Distributed Systems](http://pmg.csail.mit.edu/papers/vr.pdf)
+
+[Gossip](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf)（[Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
+
+[SEDA: An Architecture for Well-Conditioned, Scalable Internet Services](http://www.sosp.org/2001/papers/welsh.pdf)
+
+[SAGAS](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
+
 # 大数据系列
 
 ## 基础
 
 [LSMTree](https://www.cs.umb.edu/~poneil/lsmtree.pdf)
+
+[An Efficient Design and Implementation of LSM-Tree based Key-Value Store on Open-Channel SSD](http://ranger.uta.edu/~sjiang/pubs/papers/wang14-LSM-SDF.pdf)
 
 ## 文件存储
 
@@ -210,6 +218,12 @@ tags:
 
 [Hypertable Architecture Overview](http://www.hypertable.com/collateral/whitepaper-hypertable-architecture.pdf)
 
-## 数据处理
+## 数据处理[]
 
 [MapReduce: Simplified Data Processing on Large Clusters](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf)
+
+[Dremel: Interactive Analysis of Web-Scale Datasets](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36632.pdf)
+
+[Pregel: A System for Large-Scale Graph Processing](https://kowshik.github.io/JPregel/pregel_paper.pdf)
+
+[Large-scale Incremental Processing Using Distributed Transactions and Notifications](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36726.pdf)
