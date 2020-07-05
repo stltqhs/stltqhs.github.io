@@ -176,7 +176,7 @@ tags:
 
 [Viewstamped Replication: A New Primary Copy Method to Support Highly-Available Distributed Systems](http://pmg.csail.mit.edu/papers/vr.pdf)
 
-[Gossip](https://www.cs.cornell.edu/home/rvr/papers/flowgossip.pdf)（[Gossip and Epidemic Protocols](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf)[Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
+[Gossip](https://www.cs.cornell.edu/home/rvr/papers/flowgossip.pdf)（[Gossip and Epidemic Protocols](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf) , [Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
 
 [SEDA: An Architecture for Well-Conditioned, Scalable Internet Services](http://www.sosp.org/2001/papers/welsh.pdf)
 
