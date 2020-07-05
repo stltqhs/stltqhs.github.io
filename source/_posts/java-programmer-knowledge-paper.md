@@ -114,7 +114,7 @@ tags:
 
 [The Click Modular Router](https://pdos.csail.mit.edu/papers/click:tocs00/paper.pdf)
 
-[A virtual machine time-sharing system](http://www.eecs.harvard.edu/~margo/cs261/papers/meyer-1970.pdf)
+[A virtual machine time-sharing system](https://www.seltzer.com/margo/teaching/CS508.19/papers/meyer-1970.pdf)
 
 [On the criteria to be used in decomposing systems into modules](https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf)
 
@@ -176,7 +176,7 @@ tags:
 
 [Viewstamped Replication: A New Primary Copy Method to Support Highly-Available Distributed Systems](http://pmg.csail.mit.edu/papers/vr.pdf)
 
-[Gossip](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf)（[Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
+[Gossip](https://www.cs.cornell.edu/home/rvr/papers/flowgossip.pdf)（[Gossip and Epidemic Protocols](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf)[Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
 
 [SEDA: An Architecture for Well-Conditioned, Scalable Internet Services](http://www.sosp.org/2001/papers/welsh.pdf)
 
@@ -200,7 +200,7 @@ tags:
 
 [Tachyon: Reliable, Memory Speed Storage for Cluster Computing Frameworks](https://people.csail.mit.edu/matei/papers/2014/socc_tachyon.pdf)
 
-[Column-Stores vs. Row-Stores: How Different Are They Really?](http://db.csail.mit.edu/projects/cstore/abadi-sigmod08.pdf)
+[Column-Stores vs. Row-Stores: How Different Are They Really?](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.324.2739&rep=rep1&type=pdf)
 
 [RCFile: A Fast and Space-efficient Data Placement Structure in MapReduce-based Warehouse Systems](http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf)
 
