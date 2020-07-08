@@ -178,6 +178,10 @@ tags:
 
 [Gossip](https://www.cs.cornell.edu/home/rvr/papers/flowgossip.pdf)（[Gossip and Epidemic Protocols](http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf) , [Gossip Survy](http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf)）
 
+[The implementation of reliable distributed multiprocess systems](https://lamport.azurewebsites.net/pubs/implementation.pdf)
+
+[The byzantine generals problem](https://lamport.azurewebsites.net/pubs/byz.pdf)
+
 [SEDA: An Architecture for Well-Conditioned, Scalable Internet Services](http://www.sosp.org/2001/papers/welsh.pdf)
 
 [SAGAS](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
