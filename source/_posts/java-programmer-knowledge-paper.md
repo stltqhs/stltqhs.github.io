@@ -182,6 +182,11 @@ tags:
 
 [The byzantine generals problem](https://lamport.azurewebsites.net/pubs/byz.pdf)
 
+[Impossibility of Distributed Consensus with One Faulty
+Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf)
+
+[Paxos vs. Viewstamped Replication vs. Zab](https://www.cs.cornell.edu/fbs/publications/viveLaDifference.pdf)
+
 [SEDA: An Architecture for Well-Conditioned, Scalable Internet Services](http://www.sosp.org/2001/papers/welsh.pdf)
 
 [SAGAS](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
