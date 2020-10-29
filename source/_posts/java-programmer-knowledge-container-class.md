@@ -132,9 +132,22 @@ final HashEntry<K,V> next;
 ```
 
 ConcurrentHashMap数据结构如下图：
-![ConcurrentHashMap结构](http://static.zybuluo.com/Rico123/zaqxg0nmu1qq79lm6wpwss2f/ConcurrentHashMap.jpg "ConcurrentHashMap结构")
 
-不管是put还是get操作，都需要通过key计算segment的位置。由于put操作需要需改segment结构，所以put操作需要加锁，加锁方法如下：
+```text
++-------------+         +------------+
+| segments[0] |         | entries[0] |
++-------------+         +------------+         +------+-+    +-----+-+
+| segments[1] | ------> | entries[1] | ------> |      |-+--> |     | |
++-------------+         +------------+         +------+-+    +-----+-+
+| segments[2] |
++-------------+
+|     ...     |
++-------------+
+| segments[n] |
++-------------+
+```
+
+不管是put还是get操作，都需要通过key计算segment的位置。由于put操作需要改segment结构，所以put操作需要加锁，加锁方法如下：
 
 ```java
 HashEntry<K,V> node = tryLock() ? null :
@@ -148,6 +161,23 @@ HashEntry<K,V> node = tryLock() ? null :
 ## JDK 1.8实现
 
 JDK1.8的ConcurrentHashMap的实现抛弃了1.7使用的分段锁，改用“CAS+synchronized“，`Node.next`字段为`volatile`类型，而不是1.7的`final`类型。
+
+```text
+   table
++---------+        
+| Node[0] |        
++---------+         +------+-+    +-----+-+
+| Node[1] | ------> |      |-+--> |     | |
++---------+         +------+-+    +-----+-+
+| Node[2] |
++---------+
+|   ...   |
++---------+
+| Node[n] |
++---------+
+```
+
+当`put`一个Key-Value时，先检查Node[n]是否为`null`，如果为`null`则使用`casTabAt`将元素放在头部。如果不为`null`，则`synchronized(Node[n])`将元素加入到队尾，此时可能对链表转换为红黑树。
 
 # Collections.synchronizedMap实现方式 
 
