@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="讨论MapReduce之前，我们先从一个简单问题入手，一步步叙述MapReduce原理。 问题我们有2000个文件共50TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器处理哪些数据。5">
+<meta name="keywords" content="大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据系列——MapReduce分布式并行计算框架">
+<meta property="og:url" content="http://yoursite.com/2020/11/01/bigdata-mapreduce/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="讨论MapReduce之前，我们先从一个简单问题入手，一步步叙述MapReduce原理。 问题我们有2000个文件共50TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器处理哪些数据。5">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/mapreduce_types.png">
+<meta property="og:image" content="http://yoursite.com/images/mapreduce_execution_diagram.png">
+<meta property="og:updated_time" content="2020-11-01T11:06:59.637Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大数据系列——MapReduce分布式并行计算框架">
+<meta name="twitter:description" content="讨论MapReduce之前，我们先从一个简单问题入手，一步步叙述MapReduce原理。 问题我们有2000个文件共50TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器处理哪些数据。5">
+<meta name="twitter:image" content="http://yoursite.com/images/mapreduce_types.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/11/01/bigdata-mapreduce/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>大数据系列——MapReduce分布式并行计算框架 | 海东青</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">海东青</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/01/bigdata-mapreduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="海东青">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="海东青">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">大数据系列——MapReduce分布式并行计算框架
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-11-01 13:08:46 / Modified: 19:06:59" itemprop="dateCreated datePublished" datetime="2020-11-01T13:08:46+08:00">2020-11-01</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>讨论MapReduce之前，我们先从一个简单问题入手，一步步叙述MapReduce原理。</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>我们有2000个文件共50TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器处理哪些数据。50TB共2000个文件，平均每个文件也有25.6GB，因此也不能把一个文件全部载入内存做排序。可以先将一个文件按照64MB对其切割，每次读入一个64MB的切片在内存里做排序，然后将排序结果写到一个中间文件，等到一个文件的全部切片都排序完成，此时磁盘已经有很多个已排序好的中间文件。我们可以再使用归并排序将这些有序切片文件合并生成一个大的有序文件，这样一来总共就有2000个有序的中间文件。由于这2000个有序中间文件只是局部有序，还需要对这2000个有序中间文件再次使用归并排序，输出多个有序的最终文件。</p>
+<p>针对这个排序的问题，我们先去掉业务相关的排序功能，抽象通用功能，发现：</p>
+<ul>
+<li>文件切割；</li>
+<li>将数据送个业务去处理生成中间文件；</li>
+<li>合并中间文件再次送给业务去处理；</li>
+<li>控制任务分配，哪些机器跑哪些任务；</li>
+<li>分布式文件系统；</li>
+</ul>
+<p>这些都属于通用功能，具体的业务处理代码就是分布式并计算中留给用户实现的代码。这种模式由Google于2003年开发出来并公布论文<a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf" target="_blank" rel="noopener">MapReduce : Simplified Data Processing on Large Clusters</a>，Hadoop也是基于这篇论文实现的MapReduce。</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>受到函数式编程语言Lisp的启发，将复杂业务场景使用简单的map和reduce两个函数来实现，map计算生成中间结果，合并相同key的数据，reduce对map结果再次处理，得到最终结果，可表示为图-1。</p>
+<p><img src="/images/mapreduce_types.png" alt="MapReduce类型" title="MapReduce类型"></p>
+<p><em>图-1 MapReduce类型</em></p>
+<p>先来看看MapReduce的执行流程，如图-2所示。</p>
+<p><img src="/images/mapreduce_execution_diagram.png" alt="MapReduce执行流程" title="MapReduce执行流程"></p>
+<p><em>MapReduce执行流程</em></p>
+<p>每一步执行的操作是：</p>
+<p>(0) MapReduce框架首先将输入文件切分为<strong>逻辑上</strong>的多个分片文件，分片文件是MapReduce对文件进行处理和运算的输入单位。因为是逻辑分片，物理上并不会切分，只是记录了要处理数据的位置和长度。</p>
+<p>(1) Master将空闲的map任务分配在一台机器上执行。Master负责管理map和reduce任务，通过ping的方式来检查任务健康行为。如果在规定时间内任务没有返回检查状态，Master认为该任务已经死了，需要将该任务重置为空闲状态，然后重新分配执行。分片文件一般与Map任务同在一台机器或者在一个机房，叫做“计算向数据考虑”，可以节省数据网络传输的时间。</p>
+<p>(2) Map任务读取分片文件的数据，将输入的(k1,v1)送给用户实现的代码，用户代码输出(k2,v2)，输出的数据会直接写入内存缓冲区。</p>
+<p>(3) 内存缓冲区存放map输出数据(k2,v2)。</p>
+<p>(4) 当内存缓冲区写到一定程度时，后端线程会将内存数据按照<code>hash(k2) mod R</code>来分区并在内存中排序然后写入到临时的分区文件。随着内存数据不断的写入，磁盘会存在多个分区文件，比如分区编号为0的分区文件可能存在几十个，这时还需要使用归并排序，合并成一个文件。这种行为称为溢写、分区、排序、合并。当Map任务完成时，Map需要将这些文件的位置信息上报到Master节点，Master根据这些信息安排Reduce任务从哪里取数据。</p>
+<p>(5) 当所有Map任务执行完毕时，Master分配Reduce任务，准备从远端读取Map中间有序分区文件。</p>
+<p>(6) Reduce任务通过RPC从多个Map获取多个分区文件。</p>
+<p>(7) 由于分区文件来自不同的Map，多个文件只是局部有序，需要使用类似第4步的溢写、排序、归并排序，合并成一个大的有序文件。</p>
+<p>(8) Reduce任务从有序文件读取(k2,list(v2))数据集，交给用户实现的reduce逻辑。</p>
+<p>(9) 用户实现的reduce逻辑会输出list(v2)到最终文件。在输出到最终文件之前，同样会使用类似第4步溢写、归并排序生成一个大文件。当reduce任务结束时，向Master上报任务执行状态。</p>
+<h1 id="容错性"><a href="#容错性" class="headerlink" title="容错性"></a>容错性</h1><p>(1) map任务的容错性：如果master通过ping检查机制发现map任务挂掉了，会将该任务重置为空闲状态，空闲状态的map任务会被master重新分配来执行新的计算。如果一台机器挂掉了，master发现该机器存储了map已完成的中间有序文件，而且还没有被reduce任务领取，master会重新分配map任务重跑这些数据。因为map的中间文件都是本地存储，只有一个副本，机器挂掉了不能恢复时，文件内容也不能恢复。如果master受到了重复上报的已完成的中间有序文件，master会忽略这个信息，只保留一份。</p>
+<p>(2) reduce容错性：如果master通过ping检查机制发现reduce任务挂掉了，会将该任务重置为空闲状态，空闲状态的reduce任务会被master重新分配来执行新的计算。由于reduce输出的文件存放在分布式文件系统，比如GFS或者HDFS，有多个副本，就算已完成的reduce任务所在的机器挂掉了，也不需要重新跑。</p>
+<p>(3) Master的容错性：Master内部有检查点机制，检查点周期性的保存到磁盘，如果master挂掉，恢复时会从上一份检查点开始再次执行任务，这样会有部分数据的丢失，丢失的信息需要重跑补回来。一开始Master节点是单节点，无法做到高可用。后来在Hadoop中引入了备用的master节点，实时从活动的Master节点同步数据，避免单点故障。</p>
+<p>(4) Semantics in the Presence of Failures：MapReduce使用map和reduce的原子提交来达到这种特征。每一个任务输出的文件首先是临时文件，比如reduce任务是一个输出文件，map任务是R个输出文件。如果任务完成，使用rename的原子操作将文件重命名并提交到master节点，master节点会忽略重复的信息。如果多个任务执行同样的rename操作，只有一个rename能成功，因为文件只能有一个。</p>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p>除了文中开头说的排序可以使用MapReduce来完成外，MapReduce还可以使用在关系代数运算、分组与聚合运算等。</p>
+<p>关系代数运算包括</p>
+<p>(1) 关系的选择运算：对于关系的选择运算，只需要Map过程就能实现，对于关系R中的每个元组t，检测是否是满足条件的所需元组，如果满足条件，则输出键值对(t,t)，也就是说，键和值都是t。这时的Reduce函数就是一个恒等式，对输入不作任何变换就直接输出。</p>
+<p>(2) 关系的投影运算：假设对关系R投影后的属性集为S，在Map函数中，对于R中的每个元组t，提出t中不属于S的字段，得到元组t<sup>‘</sup>，输出键值对(t<sup>‘</sup>,t<sup>‘</sup>)。对于Map任务产生的每个键t<sup>‘</sup>，都可能存在一个或者多个键值对(t<sup>‘</sup>,t<sup>‘</sup>)，因此需要通过Reduce函数来剔除冗余，把属性完全相同的元组合并起来的到(t<sup>‘</sup>,list(t<sup>‘</sup>))，剔除冗余后只输出一个(t<sup>‘</sup>,t<sup>‘</sup>)。</p>
+<p>(3) 关系的并、交、差运算。</p>
+<p>(4) 关系的自然连接运算：将需要连接的公共字段作为键。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/28/java-programmer-knowledge-performance/" rel="next" title="Java后端开发 - 性能优化">
+                <i class="fa fa-chevron-left"></i> Java后端开发 - 性能优化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">海东青</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#容错性"><span class="nav-number">3.</span> <span class="nav-text">容错性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">4.</span> <span class="nav-text">应用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海东青</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
