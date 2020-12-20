@@ -22,6 +22,8 @@ tags:
 
 [Computer Architecture](https://book.douban.com/subject/6795919/)（豆瓣9.6分）
 
+[Parsing Techniques](https://book.douban.com/subject/4291903/)（豆瓣9.6分）
+
 [A Primer on Memory Consistency and Cache Coherence](https://book.douban.com/subject/6829746/)（豆瓣9.5分）
 
 [Is Parallel Programming Hard, And, If So, What Can You Do About It?](https://book.douban.com/subject/6957175/)（豆瓣9.5分）
