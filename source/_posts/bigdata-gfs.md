@@ -155,7 +155,7 @@ GFS 将一个 chunk（64MB）划分成多个文件区域（64KB），每一个�
 
 下面说明两种写文件区域失败的情况，看看 GFS 是如何处理数据一致性和完整性的。
 
-* primary 失败
+* primary （拥有写凭证的副本）失败
 
 ![primary 写失败](/images/gfs_file_region_primary_failure.png "primary 写失败")
 
@@ -170,19 +170,50 @@ GFS 将一个 chunk（64MB）划分成多个文件区域（64KB），每一个�
 * 空白填充剂
 * 文件区域的数据重复
 
-
+存储填充剂和重复记录的文件区域，其检验和也是正确的，对于 GFS 服务端而言，它也是正确的数据。那么这些多余的数据该如何鉴别并且丢弃呢？这要留给客户端处理。
 
 ### 客户端的隐式处理
 
+客户端写入数据时按照文件区域大小对齐，且每个文件区域包括：
+
+* 检验和：检查并丢弃空白填充剂
+* 文件区域ID：可以过滤重复记录
+
+客户端也可以自己维护一个文件的检查点，记录文件写入多少数据。
 
 
 
+GFS Client API 已经集成这些功能，因为它比较通用。
 
 # 系统交互
 
 ## 租约和写顺序
 
+由于修改操作会影响 chunk 内容或者元数据，为了保持数据一致性，客户端写数据前必须向 master 申请写凭证（这里成为 Lease 租约）。master 会保证任意时刻，一个 chunk 至多只有一个租约有效。拥有租约的 chunk server 称为 primary，primary 的副本（可能存在一个或者多个副本）称为 secondary。一个文件的全局写顺序由 master 分配租约的顺序来保证，而一个 chunk 并发写顺序由 primary 来保证。
 
+
+
+master 如何保证租约分配顺序？步骤如下：
+
+* 1 master 接收到租约申请，检查 chunk 是否有存活的租约；
+* 2 如果没有租约，新分配一个，找出一个副本，将其作为 primary，同时将 chunk version number （CVN）自增；
+* 3 如果有租约，但是拥有租约的 primary 节点失联，master 需要等待租约过期，过期时间是 60 秒；
+* 4 如果有存活的租约，直接返回给客户端；
+* 5 当 primary 的租约快过期时，向 master 续约；
+
+通过 CVN 可以检测 Lease 是否过期，比如当前 primary 的租约的 CVN 是 5，当客户端请求写入时传的 CVN 是 6，可能是因为异常原因、或者客户端缓存导致当前 primary 没有拿到最新的租约，写入失败，需要客户端重新申请再写入。
+
+
+
+primary 负责管理 chunk 及其副本的写入，维护数据写入的一致性。primary 如何保证写的顺序？步骤如下：
+
+* 1 客户端向 master 申请租约成功后，master  返回 primary 和 primary 的副本节点 secondary；
+* 2 客户端先将文件数据推送到 primary 和 secondary，他们会将数据存在内存中一块 LRU 缓存中；
+* 3 客户端再将写请求发送到 primary，因为 primary 只有一个节点，数据接收的顺序可以作为它写的顺序；
+* 4 primary 将相同的写顺序同步到 secondary ，secondary 也按照这样的顺序写 chunk；
+* 5 primary 和 secondary 都写入成功后，回复客户端写成功；
+* 6 任意一个节点写失败时，primary 都会通知客户端重试；客户端继续回到第3步重复操作；
+* 通过上面的方式就可以保证 primary 和 secodnary 写入顺序也是一致的。
 
 ## 数据流
 
