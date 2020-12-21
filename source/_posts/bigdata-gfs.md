@@ -6,38 +6,38 @@ tags: 大数据
 
 # 简介
 
-GFS使用在可扩展的分布式数据密集性应用，包括 OLAP 类型的海量数据存储数据库 Bigtable。GFS 提供以下特性：
+GFS<sup>[ [1] ](http://static.googleusercontent.com/media/research.google.com/en/us/archive/gfs-sosp2003.pdf)</sup>使用在可扩展的分布式数据密集性应用，包括 OLAP 类型的海量数据存储数据库 Bigtable。GFS 提供以下特性：
 
 * 可根据业务量灵活扩展计算和存储资源
-* 多副本保障系统高可用
+* 多副本（replicas）保障系统高可用
 * 文件原子写入
 
 # 设计
 
 ## 架构
 
-GFS由 Master、Chunk Server和 Application 三个组件组成，其中：
+GFS由 Master、Chunkserver和 Application 三个组件组成，其中：
 
 * Master 协调整个 GFS 的读写和副本复制；
-* Chunk Server 实际存储文件数据；
+* Chunkserver 实际存储文件数据；
 * Application 是 GFS 的客户端 SDK；
 
 这三个组件逻辑架构如图-1所示。
 
 ![GFS架构](/images/gfs_arch.png "GFS架构")
 
-图-1 GFS 架构
+*图-1 GFS 架构*
 
 现在分别以读和写的方式说明三个组件的交互过程。
 
 ** 读 **
 
-* 向 Master 查文件的 chunk 索引和 chunk 位置信息，位置信息包括哪些 chunk server 存了这些 chunk 的数据
-* Application 拿到chunk 索引和位置信息后缓存在本地（可减少访问 Master 的次数），然后从 Chunk Server 读 Chunk 的数据
+* 向 Master 查文件的 chunk 索引和 chunk 位置信息，位置信息包括哪些 chunkserver 存了这些 chunk 的数据
+* Application 拿到chunk 索引和位置信息后缓存在本地（可减少访问 Master 的次数），然后从 chunkserver 读 Chunk 的数据
 
 ** 写 **
 
-* Application 向 Master 查文件的 Lease （没有时需要分配一个 Lease 给一个 Chunk Server）在哪台 Chunk Server 上，Master 返回 Lease 的 Chunk Server （称为 primary） 和两个副本的 Chunk Server（称为 secondary）
+* Application 向 Master 查文件的 Lease （没有时需要分配一个 Lease 给一个 chunkserver）在哪台 chunkserver 上，Master 返回 Lease 的 chunkserver （称为 primary） 和两个副本的 chunkserver（称为 secondary）
 * Application 向最近的 primary 和 secondary 节点推送数据，数据是文件的内容，primary 和 secondary 将数据先存在 LRU 缓存上
 * 数据推完后，向 primary 发送一个或者多个写 chunk 请求，把刚才推送的数据写到一个或者多个 chunk
 * primary 按照接收的顺序写完后，把相同顺序的写请求发送到 secondary，让 secondary 写 chunk
@@ -69,7 +69,7 @@ Chunk 的固定大小是 64MB，优点是：
 缺点是热点问题，当读取一个大 Chunk 文件时，涉及到的磁盘读取和网络传输消耗很大，如果访问量大，流量全部压在一台机器会成为瓶颈，会降低机器性能。解决热点的问题是：
 
 * Chunk 不宜太大，一般 64MB
-* 提高复制因子，用多个副本提供服务，分担压力
+* 提高复制因子，用多个 chunkserver 提供服务，分担压力
 
 ## 元数据
 
@@ -94,11 +94,11 @@ Master 存储的元数据包括
 
 ### Chunk 位置
 
-Master 不会将 chunk 的副本位置信息写入磁盘，master 只会在 chunk server 加入机器时询问 chunk 副本位置信息。chunk 副本不存磁盘的原因是：
+Master 不会将 chunk 的副本位置信息写入磁盘，master 只会在 chunkserver 加入机器时询问 chunk 副本位置信息。chunk 副本不存磁盘的原因是：
 
-* chunk server 周期上报 chunk 副本信息非常简单
-* 相比 master 存 chunk 副本而言，可以减少当 chunk server 加入集群、离开机器、修改名字、失败、重启等等信息同步的开销
-* 哪个 chunk 存在哪台 chunk server，chunk server 有最终话语权
+* chunkserver 周期上报 chunk 副本信息非常简单
+* 相比 master 存 chunk 副本而言，可以减少当 chunkserver 加入集群、离开机器、修改名字、失败、重启等等信息同步的开销
+* 哪个 chunk 存在哪台 chunkserver，chunkserver 有最终话语权
 
 ### 操作日志
 
@@ -110,6 +110,8 @@ GFS 的操作日志记录了对所有文件的修改操作，记录这些操作�
 操作日志的实现原理如图-2所示。
 
 ![GFS操作日志和检查点](/images/gfs_operation_log.png "操作日志和检查点")
+
+*图-2 GFS 操作日志和检查点*
 
 需要注意的点：
 
@@ -139,7 +141,7 @@ GFS支持两种写入方式：
 
 这两种写入会影响一致性模型，见表-1所示。
 
-表-1 不同写模式影响一致性模型
+*表-1 不同写模式影响一致性模型*
 
 |          | Write      | Record Append    |
 | -------- | ---------- | ---------------- |
@@ -158,6 +160,8 @@ GFS 将一个 chunk（64MB）划分成多个文件区域（64KB），每一个�
 * primary （拥有写凭证的副本）失败
 
 ![primary 写失败](/images/gfs_file_region_primary_failure.png "primary 写失败")
+
+*图-3 primary 写失败*
 
 * secondary 失败
 
@@ -189,7 +193,7 @@ GFS Client API 已经集成这些功能，因为它比较通用。
 
 ## 租约和写顺序
 
-由于修改操作会影响 chunk 内容或者元数据，为了保持数据一致性，客户端写数据前必须向 master 申请写凭证（这里成为 Lease 租约）。master 会保证任意时刻，一个 chunk 至多只有一个租约有效。拥有租约的 chunk server 称为 primary，primary 的副本（可能存在一个或者多个副本）称为 secondary。一个文件的全局写顺序由 master 分配租约的顺序来保证，而一个 chunk 并发写顺序由 primary 来保证。
+由于修改操作会影响 chunk 内容或者元数据，为了保持数据一致性，客户端写数据前必须向 master 申请写凭证（这里称为 Lease 租约）。master 会保证任意时刻，一个 chunk 至多只有一个租约有效。拥有租约的 chunkserver 称为 primary，primary 的副本（可能存在一个或者多个副本）称为 secondary。一个文件的全局写顺序由 master 分配租约的顺序来保证，而一个 chunk 并发写顺序由 primary 来保证。
 
 
 
@@ -215,58 +219,219 @@ primary 负责管理 chunk 及其副本的写入，维护数据写入的一致�
 * 6 任意一个节点写失败时，primary 都会通知客户端重试；客户端继续回到第3步重复操作；
 * 通过上面的方式就可以保证 primary 和 secodnary 写入顺序也是一致的。
 
+GFS 写数据的流程如图-4所示：
+
+![GFS 写入流程](/images/gfs_mutation_order.png "GFS 写入流程")
+
+*图-4 GFS 写流程*
+
 ## 数据流
 
+上一节说到，客户端会将文件数据推送到 primary 和 secondary，它们之间的推送顺序也是有讲究的。为了提高传输效率，客户端会从 primary 和 secondary 挑选最近的节点推送数据。如何衡量节点之间的距离呢？GFS 使用 IP 地址的距离来抽象机器物理上的距离。假设 primary 是 S1，secondary 是 S2 和 S3 。客户端挑选最近的节点是 S2（处于推送数据阶段无需关注最近的节点是 primary 还是 secondary），客户端向 S2 推送数据。然后 S2 在剩余的 S1 和 S3 节点，挑选离 S2 最近的节点 S1，向 S1 推送数据。再然后，S1 向 S3 推送数据，这样的数据流就是一个管道数据流。间言之：
 
+![GFS 数据流](/images/gfs_data_flow.png "GFS 数据流")
+
+*图-5 GFS 数据流*
 
 ## 原子记录追加
 
+GFS 支持两种写入方式：
 
+* 随机写：由 client 指定一个文件的 offset，GFS 执行随机写入
+* 顺序写：由 GFS 来决定 offset（该值是文件的末尾），GFS 执行顺序写入
+
+
+
+顺序写称为原子记录追加（Atomic Record Appends）。
+
+
+
+随机写的缺点（原因已经在“一致性模型”一节讲到）：
+
+* 并发写是文件区域处于一致不明确
+* 写性能降低
+
+顺序写的优点有（原因已经在“一致性模型”一节讲到）：
+
+* 部分文件区域处于不明确，这些不明确的文件区域一般是数据错误，检查和不正确；
+* 写性能高；
+
+顺序写的副作用有（原因已经在“一致性模型”一节讲到）：
+
+* 空白填充剂
+* 重复记录
 
 ## 快照
 
+GFS 使用 copy-on-write 实现快照，用来支持客户端
 
+* 创建检查点
+* 复制大数据集
+
+创建快照的流程是：
+
+* 1 客户端向 master 请求负责文件或者目录快照
+* 2 master 通知拥有文件或者目录的租约节点，让租约过期。master 需要等待租约过期操作的回复或者等待租约超时，这样任何对这些文件的写入会再次经过 master 协调
+* 3 master 将文件或者目录的元数据在内存中复制一份（当然也会记录到操作日志中），同时更新 chunk 的引用计数器，即 reference count 需要加 1。此时客户端可以继续写这个 chunk，阻塞时长只有一个租约过期时间。
+* 4 客户端写 chunk （假设是 chunk C）时，master 需要检查它的 reference count ，如果大于 1 ，需要将这个所有存储这个 chunk  C 的副本节点都在本地复制一个 chunk C' 。由于是本地复制，可以节省网络带宽。复制完毕后，master 将 chunk C 的 reference count 减 1。
+* 5 master 将 chunk C' 告诉客户端，需要写这个 chunk
 
 # Master 操作
 
-
+master 管理所有的元数据，包括文件、目录的命名空间的管理。
 
 ## 命名空间管理和锁
 
+master 支持并发写入，命名空间的一致性维护需要使用锁，防止：
 
+* 文件删除
+* 重命名
+* 新建文件
+* 创建快照
+
+时出现冲突。锁分为两种：
+
+* 读锁
+* 写锁
+
+如果要操作一个文件或者目录 /d1/d2/.../dn/leaf ，master 需要获取 /d1，/d1/d2，/d1/d2/.../dn 的读锁，然后根据操作的类型给 /d1/d2/.../dn/leaf 加读锁还是写锁。
+
+*表-2 读写锁*
+
+|          | 删除文件 | 创建文件 | 创建快照 | 文件重命名 |
+| -------- | -------- | -------- | -------- | ---------- |
+| 父目录   | 读锁     | 读锁     | 读锁     | 读锁       |
+| 叶子结点 | 写锁     | 写锁     | 写锁     | 写锁       |
+
+创建文件时，叶子节点就是要创建的文件。如果在同一个目录下创建多个文件，流程可以并发，因为创建文件是只是对父节点加读锁操作。
+
+由于 GFS 在内存中构建一个查找表来顺序存放文件名到元数据的音色，文件名还可以做压缩操作，以节省更多空间。
 
 ## 副本位置
 
+GFS 集群中的副本节点位置搭设需要遵循一定的策略才能做到：
 
+* 可扩展
+* 可靠
+* 可用
+
+策略是：
+
+* 副本分布在多个机架
+* 多级分布式
 
 ## 创建-重复制-重平衡
 
+一个 chunk 副本被创建有以下三个原因：
 
+* 创建 chunk
+* 重复制
+* 重平衡
+
+当 master 创建一个 chunk 时，master 需要决定这个 chunk 放在哪些 chunkserver 上。规则是：
+
+* 磁盘利用率：选择磁盘利用率低于平均数的副本节点
+* 热点：最近写入操作少的节点
+* 位置：副本需要分布在多个机架
+
+当一个 chunk 的副本节点数量小于指定的数值时，master 将会启动重复制，避免拥有 chunk 的唯一节点或者少数节点挂掉后数据永久丢失。一个 chunk 的副本节点数量不够的原因有：
+
+* 一个 chunkserver 不可用
+* chunkserver 报告它的 chunk 损坏了
+* chunkserver 的磁盘不可用
+* 提高了复制因子
+
+每个 chunk 需要重复制的优先级可以这么定：
+
+* 离复制因子的距离
+* 复制存活的文件而不是删除的文件
+* 提高正在阻塞客户端读写流程的 chunk 优先级
+
+master 根据这些优先级排序，选出需要重复制的 chunk 按照创建一个 chunk 时的逻辑选出 chunkserver。
+
+执行重平衡的原因是：
+
+* 提高磁盘空间利用率
+* 负载均衡，解决热点问题
 
 ## 垃圾收集
 
 ### 机制
 
+Master 删除一个文件时，它将文件重命名为一个隐藏文件，隐藏文件的文件名带有删除时间戳，这样可以：
 
+* 继续读隐藏文件的内容
+* 将文件重命名回去，恢复文件
+* 快速返回，客户端可以立即做其他操作
+
+GFS 垃圾回收是周期性扫描整个文件系统的命名空间，符合下面两种情况的 chunk 都可以删除：
+
+* chunk 是孤儿节点
+* 隐藏文件的删除时间大于3天（当然这是可配置的）
+* CVN是过期数据旧 chunk
+
+当文件被删除时，内存中的元数据也会清空。master 会将删除信息通过心跳消息发送到包含这些 chunk 的 chunkserver，chunkserver 执行文件清理操作。
 
 ### 讨论
 
+周期性扫描的垃圾回收机制的优点是：
+
+* 在容易出错的分布式系统中，这样做的方式是简单和可靠。试想节点挂机、删除消息丢失、部分节点写入成功时，依然需要一个机制来记住哪些节点需要重发删除消息，然后定期重试，这种机制并没有垃圾回收简单。
+* 存储资源回收时可以批量进行，一边做 CPU 类型的扫描操作，一遍做 IO 类型的资源回收
+* 避免不可逆转的删除。当想恢复数据时还有办法
+
 ## 旧数据检测
 
+GFS 通过 chunk version number（CVN）来维护 chunk 的版本，可以判断一个 chunk 是旧的还是最新的。
 
+
+
+master 每次分配一个租约 lease 时，都会增加 chunk 的 CVN 版本号，master 和所有的副本节点都使用新的 CVN 来记录这个 chunk 的版本。当客户端写 chunk 时，由于某一个节点不可用时，该节点的 chunk 将不会增长，版本会过期。
+
+
+
+当 chunkserver 报告它所有 chunk 版本时，master 会对比自己存的版本号，如果 chunkserver 的 CVN 比 master 的 CVN 小，表示 chunkserver 中的 chunk 不是最新数据。如果 chunkserver 的 CVN 比 master 的 CVN 大，表示 chunkserver 的 chunk 是最新的数据，master 可能之前挂过机。
+
+
+
+CVN 旧数据将会在周期性扫描的垃圾收集时处理掉。
 
 # 容错性和诊断
 
 ## 高可用
 
+GFS 提高两个关键且简单的高可用策略：
+
+- 快速恢复
+- 复制
+
 ### 快速恢复
 
-### Chunk复制
+master 和 chunkserver 会记录操作日志和检查点，不管是以何种方式停止，重启时都会恢复检查点数据和重放日志。
 
-### Master复制
+### Chunk 复制
+
+每一个 chunk 都被复制（根据复制因子）到多个 chunkserver，而 chunkserver 按照多机架结构部署，多个 chunkserver 提供服务（多副本），部分机器挂机服务也能正常运行。
+
+### Master 复制
+
+Master 是 GFS 的协调器，是核心节点。由于 master 节点同时只有一个节点提供服务，存在单点故障。为此，GFS 还是做了一些努力。包括：
+
+* master 数据可靠复制：写操作如果被提交，它必须是1）写入到磁盘，2）同步到所有 master 副本
+* master 节点使用 DNS 名称，当 master 切换时可以自动跟随
+* master 影子节点提供只读功能，它的状态可能会落后 master 节点几秒。对于一些应用要求一致性不高时可以读影子节点的数据。这样可以降低 master 的压力。
+
+影子节点是如何实现的呢？
+
+它直接读取 master 的操作日志，将更新操作应用到自己的数据结构中。
 
 ## 数据完整性
 
+每个 chunk 被划分为多个 64KB 大小的文件区域，在 master 元数据里用 32 位存储文件区域的检验和（checksum）。不管是客户端还是其他 GFS 节点读取 chunk 时，都会计算检验和是否正确，绝不会返回检验和错误的数据或者 chunk。当 master 发现检验和错误，认为是数据损坏，需要启动重复制机制，从其他正确的节点复制数据。
 
+由于数据每次读取时都要检查检验和，对读性能还是优点影响，GFS 做了如下优化：
 
-## 诊断工具
+* GFS 客户端将读的范围与检验和的区块边界对齐
+* 一遍读数据一遍执行 CPU 计算检验和，可以分摊开销
+* 顺序写时，只需要计算新区块的检验和，之前的区块检验和不管是错误的还是正确的，在下次读取都会检查出来，并且被 master 通知更新
+* 随机写时，只需要计算写范围的第一块和最后一块的检验和，判断是否正确，目的是防止新的写入覆盖数据损坏的记录。
