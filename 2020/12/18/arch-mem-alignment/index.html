@@ -108,25 +108,29 @@
 
 
 
-  <meta name="description" content="设计模式的六大原则开闭原则即对扩展开放,对修改关闭，多使用抽象类和接口 里氏替换原则即基类可以被子类替换，使用抽象类继承,不使用具体类继承。 依赖倒转原则即要依赖于抽象,不要依赖于具体，针对接口编程,不针对实现编程。 接口隔离原则即使用多个隔离的接口,比使用单个接口好，建立最小的接口。 迪米特法则一个软件实体应当尽可能少地与其他实体发生相互作用，通过中间类建立联系。 合成复用原则即尽量使用合成/聚">
-<meta name="keywords" content="java">
+  <meta name="description" content="问题在使用 C 语言定义一个结构体时，使用 sizeof 计算结构体的字节大小时与理论计算的不一致。比如： 12345678910111213#include &amp;lt;stdio.h&amp;gt;typedef struct &amp;#123;	int a;	char b;	int c;&amp;#125; A;int main(int argc, char *args[])&amp;#123;	A a;	printf(&quot;%">
+<meta name="keywords" content="计算机体系结构">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java后端开发 - 设计模式">
-<meta property="og:url" content="http://yoursite.com/2018/10/13/java-programmer-knowledge-design-pattern/index.html">
+<meta property="og:title" content="计算机体系结构——内存对齐原理">
+<meta property="og:url" content="http://yoursite.com/2020/12/18/arch-mem-alignment/index.html">
 <meta property="og:site_name" content="海东青">
-<meta property="og:description" content="设计模式的六大原则开闭原则即对扩展开放,对修改关闭，多使用抽象类和接口 里氏替换原则即基类可以被子类替换，使用抽象类继承,不使用具体类继承。 依赖倒转原则即要依赖于抽象,不要依赖于具体，针对接口编程,不针对实现编程。 接口隔离原则即使用多个隔离的接口,比使用单个接口好，建立最小的接口。 迪米特法则一个软件实体应当尽可能少地与其他实体发生相互作用，通过中间类建立联系。 合成复用原则即尽量使用合成/聚">
+<meta property="og:description" content="问题在使用 C 语言定义一个结构体时，使用 sizeof 计算结构体的字节大小时与理论计算的不一致。比如： 12345678910111213#include &amp;lt;stdio.h&amp;gt;typedef struct &amp;#123;	int a;	char b;	int c;&amp;#125; A;int main(int argc, char *args[])&amp;#123;	A a;	printf(&quot;%">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2020-04-04T05:38:01.868Z">
+<meta property="og:image" content="http://yoursite.com/images/memory-alignment.png">
+<meta property="og:image" content="http://yoursite.com/images/memory-alignment-one-cycle-access.png">
+<meta property="og:image" content="http://yoursite.com/images/memory-alignment-more-cycle-access.png">
+<meta property="og:updated_time" content="2020-12-20T05:36:27.330Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Java后端开发 - 设计模式">
-<meta name="twitter:description" content="设计模式的六大原则开闭原则即对扩展开放,对修改关闭，多使用抽象类和接口 里氏替换原则即基类可以被子类替换，使用抽象类继承,不使用具体类继承。 依赖倒转原则即要依赖于抽象,不要依赖于具体，针对接口编程,不针对实现编程。 接口隔离原则即使用多个隔离的接口,比使用单个接口好，建立最小的接口。 迪米特法则一个软件实体应当尽可能少地与其他实体发生相互作用，通过中间类建立联系。 合成复用原则即尽量使用合成/聚">
+<meta name="twitter:title" content="计算机体系结构——内存对齐原理">
+<meta name="twitter:description" content="问题在使用 C 语言定义一个结构体时，使用 sizeof 计算结构体的字节大小时与理论计算的不一致。比如： 12345678910111213#include &amp;lt;stdio.h&amp;gt;typedef struct &amp;#123;	int a;	char b;	int c;&amp;#125; A;int main(int argc, char *args[])&amp;#123;	A a;	printf(&quot;%">
+<meta name="twitter:image" content="http://yoursite.com/images/memory-alignment.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/10/13/java-programmer-knowledge-design-pattern/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/12/18/arch-mem-alignment/"/>
 
 
 
@@ -136,7 +140,7 @@
   };
 </script>
 
-  <title>Java后端开发 - 设计模式 | 海东青</title>
+  <title>计算机体系结构——内存对齐原理 | 海东青</title>
   
 
 
@@ -281,7 +285,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/10/13/java-programmer-knowledge-design-pattern/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/12/18/arch-mem-alignment/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="海东青">
@@ -298,7 +302,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Java后端开发 - 设计模式
+          <h1 class="post-title" itemprop="name headline">计算机体系结构——内存对齐原理
               
             
           </h1>
@@ -323,7 +327,7 @@
                 
               
 
-              <time title="Created: 2018-10-13 08:16:13" itemprop="dateCreated datePublished" datetime="2018-10-13T08:16:13+08:00">2018-10-13</time>
+              <time title="Created: 2020-12-18 16:58:37" itemprop="dateCreated datePublished" datetime="2020-12-18T16:58:37+08:00">2020-12-18</time>
             
 
             
@@ -340,7 +344,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-04-04 13:38:01" itemprop="dateModified" datetime="2020-04-04T13:38:01+08:00">2020-04-04</time>
+                <time title="Modified: 2020-12-20 13:36:27" itemprop="dateModified" datetime="2020-12-20T13:36:27+08:00">2020-12-20</time>
               
             
           </span>
@@ -373,13 +377,27 @@
       
 
       
-        <h1 id="设计模式的六大原则"><a href="#设计模式的六大原则" class="headerlink" title="设计模式的六大原则"></a>设计模式的六大原则</h1><h2 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h2><p>即对扩展开放,对修改关闭，多使用抽象类和接口</p>
-<h2 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h2><p>即基类可以被子类替换，使用抽象类继承,不使用具体类继承。</p>
-<h2 id="依赖倒转原则"><a href="#依赖倒转原则" class="headerlink" title="依赖倒转原则"></a>依赖倒转原则</h2><p>即要依赖于抽象,不要依赖于具体，针对接口编程,不针对实现编程。</p>
-<h2 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h2><p>即使用多个隔离的接口,比使用单个接口好，建立最小的接口。</p>
-<h2 id="迪米特法则"><a href="#迪米特法则" class="headerlink" title="迪米特法则"></a>迪米特法则</h2><p>一个软件实体应当尽可能少地与其他实体发生相互作用，通过中间类建立联系。</p>
-<h2 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h2><p>即尽量使用合成/聚合,而不是使用继承。</p>
-<h1 id="常用设计模式"><a href="#常用设计模式" class="headerlink" title="常用设计模式"></a>常用设计模式</h1><p><a href="https://en.wikipedia.org/wiki/Software_design_pattern" target="_blank" rel="noopener">Software design pattern</a>，<a href="http://www.uml.org.cn/sjms/201211023.asp" target="_blank" rel="noopener">23种设计模式全解析</a></p>
+        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>在使用 C 语言定义一个结构体时，使用 <code>sizeof</code> 计算结构体的字节大小时与理论计算的不一致。比如：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	<span class="keyword">int</span> a;</span><br><span class="line">	<span class="keyword">char</span> b;</span><br><span class="line">	<span class="keyword">int</span> c;</span><br><span class="line">&#125; A;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *args[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	A a;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d"</span>, <span class="keyword">sizeof</span>(A));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结构体 <code>A</code> 的理论大小应该是 4 + 1 + 4 = 9 字节，当我们执行 <code>sizeof(A)</code> 或者 <code>sizeof(a)</code> 时，返回值是 12。</p>
+<h1 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h1><p>为了提高程序读写内存的效率，编译器将字段 b 多填充了 3 个字节，这3个字节都是 0。填充空白就是内存对齐，结构体 <code>A</code> 是按照 4 字节对齐。一般来说，结构体会按照内存宽度最长的那个字段来做字节对齐。</p>
+<p>为什么要字节对齐呢？</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>对于大多数处理器，包括兼容 x86 协议的处理器，允许一个内存总线周期（one memory bus cycle）访问的字节宽度是 1 字节、2 字节、4 字节，而且访问起始地址必须如下图<sup><a href="https://microchipdeveloper.com/32bit:mz-arch-memory-alignment" target="_blank" rel="noopener"> [1] </a></sup>左侧所示：</p>
+<p><img src="/images/memory-alignment.png" alt="内存对齐的数据传输" title="内存对齐的数据传输"></p>
+<p>简言之：</p>
+<p><img src="/images/memory-alignment-one-cycle-access.png" alt="一次读取" title="一次读取"></p>
+<p>下面的方式不能一次读取：</p>
+<p><img src="/images/memory-alignment-more-cycle-access.png" alt="多次次读取" title="多次读取"></p>
+<p>如果读取的数据不是字节对齐，处理器需要多次访问内存，然后做移位操作，合并数据。正如 Intel 的技术手册<a href="https://software.intel.com/content/www/us/en/develop/download/intel-64-and-ia-32-architectures-software-developers-manual-volume-1-basic-architecture.html" target="_blank" rel="noopener">《Intel® 64 and IA-32 Architectures Software Developer’s Manual Volume 1: Basic Architecture》</a>第4.1.1节“Alignment of Words, Doublewords, Quadwords, and Double Quadwords”所说的：</p>
+<p><em>However, to improve the performance of programs, data  structures (especially stacks) should be aligned on natural boundaries whenever possible. The reason for this is  that the processor requires two memory accesses to make an unaligned memory access; aligned accesses require  only one memory access. A word or doubleword operand that crosses a 4-byte boundary or a quadword operand  that crosses an 8-byte boundary is considered unaligned and requires two separate memory bus cycles for access.</em></p>
+<p>通过上面的介绍，我们可以知道数据结构 <code>B</code> 占用的内存大小是 3。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	<span class="keyword">char</span> a;</span><br><span class="line">	<span class="keyword">char</span> b;</span><br><span class="line">	<span class="keyword">char</span> c;</span><br><span class="line">&#125; B;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *args[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	B b;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d"</span>, <span class="keyword">sizeof</span>(B));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><p>内存对齐有 3 个优点<sup><a href="https://stackoverflow.com/questions/381244/purpose-of-memory-alignment" target="_blank" rel="noopener"> [2] </a></sup>：</p>
+<ul>
+<li>提高访问速度</li>
+<li>原子读写</li>
+<li>提高内存访问范围：<em>For any given address space, if the architecture can assume that the 2 LSBs are always 0 (e.g., 32-bit machines) then it can access 4 times more memory (the 2 saved bits can represent 4 distinct states), or the same amount of memory with 2 bits for something like flags.</em>这种取巧方式也用在JVM的偏向锁存储<code>JavaThread*</code>线程指针，通过将线程对象按照 128 字节对齐，可以腾出7位的空间存储 <code>age</code> 和 <code>epoch</code><sup><a href="http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/oops/markOop.hpp" target="_blank" rel="noopener"> [3] </a></sup>。</li>
+</ul>
 
       
     </div>
@@ -400,7 +418,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/java/" rel="tag"># java</a>
+            <a href="/tags/计算机体系结构/" rel="tag"># 计算机体系结构</a>
           
         </div>
       
@@ -413,8 +431,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/10/13/java-programmer-knowledge-jvm/" rel="next" title="Java后端开发 - JVM">
-                <i class="fa fa-chevron-left"></i> Java后端开发 - JVM
+              <a href="/2020/11/10/bigdata-gfs/" rel="next" title="大数据系列——分布式文件系统GFS">
+                <i class="fa fa-chevron-left"></i> 大数据系列——分布式文件系统GFS
               </a>
             
           </div>
@@ -422,10 +440,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/10/13/java-programmer-knowledge-network/" rel="prev" title="Java后端开发 - 网络">
-                Java后端开发 - 网络 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -554,7 +568,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#设计模式的六大原则"><span class="nav-number">1.</span> <span class="nav-text">设计模式的六大原则</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#开闭原则"><span class="nav-number">1.1.</span> <span class="nav-text">开闭原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#里氏替换原则"><span class="nav-number">1.2.</span> <span class="nav-text">里氏替换原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#依赖倒转原则"><span class="nav-number">1.3.</span> <span class="nav-text">依赖倒转原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口隔离原则"><span class="nav-number">1.4.</span> <span class="nav-text">接口隔离原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#迪米特法则"><span class="nav-number">1.5.</span> <span class="nav-text">迪米特法则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合成复用原则"><span class="nav-number">1.6.</span> <span class="nav-text">合成复用原则</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常用设计模式"><span class="nav-number">2.</span> <span class="nav-text">常用设计模式</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原因"><span class="nav-number">2.</span> <span class="nav-text">原因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">3.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#优点"><span class="nav-number">4.</span> <span class="nav-text">优点</span></a></li></ol></div>
             
 
           </div>
