@@ -1,3 +1,9 @@
+---
+title: 大数据系列——Bigtable
+date: 2020-12-18 15:35:44
+tags: 大数据
+---
+
 # 简介
 
 Bigtable<sup>[ [1] ](http://static.googleusercontent.com/media/research.google.com/en/us/archive/bigtable-osdi06.pdf)</sup> 是 Google 为了处理海量数据的离线计算和数据存储而开发的一套 KV 存储数据库，Bigtable 依赖 GFS 存储日志文件和数据文件。
