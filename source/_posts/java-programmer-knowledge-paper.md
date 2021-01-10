@@ -195,7 +195,7 @@ Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf)
 
 ## 基础
 
-[LSMTree](https://www.cs.umb.edu/~poneil/lsmtree.pdf)
+[LSMTree](http://paperhub.s3.amazonaws.com/18e91eb4db2114a06ea614f0384f2784.pdf)
 
 [An Efficient Design and Implementation of LSM-Tree based Key-Value Store on Open-Channel SSD](http://ranger.uta.edu/~sjiang/pubs/papers/wang14-LSM-SDF.pdf)
 

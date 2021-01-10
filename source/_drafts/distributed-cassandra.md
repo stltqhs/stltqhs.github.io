@@ -1,5 +1,5 @@
 ---
-title: distributed-cassandra
+title: 分布式系列——Cassandra
 date: 2020-12-21 09:20:13
-tags:
+tags: 分布式
 ---
