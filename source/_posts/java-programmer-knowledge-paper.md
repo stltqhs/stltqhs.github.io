@@ -164,7 +164,15 @@ tags:
 
 [Memory resource management in VMware ESX server](https://www.vmware.com/pdf/usenix_resource_mgmt.pdf)
 
+# 资源调度
 
+[Large-scale cluster management at Google with Borg](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/43438.pdf)
+
+[YARN](https://www.cse.ust.hk/~weiwa/teaching/Fall15-COMP6611B/reading_list/YARN.pdf)
+
+[Omega](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/41684.pdf)
+
+[Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center](https://www.usenix.org/legacy/event/nsdi11/tech/full_papers/Hindman.pdf)
 
 # 分布式
 

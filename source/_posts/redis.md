@@ -525,7 +525,7 @@ Redis 集群运行过程中支持动态的添加节点和删除节点，这就�
 MIGRATE target_host target_port key target_database id timeout
 ```
 
-这个命令可以将 key 从节点 A 迁移到 节点 B，当 key 成功迁移到节点 B 时，节点 A 需要删除 key。对于集群环境下，`target_database` 只能是 0。`MIGRATE` 命令还指定了超时时间，
+这个命令可以将 key 从节点 A 迁移到 节点 B，当 key 成功迁移到节点 B 时，节点 A 需要删除 key。对于集群环境下，`target_database` 只能是 0。`MIGRATE` 命令还指定了超时时间，从这里可以看出，**`MIGRATE`命令是同步阻塞的**。
 
 这样不停的获取迁移 key 然后 `MIGRATE` 迁移 key，最终会把所有的 key 都迁移完。
 
