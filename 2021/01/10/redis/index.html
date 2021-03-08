@@ -120,7 +120,7 @@
 <meta property="og:image" content="http://www.web-lovers.com/assets/bimg/redis_sentinel_1.png">
 <meta property="og:image" content="http://yoursite.com/images/redis_2_data_node.png">
 <meta property="og:image" content="http://yoursite.com/images/redis_cluster_arch.png">
-<meta property="og:updated_time" content="2021-02-21T13:32:36.507Z">
+<meta property="og:updated_time" content="2021-03-04T05:41:25.860Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis">
 <meta name="twitter:description" content="简介Redis 是一款高性能 NoSQL 数据库，支持内存和磁盘存储。纯内存操作，单机可以支持每秒 5 万到 10 万的 O(1) 时间复杂度读写操作。Redis 使用 IO 多路复用技术处理客户端网络读写请求，服务端内部只有一个读写操作线程，结合 Pipeline 机制可以很好的实现多命令的原子操作。 KV支持 get/set 这样的 KV 操作，可以给 K 设置过期时间，也支持条件设置，比如当">
@@ -345,7 +345,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2021-02-21 21:32:36" itemprop="dateModified" datetime="2021-02-21T21:32:36+08:00">2021-02-21</time>
+                <time title="Modified: 2021-03-04 13:41:25" itemprop="dateModified" datetime="2021-03-04T13:41:25+08:00">2021-03-04</time>
               
             
           </span>
@@ -641,7 +641,7 @@
 <p>此时 slot 8 处于迁移状态，属于不稳定状态，集群内其他节点依然认为 slot 8 是节点 A 提供服务的。</p>
 <p>第二步，通过 <code>CLUSTER GETKEYSINSLOT slot count</code> 获得 slot 8 下 count 个 key。因为迁移过程是循序渐进，不能一气呵成，而且大 key 迁移更慢，所以一次获得一部分 key，然后对这些 key 执行迁移操作。这部分 key 迁移完成后，继续执行 <code>CLUSTER GETKEYSINSLOT slot count</code>，直到所有的 key 都迁移完成。现在我们可以拿到 slot 下要迁移的 key ，在节点 A 执行命令：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MIGRATE target_host target_port key target_database id timeout</span><br></pre></td></tr></table></figure>
-<p>这个命令可以将 key 从节点 A 迁移到 节点 B，当 key 成功迁移到节点 B 时，节点 A 需要删除 key。对于集群环境下，<code>target_database</code> 只能是 0。<code>MIGRATE</code> 命令还指定了超时时间，</p>
+<p>这个命令可以将 key 从节点 A 迁移到 节点 B，当 key 成功迁移到节点 B 时，节点 A 需要删除 key。对于集群环境下，<code>target_database</code> 只能是 0。<code>MIGRATE</code> 命令还指定了超时时间，从这里可以看出，<strong><code>MIGRATE</code>命令是同步阻塞的</strong>。</p>
 <p>这样不停的获取迁移 key 然后 <code>MIGRATE</code> 迁移 key，最终会把所有的 key 都迁移完。</p>
 <p>第三步，当 slot 8 所有的 key 都迁移完成后，节点 A 和节点 B 都执行 <code>CLUSTER SETSLOT slot NODE node</code> 将 slot 8 设置为正常状态，此时集群稳定下来。</p>
 <h3 id="ASK-重定向"><a href="#ASK-重定向" class="headerlink" title="ASK 重定向"></a><code>ASK</code> 重定向</h3><p>在数据迁移的第二步，由于 slot 迁移过程中，有些 key 已经不在 A 节点，而是在 B 节点，当继续查 slot 的 key 时，如果在 A 节点找不到，将会发起一个重定向，将查询请求转给节点 B，这里的重定向就是 <code>ASK</code>。</p>
