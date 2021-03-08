@@ -174,6 +174,8 @@ tags:
 
 [Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center](https://www.usenix.org/legacy/event/nsdi11/tech/full_papers/Hindman.pdf)
 
+[Borg, Omega, and Kubernetes](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/44843.pdf)
+
 # 分布式
 
 [Paxos Made Simple](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf)
