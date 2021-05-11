@@ -101,9 +101,9 @@ Dynamo 使用的向量时钟格式是 [node, counter] ，node 是协调器节点
 
 图4是 Dynamo 论文[《Dynamo: Amazon’s Highly Available Key-value Store》](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf)第4.4节的截图，它展示的是一个 key 的数据版本从 D1 到 D5 的演变过程，其中涉及合并、替换旧版本数据。
 
-![Dynamo Vector Clock](/images/dynamo_vector_clock.png)
+<img src="/images/dynamo_vector_clock.png" alt="Dynamo Vector Clock" width="400"/>
 
-*图-3 向量时钟*
+*图-4 向量时钟*
 
 Sx节点首先收到 key 的 `put` 操作时，此时的数据版本是D1，使用 ([Sx,1]) 这个时钟向量来记录，Sx 然后将该数据附加版本信息复制给 preference list 的其他节点。接着 Sx 再次收到 `put` 操作，数据版本是 D2，使用 ([Sx, 2]) 来记录。Sy 收到了 ([Sx,2]) 这个版本的数据，然后 Sy 作为协调器收到 `put` 操作，数据版本是 D3，使用 ([Sx,2],[Sy,1)]) 来记录。此时 Sy 异常，没有将数据复制出去，Sx 和 Sz 都收不到。类似的，Sz 也收到了 `put` 操作，使用 ([Sx, 2],[Sz,1]) 来记录版本 D4。此时各节点的数据版本是：
 
@@ -135,12 +135,25 @@ Dynamo 的操作主要是：
 
 负责处理 `get` 和 `put` 操作的节点称为协调器，它继续向其他节点发起读写操作，如果是：
 
-* `get` 操作时，协调器需要向高优先级的前 N - 1 个 preference list 的健康节点发起 `get` 请求，等到收到 R 个节点回复成功时，再将返回数据返回给客户端，如果数据版本存在分支冲突的情况，需要客户端去解决分支冲突的问题（想象成 git 中的分支冲突处理）；
-* `put` 操作时，协调器需要向高优先级的前 N - 1 个 preference list 的健康节点发起 `put` 请求，等到 W 个节点回复成功时，再通知客户端写入成功。如果需要更新一个数据时，必须先发起 `get` 请求拿到 `context` 数据版本，将其传给 `put` 方法；
+* `get` 操作时，协调器需要向高优先级的前 N - 1 个 preference list 的健康节点发起 `get` 请求，等到收到 R - 1 个节点回复成功时，再将返回数据返回给客户端，如果数据版本存在分支冲突的情况，需要客户端去解决分支冲突的问题（想象成 git 中的分支冲突处理）；
+* `put` 操作时，协调器需要向高优先级的前 N - 1 个 preference list 的健康节点发起 `put` 请求，等到 W - 1 个节点回复成功时，再通知客户端写入成功。如果需要更新一个数据时，必须先发起 `get` 请求拿到 `context` 数据版本，将其传给 `put` 方法；
 
 Dynamo 的数据弱一致性使用 quorum 机制，遵循 R+W>N 。
 
-`get` 和 `put` 操作并不总是选择前 N 个 preference list 节点（第一个节点是协调器），因为有些节点可能发生异常或者网络分区，此时 Dynamo 会跳过这些节点。那么如果节点异常后，数量不足 R 或者 W 个节点时，Dynamo 时如何做到最大努力保证写的高可用呢？
+`get` 和 `put` 操作并不总是选择前 N 个 preference list 节点（第一个节点是协调器），因为有些节点可能发生异常或者网络分区，此时 Dynamo 会跳过这些节点。那么如果节点异常后，数量不足 R 或者 W 个节点时，Dynamo 时如何做到最大努力保证读写的高可用呢？
 
 ## 错误处理
 
+### Hinted Handoff
+
+上文说到，Dynamo 使用一种 quorum 机制来保证数据弱一致性，而 Dynamo 的目前是要保证读写的高可用，哪怕集群只有一个节点，读写还是要支持的，这样就会造成支持 R 或者 W 节点的数量不足，不满足 quorum 机制。事实上，Dynamo 使用一种叫做“sloppy quorum“机制，不会严格的使用 quorum 机制，这样就可以支持读写的高可用。
+
+<img src="/images/dynamo_preference_list.png" alt="dynamo partitino and replication" width="400"/>
+
+*图-5 Key 的分区和复制*
+
+根据图5来说明“sloppy quorum”的机制。假设根据 Dynamo 配置，N = 3。当向 A 节点写入数据时，节点 A 异常停止服务，本来应该存在A中的副本，现在会转发到节点 D，而节点 D 知道现在是暂时存储节点 A 的数据，需要在另一个数据集中存储节点 A 的数据，并做好标记，然后定期扫描。当节点 A 恢复正常时，节点 D 需要将这部分数据移动到节点 A。这样可以保证写的高可用。
+
+### 永久性错误
+
+## 成员和异常检查
