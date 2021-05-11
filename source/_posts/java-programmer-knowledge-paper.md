@@ -237,6 +237,10 @@ Process](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf)
 
 [Hypertable Architecture Overview](http://www.hypertable.com/collateral/whitepaper-hypertable-architecture.pdf)
 
+[Megastore: Providing Scalable, Highly Available Storage for Interactive Services](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/36971.pdf)
+
+
+
 ## 数据处理
 
 [MapReduce: Simplified Data Processing on Large Clusters](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf)
