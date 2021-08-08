@@ -2,6 +2,7 @@
 title: Eclipse插件收藏
 date: 2021-07-31 13:19:05
 tags:
+toc: true
 ---
 
 记录一下自己使用的Eclipse插件：

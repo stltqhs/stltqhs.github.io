@@ -2,6 +2,7 @@
 title: Redis
 tags: NoSQL
 date: 2021-01-10 20:49:08
+toc: true
 ---
 
 

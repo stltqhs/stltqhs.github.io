@@ -2,6 +2,7 @@
 title: 大数据系列——MapReduce分布式并行计算框架
 date: 2020-11-01 13:08:46
 tags: 大数据
+toc: true
 ---
 
 讨论MapReduce之前，我们先从一个简单问题入手，一步步叙述MapReduce原理。
