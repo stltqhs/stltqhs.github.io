@@ -1,9 +1,10 @@
 ---
 title: 计算机体系结构——为什么需要内存屏障
-date: 2020-12-18 16:59:05
 tags: 计算机体系结构
 toc: true
+date: 2020-12-18 16:59:05
 ---
+
 
 本文是作者阅读了[《Is Parallel Programming Hard, And, If So, What Can You Do About It?Second Edition》](https://arxiv.org/pdf/1701.00854.pdf) 一书的附录C “Why Memory Barriers” 整理出来。篇幅较长，请耐心阅读。
 
@@ -306,7 +307,7 @@ void bar(void)
 * 9 CPU 1 执行 `assert(a == 1)`，因为 `a` 的旧值依然存在 CPU 1 的缓存行中，断言失败。
 * 10 不顾断言失败，CPU 1 执行 invalidate 队列的消息，标记 `a` 的缓存行失效。
 
-很明显加速了 invalidation 回复后造成内存屏障失效了。然后，内存屏障质量也可以使用在 invalidate 队列，所以，当一个 CPU 执行一个内存屏障后，它标记所有当前 invalidate 队列的条目，然后强制接下来的 load 操作等待，直到所有的被标记的条目都已经应用到缓存行。因此我们可以在 `bar()` 加一个内存屏障，代码如下。
+很明显加速了 invalidation 回复后造成内存屏障失效了。然后，内存屏障指令也可以使用在 invalidate 队列，所以，当一个 CPU 执行一个内存屏障后，它标记所有当前 invalidate 队列的条目，然后强制接下来的 load 操作等待，直到所有的被标记的条目都已经应用到缓存行。因此我们可以在 `bar()` 加一个内存屏障，代码如下。
 
 ```c
 void foo(void)
@@ -324,3 +325,104 @@ void bar(void)
 }
 ```
 
+修改后，操作序列如下：
+
+* 1 CPU 0 执行 `a = 1`。相应的缓存行在 CPU 0的缓存中是只读，所以 CPU 0 将 `a` 的新值存到 store buffer，然后发起 **Invalidate** 消息要让 CPU 1中 `a` 缓存行的数据清除。
+* 2 CPU 1 执行 `while(b == 0) continue;`，但是 `b` 不在缓存行中，因此发起一个 **Read** 消息。
+* 3 CPU 1 收到 CPU 0 的 **Invalidate** 消息，直接将这个消息加入到 invalidate 队列，立刻回复 **Invalidate Acknowledge** 消息。
+* 4 CPU 0 收到 CPU 1 的回复，因此可以自由的执行完 `smp_mb()` ，然后将 `a` 的值从 store buffer 取出应用到缓存行。
+* 5 CPU 0 执行 `b = 1`，该 CPU 已经拥有它的缓存行（换言之，缓存行的状态可能是 “exclusive” 或者是 “modified” 状态），所以它将新值存储到缓存行中。
+* 6 CPU 0 收到 **Read** 消息，将 `b` 的缓存行最新值发送给 CPU 1，并且标记 `b` 缓存行的状态是 “shared”。
+* 7 CPU 1 收到 `b` 缓存行的数据，然后将它保存到缓存行。
+* 8 CPU 1 现在可以完成 `while(b == 0) continue` ，因为它发现 `b` 的值是 1，继续执行下面的语句。
+* 9 到了 `smp_mb()`，CPU 1 必须暂停直到所有之前的 invalidate 队列的消息都执行完成。
+* 10 CPU 1 现在执行 invalidate 消息，将 `a` 缓存行清除。
+* 11 CPU 1 执行 `assert(a == 1)` ，由于 `a` 的缓存行之前被清除，已经不在 CPU 1 的缓存中，需要发起 **Read** 消息。
+* 12 CPU 0 回复 **Read** 消息，消息包含 `a` 缓存行的数据。
+* 13 CPU 1 收到 `a` 缓存行的数据，值为 1，所以断言成功。
+
+通过很多 MESI 消息传输，CPU 能正确执行得到正确的结果。这一部分展示了为什么 CPU 设计者会十分关心他们的缓存一致性优化。
+
+# 读写内存屏障
+
+前面的章节说到，内存屏障用来标记 store buffer 和 invalidate 队列的条目。但是在我们给的示例代码中，`foo()` 没有理由对 invalidate 队列做任何事，`bar()` 也没有理由对 store buffer 做任何事。
+
+很多的 CPU 架构因此提供较弱的内存屏障指令，这些指令处理 invalidate 或者 store buffer 其中的一个，又或者两个多处理。粗略的说，“读内存屏障”仅标记 invalidate 队列，“写内存屏障”仅标记 store buffer，完整功能内存屏障指令两个都标记。
+
+读内存屏障的效果是仅对 CPU 的 load 操作（或者读操作）排序，如此一来，所有在读内存屏障前的 load 操作都必须先完成才能执行读内存屏障之后的 load 操作。同样的，写内存屏障的效果是仅对 CPU 的 store 操作（或者写操作）排序，如此一来，所有在写内存屏障之前的 store 操作比先完成才能执行写内存屏障之后的 store 操作。完整功能内存屏障指令对 load 和 store 都排序。
+
+如果我们更新 `foo` 和 `bar` 为使用读写内存屏障，代码如下： 
+
+```c
+void foo(void)
+{
+    a = 1;
+    smp_wmb();
+    b = 1;
+}
+
+void bar(void)
+{
+    while (b == 0) continue;
+    smp_rmb();
+    assert(a == 1);
+}
+```
+
+一个计算机系统的内存屏障更加复杂，但是通常来说，理解这3个变种就可以很好的介绍内存屏障了。
+
+# 内存屏障的顺序
+
+这一节我们将呈现一些非常巧妙的内存屏障使用例子。有些使用技巧是通用的，而有些技巧在特定的CPU架构才有效，如果你的目标是设计通用的代码，就不要考虑特定CPU才支持的技巧。为了让我们更好的理解技巧，我们首先关注对违反顺序规则的架构（ordering-hostile architecture）。
+
+## Ordering-Hostile Architecture
+
+Ordering-Hostile 架构的计算机系统已经出现十年多，但是每种硬件系统对顺序的处理都有细微差别，要理解他们需要详细的了解具体的硬件架构。不应该让用户着迷特定硬件产生的技术规范，应该要设计比较通用的内存 Ordering-Hostile 系统架构。
+
+我们设计的这套硬件支持如下排序规则：
+
+* 每个CPU都按照程序顺序规则访问内存。
+* CPU 会对带有 store 操作的指令重排序，仅且仅当两个操作引用了不同地址。
+* 一个CPU的读内存屏障之前的 load 指令，能被其他CPU在执行这个读内存屏障后面的 load 指令之前感知到。这里说的是内存可见性，执行读内存屏障后面的 load 指令可定能看到执行此读内存屏障之前的 load 指令的内容。（书上原文是 *All of a given CPU’s loads preceding a read memory barrier (smp_rmb()) will be perceived by all CPUs to precede any loads following that read memory barrier*）。
+* 一个CPU的写内存屏障之前的 store 指令，能被其他CPU在执行这个写内存屏障后面的 store 指令之前感知到。（书上原文是 *All of a given CPU’s stores preceding a write memory barrier (smp_wmb()) will be perceived by all CPUs to precede any stores following that write memory barrier.*）。
+* 一个CPU的内存屏障之前的访问指令，能被其他CPU在执行这个写内存屏障后面的 访问指令之前感知到。
+
+想象一个大的 NUCA 系统（non-uniform cache architecture），为了给每个互联的 Node 节点提供公平的分配策略，每个 CPU 要一个队列，如图-9所示。尽管一个CPU在内存屏障下会按照顺序执行，但是在一组 Node 节点下的两个 CPU 依然会乱序执行。
+
+<img src="/images/memory_barrier_f9_example_ordering_hostile_architecture.jpg" alt="memory_barrier_f9_example_ordering_hostile_architecture" width="40%">
+
+*图-9 一种 Ordering-Hostile Architecture*
+
+下面来说说乱序的原因。
+
+## 例1
+
+图-10 是 3 个 CPU 并发执行三段代码的示意图。 `a`，`b`，`c`都初始化为0。
+
+<img src="/images/memory_barrier_list_c_1.jpg" alt="memory_barrer_list_c_1" width="60%">
+
+*图-10 代码示例1*
+
+假如CPU 0最近经历了大量的缓存失效，以致它的 message queue 是满的；而 CPU 1 一直处于独占缓存的情况下运行，以致它的 message queue 是空的。CPU 0 赋值给 `a` 和 `b` 将会立刻出现在 Node 0 的缓存（对 CPU 1 也是可见的），但是随后会被 CPU 0 之前缓存失效的大量动作所阻塞。相应的，CPU 1 赋值给 `c` 时会经历 CPU 1 之前的空 message queue，因此 CPU 2 可能看到 CPU 1 对 `c` 的赋值，而 CPU 0 对 `a` 的赋值此时 CPU 1 还看不到。最终导致断言失败。
+
+## 例2
+
+图-11 是 3个CPU并发执行三段代码的示意图。 `a`，`b` 都初始化为0。
+
+<img src="/images/memory_barrier_list_c_2.jpeg" alt="memory_barrier_list_c_2" width="60%">
+
+*图-11 代码示例2*
+
+假如CPU 0最近经历了大量的缓存失效，以致它的 message queue 是满的；而 CPU 1 一直处于独占缓存的情况下运行，以致它的 message queue 是空的。CPU 0 赋值给 `a` 将会立刻出现在 Node 0 的缓存（对 CPU 1 也是可见的），但是随后会被 CPU 0 之前缓存失效的大量动作所阻塞。CPU 1的对 `b` 赋值经历 CPU 1 之前的空 message queue。因此 CPU 2 可能会看到 CPU 1 对 `b` 的赋值，但是此时还看不到 CPU 0 对 `a` 的赋值。最终导致断言失败。
+
+## 例3
+
+图-13 是 3个CPU并发执行三段代码的示意图。 所有变量都初始化为0。
+
+<img src="/images/memory_barrier_list_c_3.jpg" alt="memory_barrier_list_c_3" width="60%">
+
+*图-12 代码示例3*
+
+注意，不管是 CPU 1 还是 CPU 2，都需要先看到 CPU 0 在第3行对 `b` 的赋值才能执行到第5行。一旦CPU 1 和CPU 2 执行到第4行的内存屏障，他们就都能够看到 CPU 0 在第2行内存屏障之前的所有赋值，当然就包括 `a `。同样的，CPU 0 在执行第9行的 `e` 赋值之前，也会一直等待 CPU 1 和 CPU 2 对 `c` 和 `d` 的赋值能够被自己看到，当 CPU 0 能指定到第8行时也说明 CPU 0 的对 `b` 的赋值已经被 CPU 1 和 CPU 2 可见。最后CPU 2断言会成功，因为它已经能看到 `a` 的值。
+
+Linux 内核的 `synchronize_rcu()` 原语使用的就是此例类似的算法。
