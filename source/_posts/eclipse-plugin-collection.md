@@ -56,3 +56,11 @@ toc: true
 ![eclipse_plugin_spot_bugs](/images/eclipse_plugin_spotbugs.jpg)
 
 **安装方法**：参考 [https://spotbugs.readthedocs.io/en/stable/eclipse.html](https://spotbugs.readthedocs.io/en/stable/eclipse.html)
+
+
+
+### 5.UCDetector
+
+Unused Code Detector 可以检测项目里没有用到的代码。
+
+**安装方法**：参考 http://www.ucdetector.org/
