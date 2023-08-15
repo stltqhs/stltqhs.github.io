@@ -29,9 +29,9 @@ partition 称为分区，一个 topic 会包含多个分区，Kafka 集群内的
 
 ## Segment
 
-为了防止数据膨胀，Partition 在切分为 segment，也就是说，一个 partition 是由多个 segment 组成。当向一个分区写入数据时，kafka 会判断当前分区的 segment 是否超过限定大小（比如限制每个 segment 文件不能超过 500MB），如果超过时，kafka 会为该分区创建一个新的 segment 文件，新消息就往这个 segment 文件写入。
+为了防止数据膨胀，Partition 需要再切分为 segment，也就是说，一个 partition 是由多个 segment 组成的。当向一个分区写入数据时，kafka 会判断当前分区的 segment 是否超过限定大小（比如限制每个 segment 文件不能超过 500MB），如果超过时，kafka 会为该分区创建一个新的 segment 文件，新消息就往这个 segment 文件写入。
 
-一般地，segment 文件名已文件内第一个消息的 offset 来命名。offset 是消息的位置，比如第 0 号消息的 offset 就是 0，每新写入一个消息，offset 就需要自增。
+一般地，segment 文件名以文件内第一个消息的 offset 来命名。offset 是消息的位置，比如第 0 号消息的 offset 就是 0，每新写入一个消息，offset 就需要自增。
 
 ![img](https://miro.medium.com/max/1400/1*bZ-fWeb2KG_KhYv2EKDvhA.png)
 
@@ -79,9 +79,9 @@ offset: 3065011417 position: 1779 isvalid: true payloadsize: 2244 magic: 1 compr
 
 ## 生产者和消费者
 
-一个 topic，不管有多少个分区，可以指出任意个生产者写入数据。
+一个 topic，不管有多少个分区，可以设置任意个生产者写入数据。
 
-一个 topic，一个分区只能被一个消费者消费，其他消费者就不能消费这个 topic 的数据，除非之前的消费者关闭。
+一个 topic，一个分区只能被一个消费者消费，其他消费者就不能消费这个分区的数据，除非之前的消费者关闭。
 
 每个分区都有一个 leader 负责读写数据。
 
@@ -92,7 +92,7 @@ offset: 3065011417 position: 1779 isvalid: true payloadsize: 2244 magic: 1 compr
 * 消息的顺序写入和顺序消费
 * Zero Copy 技术的应用；
 
-由于这个特性，Kafka 被大量应用在大数据场景。而在一边的事务型业务中，一般消费者会启动每处理一条消息做做一次同步提交，相等于是一个 2pc 操作，kafka 的高性能优势便不明显。
+由于这个特性，Kafka 被大量应用在大数据场景。而在事务型业务中，一般消费者每次处理一条消息就做一次同步提交，相等于是一个 2pc 操作，kafka 的高性能优势便不明显。
 
 要想利用 kafka 的高性能，你需要：
 
