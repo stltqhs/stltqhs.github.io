@@ -15,7 +15,7 @@ toc: true
 
 ## Topic
 
-Topic 就是队列，kafka 支持多个 topic，往 topic 写入消息的服务称为生产者，往 topic 消费消息称为消费者。一个 topic 支持多个生产者和多个消费者，对于消费者的消费数据的场景会有所不同，下文将详细说明。
+Topic 就是队列，kafka 支持多个 topic，往 topic 写入消息的服务称为生产者，往 topic 消费消息的服务称为消费者。一个 topic 支持多个生产者和多个消费者，对于消费者的消费数据的场景会有所不同，下文将详细说明。
 
 ## Partition
 
@@ -109,9 +109,9 @@ offset: 3065011417 position: 1779 isvalid: true payloadsize: 2244 magic: 1 compr
 
 存储系统的高可用离不开多副本，Kafka 集群需要使用多副本复制功能。Kafka 以 partition 为单位进行多节点复制，每一个 partition 由一个 leader 负责写入，多个 follower 节点负责同步 leader 的数据。
 
-先来说说 *primary-backup* 和 *quorum-based* 两种数据负责策略，他们都需要先分配一个 leader 来接受用户写入的数据，然后 leader 将数据传播给其他节点 follower 节点。但是传播的方式有区别。使用该算法的有 Zab 和 Raft 算法。
+先来说说 *primary-backup* 和 *quorum-based* 两种数据复制策略，他们都需要先分配一个 leader 来接受用户写入的数据，然后 leader 将数据传播给其他节点 follower 节点。但是传播的方式有区别。使用该算法的有 Zab 和 Raft 算法。
 
-以 *primary-backup* 为复制策略的系统，leader 需要等到数据全部复制给 follower 节点才能返回用户 commit 消息，如果一个节点 down 掉，leader 继续参数下一个节点。在该策略下，如果有 f 个副本节点，系统最多可以容忍 f-1 个副本节点 down 掉。
+以 *primary-backup* 为复制策略的系统，leader 需要等到数据全部复制给 follower 节点才能返回用户 commit 消息，如果一个节点 down 掉，leader 继续尝试下一个节点。在该策略下，如果有 f 个副本节点，系统最多可以容忍 f-1 个副本节点 down 掉。
 
 以 *quorum-based* 为复制策略的系统，leader 需要等到数据复制给大多数 follower 节点才能返回用户 commit 消息。在该策略下，如果有 2f + 1 个副本节点，系统最多可以容忍 f 个副本节点 down 掉。比如 Dynamo 就是使用这种策略，它以写多数 W 和读多数 R 来达到数据一致性，如果集群节点为 N ，这就要求 W + R > N ，也就是说写入的节点与读取的节点的集合有重合，才能保证写入的数据能够被读取到。
 
