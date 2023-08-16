@@ -109,7 +109,7 @@ offset: 3065011417 position: 1779 isvalid: true payloadsize: 2244 magic: 1 compr
 
 存储系统的高可用离不开多副本，Kafka 集群需要使用多副本复制功能。Kafka 以 partition 为单位进行多节点复制，每一个 partition 由一个 leader 负责写入，多个 follower 节点负责同步 leader 的数据。
 
-先来说说 *primary-backup* 和 *quorum-based* 两种数据复制策略，他们都需要先分配一个 leader 来接受用户写入的数据，然后 leader 将数据传播给其他节点 follower 节点。但是传播的方式有区别。使用该算法的有 Zab 和 Raft 算法。
+先来说说 *primary-backup* 和 *quorum-based* 两种数据复制策略，他们都需要先分配一个 leader 来接收用户写入的数据，然后 leader 将数据传播给其他 follower 节点。但是传播的方式有区别。使用该算法的有 Zab 和 Raft 算法。
 
 以 *primary-backup* 为复制策略的系统，leader 需要等到数据全部复制给 follower 节点才能返回用户 commit 消息，如果一个节点 down 掉，leader 继续尝试下一个节点。在该策略下，如果有 f 个副本节点，系统最多可以容忍 f-1 个副本节点 down 掉。
 
@@ -135,11 +135,11 @@ Kafka 使用的是  *primary-backup* 复制策略。
 
 ### 写
 
-当一个客户端需要向一个 topic 写入数据时，首先需要重 Zookeeper 找到该 topic 的一个 partition 的 leader，找到 leader 后，就可以向 leader 发布消息。leader 将接收的消息写入到本地日志文件，follower 节点会通过一个 socket 通道迅速从 leader 节点拉到消息，用这种方式，follower 可以从 leader 拉到所有消息，而且是跟 leader 相同顺序接收并存放到本地日志文件。follower 每拉到一个消息，就存放在本地日志文件，然后向 leader 回复一个 ACK，表示消息已经收到。如果 leader 收到所有 ISR 节点对一个消息的 ACK，就表示这个消息已提交。之后，leader 需要将 HW 设置为当前提交消息的 offset，然后回复用户消息已提交。leader 还需要将 HW 信息同步到 follower 节点，有两种方式可以完成，第一个是广播消息，第二个是 follower 拉消息时就可以直接返回 leader 当前的 HW。每个副本节点收到 HW 后，还需要将 HW 存储在磁盘，记录一下检查点（checkpoint）。
+当一个客户端需要向一个 topic 写入数据时，首先需要从 Zookeeper 找到该 topic 的一个 partition 的 leader，找到 leader 后，就可以向 leader 发布消息。leader 将接收的消息写入到本地日志文件，follower 节点会通过一个 socket 通道迅速从 leader 节点拉到消息，用这种方式，follower 可以从 leader 拉到所有消息，而且是跟 leader 相同顺序接收并存放到本地日志文件。follower 每拉到一个消息，就存放在本地日志文件，然后向 leader 回复一个 ACK，表示消息已经收到。如果 leader 收到所有 ISR 节点对一个消息的 ACK，就表示这个消息已提交。之后，leader 需要将 HW 设置为当前提交消息的 offset，然后回复用户消息已提交。leader 还需要将 HW 信息同步到 follower 节点，有两种方式可以完成，第一个是广播消息，第二个是 follower 拉消息时就可以直接返回 leader 当前的 HW。每个副本节点收到 HW 后，还需要将 HW 存储在磁盘，记录一下检查点（checkpoint）。
 
 ### 读
 
-读也是从 leader 读取数据，leader 会返回 HW 之前（包含）的数据给用，HW之后的数据不会给，因为这些数据还没有提交。
+读也是从 leader 读取数据，leader 会返回 HW 之前（包含）的数据给用户，HW之后的数据不会给，因为这些数据还没有提交。
 
 ### 异常场景
 
@@ -151,8 +151,8 @@ Kafka 使用的是  *primary-backup* 复制策略。
 
 leader  失败有 3 种场景：
 
-* S1 写入消息到本地日志文件之前就 crash，用户将会 timeout 让后再次向新的 leader 发送消息；
-* S2 leader 在写入本地日志文件之后，回复用户 commit 之前 crash，此时有可以分两种场景；
+* S1 写入消息到本地日志文件之前就 crash，用户将会 timeout 然后再次向新的 leader 发送消息；
+* S2 leader 在写入本地日志文件之后，回复用户 commit 之前 crash，此时又可以分两种场景；
   * 需要保证原子性，要么所有的副本节点都保存消息，要么都没有保存；
   * 用户重发消息，这种情况下，系统需要保证消息没有两次写入。因为有可能是有个副本节点已经写入了消息，并且已经提交，而之后又被选举为 leader；
 * S3 leader 回复用户 commit 后 crash，新的 leader 会被选举出来，然后继续接收新的请求；
@@ -167,7 +167,7 @@ leader  失败有 3 种场景：
 
 #### 数据丢失
 
-对于失败场景 S1 来说，消息根本就没有写入成本，旧 leader 和副本节点都没有写入成功，用户收到失败或者超时信息，是属于正常情况，不会造成数据不一致的情况。
+对于失败场景 S1 来说，消息根本就没有写入副本，旧 leader 和副本节点都没有写入成功，用户收到失败或者超时信息，是属于正常情况，不会造成数据不一致的情况。
 
 对于失败场景 S2 来说，用户同样是没有收到确认的消息，这时对于用户来说，消息可能保存成功，也可能保存不成功，所以无论新 leader 是否包含这个消息都是正确的，也不会造成数据不一致的情况。这种场景在生活当中也是常见的，比如当我们发起一笔付款后，如果出现超时（可能是手机没有信号），自己是不知道到底是支付成功还是失败，只有在异常恢复时去查看确认一下才知道。对于 kafka 来说，没有提供一个确认方法，只能在消费时，才能反映是成功还是失败了。这种情况，为了自己程序的健壮性，当然是需要重发，然后消费端自己处理幂等性。
 
@@ -183,7 +183,7 @@ leader  失败有 3 种场景：
 
 
 
-0.8 之后的复制算法见 [kafka Detailed Replication Design V3](https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3) 算法来完成复制功能。
+Kafka 0.8 版本之后的复制算法见 [kafka Detailed Replication Design V3](https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3) 算法来完成复制功能。
 
 # 其他
 
