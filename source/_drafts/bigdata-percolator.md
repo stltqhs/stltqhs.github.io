@@ -41,7 +41,7 @@ Percolator 提供了两大抽象模型，一个是 ACID 事务模型，另一个
 
 *图-1 Percolator 和它的依赖*
 
-站在开发者的角度来看，Percolator 存储系统由一个个小的表组成，每个表都是由一个个小格子组成，格子就是行和列的索引，一个字节数组用来表示它的值。在内部，为了支持快照隔离级别，我们将每个格子多当作一系列的时间戳索引的数据，时间戳作为数据的版本号。
+站在开发者的角度来看，Percolator 存储系统由一个个小的表组成，每个表都是由一个个小格子组成，格子就是行和列的索引，一个字节数组用来表示它的值。在内部，为了支持快照隔离级别，我们将每个格子都当作一系列的时间戳索引的数据，时间戳作为数据的版本号。
 
 Percolator 的设计受到两个因素的影响：
 
@@ -52,7 +52,7 @@ Percolator 的设计受到两个因素的影响：
 
 ## Bigtable 简介
 
-Percolator 构建在 Bigtable 分布式存储系统之上。Bigtable 对用户提供多维度的 map 数据结构：key 是 (row, column, timestamp) 元组，key 按照从小到大排序。Bigtable 提供了查找和更新行的操作，而且基于行的操作是 read-modify-write 原子操作，最小事物，或者说修改一行的数据就是一个原子操作。Bigtable 可靠的运行在由大量机器组成的集群上，而且处理着 PB 级别的数据。
+Percolator 构建在 Bigtable 分布式存储系统之上。Bigtable 对用户提供多维度的 map 数据结构：key 是 (row, column, timestamp) 元组，key 按照从小到大排序。Bigtable 提供了查找和更新行的操作，而且基于行的操作是 read-modify-write 原子操作，最小事务，或者说修改一行的数据就是一个原子操作。Bigtable 可靠的运行在由大量机器组成的集群上，而且处理着 PB 级别的数据。
 
 一个运行的 Bigtable 由多个 tablet server 和 一个 master 组成。master 管理和协调 tablet server 加载和卸载哪些 tablet；tablet server 为 tablet 提供服务，一个 tablet 就是一系列 SSTable 格式的文件组成，是一块连续区域的键空间。SSTable 文件存储在 GFS；Bigtable 依赖 GFS 可靠的存储能力。BigTable 允许用户调整查询性能：将一组相关联的列放在一个 locality group，这些列会存放在一个 SSTable 文件（或者文件集合）中。由于其他列不在 locality group 对应的 SSTable 文件，这样就可以避免多余的磁盘文件扫描，提高查询速度。
 
