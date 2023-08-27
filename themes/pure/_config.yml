@@ -187,7 +187,7 @@ postCount:
 plugins:
   google_analytics: # enter the tracking ID for your Google Analytics
   google_site_verification: # enter Google site verification code
-  baidu_analytics: # enter Baidu Analytics hash key
+  baidu_analytics: be79fae6ef126e586106ff806c368fc7 # enter Baidu Analytics hash key
   tencent_analytics: 
   
 # Miscellaneous
@@ -203,8 +203,8 @@ profile:
   avatar: images/avatar.jpg
   gravatar: # Gravatar email address, if you enable Gravatar, your avatar config will be overriden
   author: 海东青
-  author_title: Java & 监控系统架构
-  author_description: 高级 Java 开发工程师，熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术，在监控领域经验丰富。
+  author_title: Java 技术专家
+  author_description: 熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。
   location: Guangzhou, China
   follow: https://github.com/stltqhs
   # Social Links
