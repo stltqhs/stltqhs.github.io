@@ -8,7 +8,7 @@ toc: true
 
 # 简介
 
-Redis 是一款高性能 NoSQL 数据库，支持内存和磁盘存储。纯内存操作，单机可以支持每秒 5 万到 10 万的 O(1) 时间复杂度读写操作。Redis 使用 IO 多路复用技术处理客户端网络读写请求，服务端内部只有一个读写操作线程，结合 Pipeline 机制可以很好的实现多命令的原子操作。
+Redis 是一款高性能 NoSQL 数据库，支持内存和磁盘存储。纯内存操作，单机可以支持每秒 5 万到 10 万的 O(1) 时间复杂度读写操作。Redis 使用 IO 多路复用技术处理客户端网络读写请求，服务端内部只有一个读写操作线程，结合 Pipeline 机制和 Lua 脚本可以很好的实现多命令的原子操作。
 
 ## KV
 
@@ -67,7 +67,7 @@ Redis 支持两种存储方式：
 * RDB：将内存数据写入文件，是内存数据的一个镜像（`fork`进程实现），用于实现快速恢复或者全量复制；
 * AOF：记录 Redis 修改操作的命令，用于增量恢复；
 
-使用 RDB 的优势：RDB 是一个紧凑的二进制文件，占用空间容量下，利于快速恢复。使用 `fork` 实现 RDB 存储，不阻塞 Redis 处理其他请求。
+使用 RDB 的优势：RDB 是一个紧凑的二进制文件，占用空间容量小，利于快速恢复。使用 `fork` 实现 RDB 存储，不阻塞 Redis 处理其他请求。
 
 使用 RDB 的劣势：由于 RDB 是内存数据镜像，当内存数据非常大时，写磁盘或者 RDB 文件也非常大，中间会消耗很长时间，增量数据就不会存在 RDB 文件中，如果依靠 RDB 文件恢复，则数据丢失的情况容易发生。
 
@@ -90,7 +90,7 @@ Redis 文件恢复的规则：
 可以配置 Redis 的实例为另一个 Redis 实例的 slave，master-slave 执行复制的操作如下<sup>[[ 1 ](https://redis.io/topics/replication)]</sup>：
 
 * slave 与 master 建立网络连接，不断的从 master 的命令队列同步消息；
-* 当网络端口时，slave 首先尝试 *partial resynchronization* 从命令队列同步，当命令队列缓存因为溢出被刷新过，只能通过 *full resynchronization*，
+* 当网络断开时，slave 首先尝试 *partial resynchronization* 从命令队列同步，当命令队列缓存因为溢出被刷新过，只能通过 *full resynchronization*，
 * 通过 *full resynchronization*， master 需要使用 CoW 复制一块内存快照用于复制；
 
 复制基本原理见图-1所示。
@@ -110,8 +110,8 @@ Redis 文件恢复的规则：
 
 当 slave 与 master 断开或者 slave 开始全量同步时，slave 处理客户端请求的策略是：
 
-* 如果 slave 配置 `slave-serve-stale-data=yes`，则 slave 拒绝客户端请求；
-* 如果 slave 配置 `slave-serve-stale-data=no`，则 slave 继续用老的数据集处理客户端请求，当同步完成，slave 加载新的数据集时，依然会拒绝客户端请求。如果新数据集太大，拒绝的时间也会很长；
+* 如果 slave 配置 `slave-serve-stale-data=no`，则 slave 拒绝客户端请求；
+* 如果 slave 配置 `slave-serve-stale-data=yes`，则 slave 继续用老的数据集处理客户端请求，当同步完成，slave 加载新的数据集时，依然会拒绝客户端请求。如果新数据集太大，拒绝的时间也会很长；
 
 ## 开启复制
 
