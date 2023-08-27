@@ -23,17 +23,17 @@ Bigtable 是 KV 存储结构，其中 K 的结构抽象成：
 
 ## 行
 
-Bigtable 的行键（row key）有任意字符串组成，内部转换成字节，最大 64 KB。转换成字节后，多个 row key 按照字节大小顺序排列，根据数值大小的范围分成多个 *tablet*（如图-1所示）。Bigtable 支持原子修改一个 row key 的内容，不管它有多少列。由于 tablet 的划分，读取相同或者相近的 tablet 速度快，因为数据空间局部性的关系，所以读取小范围的数据会非常高效。
+Bigtable 的行键（row key）由任意字符串组成，内部转换成字节，最大 64 KB。转换成字节后，多个 row key 按照字节大小顺序排列，根据数值大小的范围分成多个 *tablet*（如图-1所示）。Bigtable 支持原子修改一个 row key 的内容，不管它有多少列。由于 tablet 的划分，读取相同或者相近的 tablet 速度快，因为数据空间局部性的关系，所以读取小范围的数据会非常高效。
 
 总结一下 row key 的特点：
 
 * 行范围组成的 *tablet*；
 * 单行事务；
-* 数据空间局部性特性；
+* 数据空间局部性；
 
 ## 列
 
-Bigtable 的列（column key）由 *family:qualifier* 组成，多个 column key 组成一个集合，即列族。column key 的特点如下：
+Bigtable 的列（column key）由 *family:qualifier* 组成，多个 column key 组成一个集合，即列族（family）。column key 的特点如下：
 
 * 每一个表的 *family* 要预先定义，*qualifier* 不需要预先定义；
 * *family* 是权限访问控制和内存管理的基本单位；
@@ -74,7 +74,7 @@ key n -> block q
 
 ```text
 key x  ------------+
-                   | 判断 key x 是否 介于 key 1 和 key 2 之间，如果是，则数据应该存在 block 2
+                   | 判断 key x 是否介于 key 1 和 key 2 之间，如果是，则数据应该存在 block 2
                    v
 (-∞,key 1]   (key 1,key 2]  ...     (key m,key n]
     |              |                       |
@@ -98,7 +98,7 @@ Bigtable 高度依赖 Chubby 服务，如果 Chubby 服务不可用，Bigtable �
 
 # 架构
 
-Bigtable 保护三个组件：客户端，一个 master 和多个 tablet server。
+Bigtable 包含三个组件：客户端，一个 master 和多个 tablet server。
 
 架构图见图-3。
 
@@ -166,13 +166,13 @@ Tablet server 处理 tablet 的读写请求如图-5所示。
 
 *图-5 tablet 读写*
 
-对于读请求来说，tablet server 首先查 memtable，当 memtable 存储，直接返回。当 memtable 不存在，需要找 SSTable File n，SSTable File n-1，...，SSTable File 0，直到找到为止。此时要求删除操作不能把仅仅把 K 移除就完事，而是要记录 K 的值，表示这个 K 被删除。这个时候找到这个 K 取出它的值就知道其已经被删除，返回用户值不存在，而不是继续找下一个文件。
+对于读请求来说，tablet server 首先查 memtable，当 memtable 存在所查的数据，直接返回。当 memtable 不存在，需要找 SSTable File n，SSTable File n-1，...，SSTable File 0，直到找到为止。此时要求删除操作不能仅仅把 K 移除就完事，而是要记录 K 的值，表示这个 K 被删除。这个时候找到这个 K 取出它的值就知道其已经被删除，返回用户值不存在，而不是继续找下一个文件。
 
 对于写操作来说，tablet server 首先写操作日志到 GFS，memtable 的数据全部都是已经写入 commit-log 日志文件。
 
 ## 压缩
 
-当 memtable 不断的写入，内存会越来越大，当操作一定的界限，触发溢写操作。tablet server 停止当前 memtable 的写入，创建一个新的 memtable ，所有新的写操作全部写入到新的 memtable 。tablet server 后端线程将旧 memtable 写入到 GFS 的 SSTable 文件。这个过程称为 *minor compaction*，它有两个作用：
+当 memtable 不断的写入，内存占用会越来越大，当达到一定的界限，触发溢写操作。tablet server 停止当前 memtable 的写入，创建一个新的 memtable ，所有新的写操作全部写入到新的 memtable 。tablet server 后端线程将旧 memtable 写入到 GFS 的 SSTable 文件。这个过程称为 *minor compaction*，它有两个作用：
 
 *  避免内存使用过大；
 * 减少恢复时读 commit-log 的数量；
@@ -201,7 +201,7 @@ Bigtable 支持两种缓存，Scan Cache 和 Block Cache。Scan Cache 缓存 SST
 
 ## commit-log 实现
 
-有一个矛盾，如果每个 tablet 的写操作都走 commit-log，优点是恢复时读的数据少，缺点是需要写太多的文件到 GFS，写入性能降低。Bigtable 的做法是一个 tablet server 写一个 commit-log。
+如果每个 tablet 的写操作都走 commit-log，优点是恢复时读的数据少（因为只需要关注这个 tablet 的 commit-log 即可），缺点是需要写太多的文件到 GFS，写入性能降低。Bigtable 的做法是一个 tablet server 写一个 commit-log。
 
 Commit-log 写入和恢复如图-6所示。
 
@@ -221,8 +221,8 @@ tablet server 的 SSTable 都是不可变的数据结构，读取时不需要加
 
 # 总结
 
-MapReduce 、GFS 和 Bigtable 是 Google 大数据的产物，它们拉开了大数据时代。对应的开源实现是 Hadoop MapReduce，HDFS 和 HBase。在大数据应用中，他们常用来处理海量离线计算业务。
+MapReduce 、GFS 和 Bigtable 是 Google 大数据的产物，它们拉开了大数据时代的序幕。对应的开源实现是 Hadoop MapReduce，HDFS 和 HBase。在大数据应用中，他们常用来处理海量离线计算业务。
 
 LSM 算法是 KV 存储的经典算法，适用于写入量大的存储应用。比如 LevelDB，RocksDB，Cassandra，TiDB 等都是用了 LSM 来提高写入性能。
 
-由于 Bigtable 底层依赖 GFS ，所以它本身不适合用在高并发写入的场景。一般来说，tablet server 和 chunk server 尽量放在同一台机器上，此时读取可以不用跨网络，而是本地磁盘，因为数据都存在本地，只有本地磁盘没有数据时才需要由 GFS 跨网络读取。
+Bigtable 底层依赖 GFS ，一般来说，tablet server 和 chunk server 尽量放在同一台机器上，此时读取可以不用跨网络，而是本地磁盘，因为数据都存在本地，只有本地磁盘没有数据时才需要由 GFS 跨网络读取。
