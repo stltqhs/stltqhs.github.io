@@ -406,7 +406,7 @@ Redis 集群架构图如图-4所示。
 
 *图-4 Redis 集群*
 
-Redis 集群数据存储是非中心化，因此每个节点都存储一部分数据。图-4是由 3 个 master 节点和 4 个 slave 节点组成的集群。master 节点支持读写操作，slave 节点只支持读操作，而且需要从 master 节点复制数据。当 master 节点停止服务时，其他 2 个 master 节点没有数据副本，只能让停止服务的 master 节点的 slave 节点晋升为 master 节点继续提供服务。如果停止服务的 master 节点没有活跃可用的 slave 节点时，整个集群将会停止服务。保证集群的可用性，主要是保证 master 节点由可用的 slave 节点。集群内每个 master 节点只有一个 slave 节点时，集群停止服务的概率还是比较高的，比如 slave 晋升为 master 节点后也停止了服务，而旧 master 并为恢复变成 slave 节点，导致停止服务的 master 节点没有可用的 slave。如果每个 master 节点由两个 slave 节点，又可能造成资源浪费。图-4中，Node A Master 节点有两个 slave 节点。Redis Cluster 支持 slave 节点的平衡，自动发现哪些 master 节点没有 slave，哪些 master 的 slave 节点过多，改变 slave 节点的 master，这称为[Replica migration](https://redis.io/topics/cluster-spec#replica-migration)。
+Redis 集群数据存储是非中心化，因此每个节点都存储一部分数据。图-4是由 3 个 master 节点和 4 个 slave 节点组成的集群。master 节点支持读写操作，slave 节点只支持读操作，而且需要从 master 节点复制数据。当 master 节点停止服务时，其他 2 个 master 节点没有数据副本，只能让停止服务的 master 节点的 slave 节点晋升为 master 节点继续提供服务。如果停止服务的 master 节点没有活跃可用的 slave 节点时，整个集群将会停止服务。保证集群的可用性，主要是保证 master 节点有可用的 slave 节点。集群内每个 master 节点只有一个 slave 节点时，集群停止服务的概率还是比较高的，比如 slave 晋升为 master 节点后也停止了服务，而旧 master 并未恢复变成 slave 节点，导致停止服务的 master 节点没有可用的 slave。如果每个 master 节点有两个 slave 节点，又可能造成资源浪费。图-4中，Node A Master 节点有两个 slave 节点。Redis Cluster 支持 slave 节点的平衡，自动发现哪些 master 节点没有 slave，哪些 master 的 slave 节点过多，改变 slave 节点的 master，这称为[Replica migration](https://redis.io/topics/cluster-spec#replica-migration)。
 
 **Redis Cluster 是异步复制，使用 Gossip 协议同步分片配置信息，属于最终一致性。**
 
@@ -458,28 +458,28 @@ d289c575dcbc4bdd2931585fd4339089e461a27d 127.0.0.1:6381 master - 1318428931 1318
 
 ### 集群总线
 
-每个加入到 Redis Cluster 的节点都会打开一个端口，通过该端口建立TCP网络链接用来交换集群内其他节点的消息，该端口是 Redis 端口再加10000，比如 Redis 端口是 6379，则集群总线端口就是 16379。消息交换协议是 Redis 私有消息，可通过 `cluster.c` 和 `cluster.h` 研究协议，然后伪装一个 Redis 节点用于其他目的的应用。
+每个加入到 Redis Cluster 的节点都会打开一个端口，通过该端口建立 TCP 网络链接用来交换集群内其他节点的消息，该端口是 Redis 端口再加 10000，比如 Redis 端口是 6379，则集群总线端口就是 16379。消息交换协议是 Redis 私有消息，可通过 `cluster.c` 和 `cluster.h` 研究协议，然后伪装一个 Redis 节点用于其他目的的应用。
 
 ### 集群拓扑
 
 由于集群内的节点是两两建立链接通信，这样就组成了一个网状结构。假设集群内有 `n` 个节点，那么每个节点需要建立 `n-1` 个长链接与剩下的节点通信。为了避免因链接坏死而无法交换消息，Redis Cluster 有一套链接保活机制：
 
 - 首先链接属于长链接，一直打开，定期发送 ping 消息给其他节点；
-- 如果其他节点长时间没有恢复 pong 消息，Redis 会重新建立一个新链接，使用新链接发送消息；
+- 如果其他节点长时间没有回复 pong 消息，Redis 会重新建立一个新链接，使用新链接发送消息；
 
 ### Gossip 协议
 
-图-4显示，Redis 集群内部，各节点使用 Gossip 协议来交换状态数据，这里说说什么是 Gossip 协议。Gossip 协议有一个特征是 Epidemic，即传染性，想想现实世界中的传染病，如果人群中有一个人感染了病毒（数据状态），如果传播途径一直存在，最终这群人将全部感染这个病毒（数据状态）。Gossip 协议来源于生活，Redis 集群内的一个节点 A 将自己的状态（数据）传播给另一个节点 B，B 检查状态（数据）的版本是否是最新的，如果是最新的状态（数据），则 B 需要加下来，并且继续将该状态（数据）传播给节点 C，这种传播策略一直执行下去，最终集群内的全部节点都有这份状态（数据）。所以 Gossip 协议是最终一致性，而非强一直性，它的优点是**非中心化，可用性高**，缺点是**需要避免数据的大量传播带来的带宽消耗，状态数据存在一定延时**。Redis 集群的传播策略如下：
+图-4显示，Redis 集群内部，各节点使用 Gossip 协议来交换状态数据，这里说说什么是 Gossip 协议。Gossip 协议有一个特征是 Epidemic，即传染性，想想现实世界中的传染病，如果人群中有一个人感染了病毒（数据状态），如果传播途径一直存在，最终这群人将全部感染这个病毒（数据状态）。Gossip 协议来源于生活，Redis 集群内的一个节点 A 将自己的状态（数据）传播给另一个节点 B，B 检查状态（数据）的版本是否是最新的，如果是最新的状态（数据），则 B 需要将数据存在自己本地，并且继续将该状态（数据）传播给节点 C，这种传播策略一直执行下去，最终集群内的全部节点都有这份状态（数据）。所以 Gossip 协议是最终一致性，而非强一直性，它的优点是**非中心化，可用性高**，缺点是**需要避免数据的大量传播带来的带宽消耗，状态数据存在一定延时**。Redis 集群的传播策略如下：
 
-- 每秒发送 PING 消息，对端节点收到 PING 消息时需要恢复 PONG 消息，PONG 消息包括节点的配置信息；
+- 每秒发送 PING 消息，对端节点收到 PING 消息时需要回复 PONG 消息，PONG 消息包括节点的配置信息；
 - 检查收到的配置信息是否最新，如果是最新，除了自己保存外，还需要传播给其他节点；
-- 如果的配置信息不是最新，直接丢弃配置信息，不再传播，减少带宽消耗；
+- 如果配置信息不是最新，直接丢弃配置信息，不再传播，减少带宽消耗；
 
 第2和第3步是配置更新策略，通过 configuration epoch 检查配置版本是否比自己的 epoch 大来判断配置是否最新。
 
 ### 握手
 
-节点 A 通过集群总线端口与集群中的一个节点 B 建立链接，然后发送 `MEET` 消息。`MEET` 消息与 PING 消息类似，它会强制节点 B 把 节点 A 加入本集群，节点 B 使用 Gossip 谢谢把集群新配置传播给节点 C，最终所有集群内所有的节点都知道 A 节点是集群的成员。
+节点 A 通过集群总线端口与集群中的一个节点 B 建立链接，然后发送 `MEET` 消息。`MEET` 消息与 PING 消息类似，它会强制节点 B 把节点 A 加入本集群，节点 B 使用 Gossip 协议把集群新配置传播给节点 C，最终集群内所有的节点都知道 A 节点是集群的成员。
 
 发送 `MEET` 消息的方式是管理员通过命令：
 
@@ -487,13 +487,13 @@ d289c575dcbc4bdd2931585fd4339089e461a27d 127.0.0.1:6381 master - 1318428931 1318
 CLUSTER MEET ip port
 ```
 
-来完成，该命令指定来节点的 IP 和端口。新节点的角色是 master 还是 slave 也可以在加入后指定。如果新节点是 slave 节点，需要从 master 节点复制数据。如果新节点是 master 节点，需要从其他 master 节点领取数据，槽位数据迁移，数据重平衡。
+来完成，该命令指定了节点的 IP 和端口。新节点的角色是 master 还是 slave 也可以在加入后指定。如果新节点是 slave 节点，需要从 master 节点复制数据。如果新节点是 master 节点，需要从其他 master 节点领取数据，槽位数据迁移，数据重平衡。
 
 ## 数据分片
 
 ### `MOVED` 重定向
 
-图-4所示，3 个 master 节点 A、B、C，每个节点都负责服务一部分健空间，总共 16384 个槽位。客户端连接节点 A 执行命令 `GET X`，节点 A 会计算 X 属于哪个槽位，如果计算出来的槽位是 4567，该槽位是 B 来提供服务，因此 A 需要回复给客户端 `-MOVED 4567 Bip Bport`，此时客户端应该记下槽位的状态，然后跑到节点 B 去执行命令 `GET X` 。客户端需要自己维护槽位到主机IP和PORT的映射，以便下次直连，而不是依赖 `MOVED` 重定向，它会增加延时。`MOVED` 重定向只是数据可用性的保底策略。
+图-4所示，3 个 master 节点 A、B、C，每个节点都负责服务一部分键空间，总共 16384 个槽位。客户端连接节点 A 执行命令 `GET X`，节点 A 会计算 X 属于哪个槽位，如果计算出来的槽位是 4567，该槽位是 B 来提供服务，因此 A 需要回复给客户端 `-MOVED 4567 Bip Bport`，此时客户端应该记下槽位的状态，然后跑到节点 B 去执行命令 `GET X` 。客户端需要自己维护槽位到主机 IP 和 PORT 的映射，以便下次直连，而不是依赖 `MOVED` 重定向，它会增加延时。`MOVED` 重定向只是数据可用性的保底策略。
 
 一般来说，客户端应该首先通过命令 `CLUSTER SLOTS` 获得集群内所有的节点负责的槽位信息。当读写 Redis 时提前计算好应该与哪个节点直连发送命令，减少因为重定向带来的网络 RTT，它会带来延时，降低性能。
 
@@ -538,7 +538,7 @@ MIGRATE target_host target_port key target_database id timeout
 
 为什么不使用 `MOVED` 呢？因为 `MOVED` 是集群稳定下的重定向，它会让客户端更新槽位和节点的映射，记下状态，下次就可以直连。而在迁移过程中，并不需要下次直连节点 B，因为客户端下一次访问的 key 可能还在节点 A。
 
-客户端收到 `ASK` 重定向时，转而请求节点 B 时应该要带上 `ASKING` 命令，要不然，节点 B 会认为该 key 对应的槽位不在自己这里，恢复一个 `MOVED` 重定向。因为迁移过程中，节点服务哪些槽位的配置并不会更新，只有迁移完成后才会更新。
+客户端收到 `ASK` 重定向时，转而请求节点 B 时应该要带上 `ASKING` 命令，要不然，节点 B 会认为该 key 对应的槽位不在自己这里，回复一个 `MOVED` 重定向。因为迁移过程中，节点服务哪些槽位的配置并不会更新，只有迁移完成后才会更新。
 
 ###  操作多个 KEY 的问题
 
@@ -552,7 +552,7 @@ MSET sns:{userid}:1 sns:{userid}:2
 
 ### Slave 节点
 
-在 Redis 集群中，同样可以将 slave 设置为 READONLY 来提高读性能。slave 提供的槽位信息与它的 master 保持一致。所以，如果客户端发起请求的 key 不在其 master 的服务访问，将会回复 `MOVED` 重定向。
+在 Redis 集群中，同样可以将 slave 设置为 READONLY 来提高读性能。slave 提供的槽位信息与它的 master 保持一致。所以，如果客户端发起请求的 key 不在其 master 的服务范围，将会回复 `MOVED` 重定向。
 
 ## 容错性
 
@@ -580,7 +580,7 @@ gossip 块信息记录的是该节点记下的其他节点信息，用来传播�
 
 集群内所有的节点都会随机的向其他节点每秒发送 PING 心跳包，而且，如果一个节点与其他节点处于失联状态，该节点就应该要向这些失联节点发送 PING 心跳消息包。失联的意思是一个节点超过了半个  `NODE_TIMEOUT` 时间没有收到另一个节点发送 PING 消息或者没有收到 PONG 回复消息，无法确定节点是否还活着。
 
-如果节点 A 认为节点 B 快失联 `NODE_TIMEOUT` 了，节点 A 会跟其他节点发送心跳，确定到底是记录因为网络分区被隔离还是节点 B 被隔离。如果节点 A 与其他节点可以正常通信，与节点 B 依然无法通信，此时节点 A 会重新建立与节点 B 的连接，确定是不是 TCP 连接坏死。
+如果节点 A 认为节点 B 快失联 `NODE_TIMEOUT` 了，节点 A 会跟其他节点发送心跳，确定到底是因为网络分区被隔离还是节点 B 被隔离。如果节点 A 与其他节点可以正常通信，与节点 B 依然无法通信，此时节点 A 会重新建立与节点 B 的连接，确定是不是 TCP 连接坏死。
 
 如果节点 B 失联时长超过了  `NODE_TIMEOUT`  ，此时节点 A 需要标记节点 B 为 `PFAIL` 状态。这里需要引入两个状态术语，`PFAIL` 和 `FAIL`。类似 Redis 的哨兵模式的 `SDOWN` 和 `ODOWN`，即主观下线和客观下线。
 
@@ -620,7 +620,7 @@ DELAY = 500 milliseconds + random delay between 0 and 500 milliseconds +
         SLAVE_RANK * 1000 milliseconds.
 ```
 
-的等待延迟时间来执行晋升操作。其中 `SLAVE_RANK` 由复制 master 的 offset 决定，与offset 最接近的 slave，该值是 0，次接近的 slave，该值是 1，以此类推。
+的等待延迟时间来执行晋升操作。其中 `SLAVE_RANK` 由复制 master 的 offset 决定，与offset 最接近的 slave，该值是 0，其次接近的 slave，该值是 1，以此类推。
 
 故障转移的流程如下。
 
@@ -676,7 +676,7 @@ Redis 集群将 key space 划分为 16384 个 slot，这称为 hash slot，集�
 16383 -> NULL
 ```
 
-如果下次收到心跳消息表示 slot 2 是节点比维护且 configEpoch 是 4，则更新表为：
+如果下次收到心跳消息表示 slot 2 是节点 B 维护且 configEpoch 是 4，则更新表为：
 
 ```text
 0 -> NULL
@@ -716,7 +716,7 @@ Redis 集群有一个特性，就是**所有的 master 节点的 configEpoch 不
 
 ## epoch
 
-Redis 多次使用了 epoch 的概念来实现选举或者 `quorum` 算法，思想来自 Raft 的 Term 。每次 Redis 需要选举，都会使用一个更大的 epoch 来表示提议的版本。当选举成功后需要推送新配置时依然使用 epoch 来表示配置的版本，最有大的 epoch 才能替代小的 epoch 配置。
+Redis 多次使用了 epoch 的概念来实现选举或者 `quorum` 算法，思想来自 Raft 的 Term 。每次 Redis 需要选举，都会使用一个更大的 epoch 来表示提议的版本。当选举成功后需要推送新配置时依然使用 epoch 来表示配置的版本，最大的 epoch 才能替代小的 epoch 配置。
 
 在 Redis Sentinel 和 Redis Cluster 的共识算法中，都使用 epoch，这些 epoch 是：
 
@@ -724,13 +724,13 @@ Redis 多次使用了 epoch 的概念来实现选举或者 `quorum` 算法，思
 * configEpoch
 * leaderEpoch
 
-其中 currentEpoch 表示事件的版本，或者事件发生的时间，这个时间是逻辑时间，只能一直往上涨。slave 晋升投票是一个事件，使用 currentEpoch 来表示。而 Redis Cluster 的 configEpoch 表示的是配置的版本，注意：Redis 集群有一个特性，就是**所有的 master 节点的 configEpoch 不能相同**。没错 slot 发生变化，都需要更新 configEpoch，比如在 slave 晋升为 master 时，slot 的服务节点发生变化，此时需要更新 configEpoch，该值传播出去后，其他节点就可以更新了。
+其中 currentEpoch 表示事件的版本，或者事件发生的时间，这个时间是逻辑时间，只能一直往上涨。slave 晋升投票是一个事件，使用 currentEpoch 来表示。而 Redis Cluster 的 configEpoch 表示的是配置的版本，注意：Redis 集群有一个特性，就是**所有的 master 节点的 configEpoch 不能相同**。每次 slot 发生变化，都需要更新 configEpoch，比如在 slave 晋升为 master 时，slot 的服务节点发生变化，此时需要更新 configEpoch，该值传播出去后，其他节点就可以更新了。
 
-leaderEpoch 时 Redis Sentinel 的概念，当执行 slave 晋升操作时，需要使用共识算法来选择到底是由哪个 Sentinel 节点来执行晋升操作，被选中的 Sentinel 节点需要更新它的 leaderEpoch。
+leaderEpoch 是 Redis Sentinel 的概念，当执行 slave 晋升操作时，需要使用共识算法来选择到底是由哪个 Sentinel 节点来执行晋升操作，被选中的 Sentinel 节点需要更新它的 leaderEpoch。
 
 ## 选举活跃性
 
-Redis Sentinel 选举时，为了解决活跃性问题，每次由一个 Redis Sentinel 改变角色，变成选举的候选者，其他 Sentinel 进行投票。多个 Sentinel 需要使用一个随机的时间错开作为候选者进行选举的时间，减少同时由多个 Sentinel 发起选举。单一个 Sentinel 选举超时时，由其他 Sentinel 继续发起选举流程。
+Redis Sentinel 选举时，为了解决活跃性问题，每次由一个 Redis Sentinel 改变角色，变成选举的候选者，其他 Sentinel 进行投票。多个 Sentinel 需要使用一个随机的时间错开作为候选者进行选举的时间，减少同时由多个 Sentinel 发起选举。当一个 Sentinel 选举超时时，由其他 Sentinel 继续发起选举流程。
 
 Redis Cluster 的 slave 晋升时，需要根据 `DELAY = 500 milliseconds + random delay between 0 and 500 milliseconds + SLAVE_RANK * 1000 milliseconds` 错开时间，避免所有的 slave 同时发起晋升投票。
 
