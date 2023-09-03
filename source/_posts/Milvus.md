@@ -2,7 +2,9 @@
 title: Milvus
 tags: 人工智能
 toc: true
+date: 2023-09-03 17:18:33
 ---
+
 
 本文是阅读 [Milvus: A Purpose-Built Vector Data Management System](https://www.cs.purdue.edu/homes/csjgwang/pubs/SIGMOD21_Milvus.pdf) 论文的总结。
 
