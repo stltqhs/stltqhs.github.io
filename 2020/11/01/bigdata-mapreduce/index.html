@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>大数据系列——MapReduce分布式并行计算框架 | 海东青</title>
+  <meta name="description" content="讨论 MapReduce 之前，我们先从一个简单问题入手，一步步叙述 MapReduce 原理。 问题我们有 2000 个文件共 50 TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器">
+<meta name="keywords" content="大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据系列——MapReduce分布式并行计算框架">
+<meta property="og:url" content="https://stltqhs.github.io/2020/11/01/bigdata-mapreduce/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="讨论 MapReduce 之前，我们先从一个简单问题入手，一步步叙述 MapReduce 原理。 问题我们有 2000 个文件共 50 TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://stltqhs.github.io/images/mapreduce_types.png">
+<meta property="og:image" content="https://stltqhs.github.io/images/mapreduce_execution_diagram.png">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.357Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大数据系列——MapReduce分布式并行计算框架">
+<meta name="twitter:description" content="讨论 MapReduce 之前，我们先从一个简单问题入手，一步步叙述 MapReduce 原理。 问题我们有 2000 个文件共 50 TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器">
+<meta name="twitter:image" content="https://stltqhs.github.io/images/mapreduce_types.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2020/11/01/bigdata-mapreduce/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#问题"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#原理"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#容错性"><span class="toc-number">3.</span> <span class="toc-text">容错性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#应用"><span class="toc-number">4.</span> <span class="toc-text">应用</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-bigdata-mapreduce" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      大数据系列——MapReduce分布式并行计算框架
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2020/11/01/bigdata-mapreduce/" class="article-date">
+	  <time datetime="2020-11-01T05:08:46.000Z" itemprop="datePublished">2020-11-01</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/大数据/">大数据</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2020/11/01/bigdata-mapreduce/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>讨论 MapReduce 之前，我们先从一个简单问题入手，一步步叙述 MapReduce 原理。</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>我们有 2000 个文件共 50 TB，每一行内容都是数字，现在需要对这些数字做排序，使用什么方法可以简单高效的完成任务呢？由于文件太大，不能全部载入内存来做排序，而且一台机器的磁盘也很难容纳这么大的文件，可以使用多台机器并行执行排序任务，可快速的完成任务。使用多台机器并行计算时，需要控制哪些机器处理哪些数据。50TB 共 2000 个文件，平均每个文件也有 25.6 GB，因此也不能把一个文件全部载入内存做排序。可以先将一个文件按照 64MB 对其切割，每次读入一个 64MB 的切片并在内存里做排序，然后将排序结果写到一个中间文件，等到一个文件的全部切片都排序完成，此时磁盘已经有很多个已排序好的中间文件。我们可以再使用归并排序将这些有序切片文件合并生成一个大的有序文件，这样一来总共就有 2000 个有序的中间文件。由于这 2000 个有序中间文件只是局部有序，还需要对这 2000 个有序中间文件再次使用归并排序，输出多个有序的最终文件。</p>
+<p>针对这个排序的问题，我们先去掉业务相关的排序功能，抽象通用功能，发现：</p>
+<ul>
+<li>文件切割；</li>
+<li>将数据送给业务去处理生成中间文件；</li>
+<li>合并中间文件再次送给业务去处理；</li>
+<li>控制任务分配，哪些机器跑哪些任务；</li>
+<li>分布式文件系统；</li>
+</ul>
+<p>这些都属于通用功能，具体的业务处理代码就是分布式并行计算中留给用户实现的代码。这种模式由 Google 于 2003 年开发出来并发表论文 <a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf" target="_blank" rel="noopener">MapReduce : Simplified Data Processing on Large Clusters</a>，Hadoop 也是基于这篇论文实现的 MapReduce。</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>受到函数式编程语言 Lisp 的启发，将复杂业务场景使用的 map 和 reduce 两个函数来实现，map 计算生成中间结果，合并相同 key 的数据，reduce 对 map 结果再次处理，得到最终结果，可表示为图-1。</p>
+<p><img src="/images/mapreduce_types.png" alt="MapReduce类型" title="MapReduce类型"></p>
+<p><em>图-1 MapReduce 类型</em></p>
+<p>先来看看 MapReduce 的执行流程，如图-2所示。</p>
+<p><img src="/images/mapreduce_execution_diagram.png" alt="MapReduce执行流程" title="MapReduce执行流程"></p>
+<p><em>MapReduce 执行流程</em></p>
+<p>每一步执行的操作是：</p>
+<p>(0) MapReduce 框架首先将输入文件切分为<strong>逻辑上</strong>的多个分片文件，分片文件是MapReduce对文件进行处理和运算的输入单位。因为是逻辑分片，物理上并不会切分，只是记录了要处理数据的位置和长度。</p>
+<p>(1) Master 将空闲的 map 任务分配在一台机器上执行。Master 负责管理 map 和 reduce 任务，通过 ping 的方式来检查任务健康行为。如果在规定时间内任务没有返回检查状态，Master 认为该任务已经死了，需要将该任务重置为空闲状态，然后重新分配执行。分片文件一般与 Map 任务同在一台机器或者在一个机房，叫做“计算向数据靠拢”，可以节省数据网络传输的时间。</p>
+<p>(2) Map 任务读取分片文件的数据，将输入的 (k1,v1) 送给用户实现的代码，用户代码输出 (k2,v2)，输出的数据会直接写入内存缓冲区。</p>
+<p>(3) 内存缓冲区存放 map 输出数据 (k2,v2)。</p>
+<p>(4) 当内存缓冲区写到一定程度时，后端线程会将内存数据按照 <code>hash(k2) mod R</code> 来分区并在内存中排序然后写入到临时的分区文件。随着内存数据不断的写入，磁盘会存在多个分区文件，比如分区编号为0的分区文件可能存在几十个，这时还需要使用归并排序，合并成一个文件。这种行为称为溢写、分区、排序、合并。当 Map 任务完成时，Map需要将这些文件的位置信息上报到 Master 节点，Master 根据这些信息安排 Reduce 任务从哪里取数据。</p>
+<p>(5) 当所有 Map 任务执行完毕时，Master 分配 Reduce 任务，准备从远端读取 Map 中间有序分区文件。</p>
+<p>(6) Reduce 任务通过 RPC 从多个 Map 获取多个分区文件。</p>
+<p>(7) 由于分区文件来自不同的 Map ，多个文件只是局部有序，需要使用类似第4步的溢写、排序、归并排序，合并成一个大的有序文件。</p>
+<p>(8) Reduce 任务从有序文件读取 (k2,list(v2)) 数据集，交给用户实现的 reduce 逻辑。</p>
+<p>(9) 用户实现的 reduce 逻辑会输出 list(v2) 到最终文件。在输出到最终文件之前，同样会使用类似第4步溢写、归并排序生成一个大文件。当 reduce 任务结束时，向 Master 上报任务执行状态。</p>
+<h1 id="容错性"><a href="#容错性" class="headerlink" title="容错性"></a>容错性</h1><p>(1) map 任务的容错性：如果 master 通过 ping 检查机制发现 map 任务挂掉了，会将该任务重置为空闲状态，空闲状态的 map 任务会被 master 重新分配来执行新的计算。如果一台机器挂掉了，master 发现该机器存储了 map 已完成的中间有序文件，而且还没有被reduce 任务领取，master 会重新分配map任务重跑这些数据。因为 map 的中间文件都是本地存储，只有一个副本，机器挂掉了不能恢复时，文件内容也不能恢复。如果 master 收到了重复上报的已完成的中间有序文件，master 会忽略这个信息，只保留一份。</p>
+<p>(2) reduce 容错性：如果 master 通过 ping 检查机制发现 reduce 任务挂掉了，会将该任务重置为空闲状态，空闲状态的 reduce 任务会被 master 重新分配来执行新的计算。由于 reduce 输出的文件存放在分布式文件系统，比如 GFS 或者 HDFS（对于 Hadoop 就是放在 HDFS 中），有多个副本，就算已完成的 reduce 任务所在的机器挂掉了，也不需要重新跑。</p>
+<p>(3) Master 的容错性：Master 内部有检查点机制，检查点周期性的保存到磁盘，如果 master 挂掉，恢复时会从上一份检查点开始再次执行任务，这样会有部分数据的丢失，丢失的信息需要重跑补回来。一开始 Master 节点是单节点，无法做到高可用。后来在 Hadoop 中引入了备用的 master 节点，实时从活动的 Master 节点同步数据，避免单点故障。</p>
+<p>(4) Semantics in the Presence of Failures：MapReduce 使用map 和 reduce 的原子提交来达到这种特征。每一个任务输出的文件首先是临时文件，比如 reduce 任务是一个输出文件，map 任务是 R 个输出文件。如果任务完成，使用 rename 的原子操作将文件重命名并提交到 master 节点，master 节点会忽略重复的信息。如果多个任务执行同样的 rename 操作，只有一个 rename 能成功，因为文件只能有一个。</p>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p>除了文中开头说的排序可以使用 MapReduce 来完成外，MapReduce 还可以使用在关系代数运算、分组与聚合运算等。</p>
+<p>关系代数运算包括</p>
+<p>(1) 关系的选择运算：对于关系的选择运算，只需要 Map 过程就能实现，对于关系R中的每个元组t，检测是否是满足条件的所需元组，如果满足条件，则输出键值对 (t,t)，也就是说，键和值都是 t。这时的 Reduce 函数就是一个恒等式，对输入不作任何变换就直接输出。</p>
+<p>(2) 关系的投影运算：假设对关系 R 投影后的属性集为 S，在 Map 函数中，对于 R 中的每个元组 t，提取出 t 中不属于 S 的字段，得到元组 t<sup>‘</sup>，输出键值对 (t<sup>‘</sup>,t<sup>‘</sup>)。对于 Map 任务产生的每个键 t<sup>‘</sup>，都可能存在一个或者多个键值对 (t<sup>‘</sup>,t<sup>‘</sup>)，因此需要通过 Reduce 函数来剔除冗余，把属性完全相同的元组合并起来的到 (t<sup>‘</sup>,list(t<sup>‘</sup>))，剔除冗余后只输出一个 (t<sup>‘</sup>,t<sup>‘</sup>)。</p>
+<p>(3) 关系的并、交、差运算。</p>
+<p>(4) 关系的自然连接运算：将需要连接的公共字段作为键。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2020/11/01/bigdata-mapreduce/" title="大数据系列——MapReduce分布式并行计算框架" target="_blank" rel="external">https://stltqhs.github.io/2020/11/01/bigdata-mapreduce/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2020/11/10/bigdata-gfs/" title="大数据系列——分布式文件系统GFS"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/07/28/java-programmer-knowledge-performance/" title="Java后端开发 - 性能优化"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

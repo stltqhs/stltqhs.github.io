@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>tags | 海东青</title>
+  <meta property="og:type" content="website">
+<meta property="og:title" content="tags">
+<meta property="og:url" content="https://stltqhs.github.io/tags/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.656Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tags">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/tags/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  <main class="main" role="main">
+  <article class="article article-tags post-type-list" itemscope="">
+    <header class="article-header">
+      <h1 itemprop="name" class="hidden-xs">tags</h1>
+      <p class="text-muted hidden-xs">共 10 个标签</p>
+      <nav role="navigation" id="nav-main" class="okayNav">
+        <ul>
+          <li><a href="/tags">All</a></li>
+          
+          <li><a href="/tags/大数据/">大数据</a></li>
+          
+          <li><a href="/tags/分布式/">分布式</a></li>
+          
+          <li><a href="/tags/gc/">gc</a></li>
+          
+          <li><a href="/tags/innodb/">innodb</a></li>
+          
+          <li><a href="/tags/计算机体系结构/">计算机体系结构</a></li>
+          
+          <li><a href="/tags/人工智能/">人工智能</a></li>
+          
+          <li><a href="/tags/NoSQL/">NoSQL</a></li>
+          
+          <li><a href="/tags/算法/">算法</a></li>
+          
+          <li><a href="/tags/java/">java</a></li>
+          
+          <li><a href="/tags/mq/">mq</a></li>
+          
+        </ul>
+      </nav>
+    </header>
+    <!-- /header -->
+    <div class="article-body">
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/大数据/" title="#大数据"># 大数据</a>
+        <small class="text-muted">(Total 4 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-12-18T07:35:44.000Z" itemprop="datePublished">2020-12-18</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/12/18/bigdata-bigtable/">大数据系列——Bigtable</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/大数据/" class="label label-default mb">大数据</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-11-10T07:35:44.000Z" itemprop="datePublished">2020-11-10</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/11/10/bigdata-gfs/">大数据系列——分布式文件系统GFS</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/大数据/" class="label label-default mb">大数据</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/12/21/bigdata-percolator/">大数据系列——Percolator</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/大数据/" class="label label-default mb">大数据</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-11-01T05:08:46.000Z" itemprop="datePublished">2020-11-01</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/11/01/bigdata-mapreduce/">大数据系列——MapReduce分布式并行计算框架</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/大数据/" class="label label-default mb">大数据</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/分布式/" title="#分布式"># 分布式</a>
+        <small class="text-muted">(Total 0 articles)</small>
+      </h3>
+      <div class="row">
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/gc/" title="#gc"># gc</a>
+        <small class="text-muted">(Total 0 articles)</small>
+      </h3>
+      <div class="row">
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/innodb/" title="#innodb"># innodb</a>
+        <small class="text-muted">(Total 0 articles)</small>
+      </h3>
+      <div class="row">
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/计算机体系结构/" title="#计算机体系结构"># 计算机体系结构</a>
+        <small class="text-muted">(Total 2 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-12-18T08:58:37.000Z" itemprop="datePublished">2020-12-18</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/12/18/arch-mem-alignment/">计算机体系结构——内存对齐原理</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/计算机体系结构/" class="label label-default mb">计算机体系结构</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-12-18T08:59:05.000Z" itemprop="datePublished">2020-12-18</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/12/18/arch-why-mem-barrier/">计算机体系结构——为什么需要内存屏障</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/计算机体系结构/" class="label label-default mb">计算机体系结构</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/人工智能/" title="#人工智能"># 人工智能</a>
+        <small class="text-muted">(Total 1 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2023/09/03/Milvus/">Milvus</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/人工智能/" class="label label-default mb">人工智能</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/NoSQL/" title="#NoSQL"># NoSQL</a>
+        <small class="text-muted">(Total 2 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/12/21/distributed-dynamo/">分布式系列——Dynamo</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/NoSQL/" class="label label-default mb">NoSQL</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2021/01/10/redis/">Redis</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/NoSQL/" class="label label-default mb">NoSQL</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/算法/" title="#算法"># 算法</a>
+        <small class="text-muted">(Total 1 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:18:07.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-algorithm/">Java后端开发 - 算法和数据结构</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/算法/" class="label label-default mb">算法</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/java/" title="#java"># java</a>
+        <small class="text-muted">(Total 9 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:16:13.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-design-pattern/">Java后端开发 - 设计模式</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:14:38.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-container-class/">Java后端开发 - 容器类</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:14:22.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-basic/">Java后端开发 - 基础</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:17:59.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-network/">Java后端开发 - 网络</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:14:57.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-concurrent/">Java后端开发 - 并发</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:15:16.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-jvm/">Java后端开发 - JVM</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:15:09.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-servlet/">Java后端开发 - Servlet</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-10-13T00:14:49.000Z" itemprop="datePublished">2018-10-13</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/10/13/java-programmer-knowledge-thread/">Java后端开发 - 线程</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2018-07-12T13:16:30.000Z" itemprop="datePublished">2018-07-12</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2018/07/12/java-programmer-knowledge/">Java后端开发</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/java/" class="label label-default mb">java</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+      <h3 class="panel-title mb-1x">
+        <a href="/tags/mq/" title="#mq"># mq</a>
+        <small class="text-muted">(Total 1 articles)</small>
+      </h3>
+      <div class="row">
+        
+        <div class="col-md-6">
+          
+<article class="panel panel-default hover-shadow hover-grow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="panel-body">
+     <div class="article-meta">
+       <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+     </div>
+     <h3 class="article-title" itemprop="name">
+       <a class="article-link" href="/2020/12/23/kafka/">Kafka</a>
+     </h3>
+   </div>
+   
+   <div class="panel-footer">
+     
+      <a href="/tags/mq/" class="label label-default mb">mq</a>
+     
+     
+   </div>
+   
+</article>
+
+
+        </div>
+        
+      </div>
+      
+    </div>
+  </article>
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

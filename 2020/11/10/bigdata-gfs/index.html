@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>大数据系列——分布式文件系统GFS | 海东青</title>
+  <meta name="description" content="简介GFS [1] 使用在可扩展的分布式数据密集性应用，包括 OLAP 类型的海量数据存储数据库 Bigtable。GFS 提供以下特性：  可根据业务量灵活扩展计算和存储资源 多副本（replicas）保障系统高可用 文件原子写入  设计架构GFS由 Master、Chunkserver和 Application 三个组件组成，其中：  Master 协调整个 GFS 的读写和副本复制； Chu">
+<meta name="keywords" content="大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据系列——分布式文件系统GFS">
+<meta property="og:url" content="https://stltqhs.github.io/2020/11/10/bigdata-gfs/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="简介GFS [1] 使用在可扩展的分布式数据密集性应用，包括 OLAP 类型的海量数据存储数据库 Bigtable。GFS 提供以下特性：  可根据业务量灵活扩展计算和存储资源 多副本（replicas）保障系统高可用 文件原子写入  设计架构GFS由 Master、Chunkserver和 Application 三个组件组成，其中：  Master 协调整个 GFS 的读写和副本复制； Chu">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://stltqhs.github.io/images/gfs_arch.png">
+<meta property="og:image" content="https://stltqhs.github.io/images/gfs_operation_log.png">
+<meta property="og:image" content="https://stltqhs.github.io/images/gfs_file_region_primary_failure.png">
+<meta property="og:image" content="https://stltqhs.github.io/images/gfs_mutation_order.png">
+<meta property="og:image" content="https://stltqhs.github.io/images/gfs_data_flow.png">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.356Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大数据系列——分布式文件系统GFS">
+<meta name="twitter:description" content="简介GFS [1] 使用在可扩展的分布式数据密集性应用，包括 OLAP 类型的海量数据存储数据库 Bigtable。GFS 提供以下特性：  可根据业务量灵活扩展计算和存储资源 多副本（replicas）保障系统高可用 文件原子写入  设计架构GFS由 Master、Chunkserver和 Application 三个组件组成，其中：  Master 协调整个 GFS 的读写和副本复制； Chu">
+<meta name="twitter:image" content="https://stltqhs.github.io/images/gfs_arch.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2020/11/10/bigdata-gfs/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#简介"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#设计"><span class="toc-number">2.</span> <span class="toc-text">设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#架构"><span class="toc-number">2.1.</span> <span class="toc-text">架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一个-Master"><span class="toc-number">2.2.</span> <span class="toc-text">一个 Master</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Chunk-大小"><span class="toc-number">2.3.</span> <span class="toc-text">Chunk 大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#元数据"><span class="toc-number">2.4.</span> <span class="toc-text">元数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#内存数据结构"><span class="toc-number">2.4.1.</span> <span class="toc-text">内存数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Chunk-位置"><span class="toc-number">2.4.2.</span> <span class="toc-text">Chunk 位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#操作日志"><span class="toc-number">2.4.3.</span> <span class="toc-text">操作日志</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一致性模型"><span class="toc-number">2.5.</span> <span class="toc-text">一致性模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GFS-保证的一致性和完整性"><span class="toc-number">2.5.1.</span> <span class="toc-text">GFS 保证的一致性和完整性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#客户端的隐式处理"><span class="toc-number">2.5.2.</span> <span class="toc-text">客户端的隐式处理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#系统交互"><span class="toc-number">3.</span> <span class="toc-text">系统交互</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#租约和写顺序"><span class="toc-number">3.1.</span> <span class="toc-text">租约和写顺序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据流"><span class="toc-number">3.2.</span> <span class="toc-text">数据流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原子记录追加"><span class="toc-number">3.3.</span> <span class="toc-text">原子记录追加</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#快照"><span class="toc-number">3.4.</span> <span class="toc-text">快照</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Master-操作"><span class="toc-number">4.</span> <span class="toc-text">Master 操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#命名空间管理和锁"><span class="toc-number">4.1.</span> <span class="toc-text">命名空间管理和锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#副本位置"><span class="toc-number">4.2.</span> <span class="toc-text">副本位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建-重复制-重平衡"><span class="toc-number">4.3.</span> <span class="toc-text">创建-重复制-重平衡</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#垃圾收集"><span class="toc-number">4.4.</span> <span class="toc-text">垃圾收集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#机制"><span class="toc-number">4.4.1.</span> <span class="toc-text">机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#讨论"><span class="toc-number">4.4.2.</span> <span class="toc-text">讨论</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#旧数据检测"><span class="toc-number">4.5.</span> <span class="toc-text">旧数据检测</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#容错性和诊断"><span class="toc-number">5.</span> <span class="toc-text">容错性和诊断</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#高可用"><span class="toc-number">5.1.</span> <span class="toc-text">高可用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#快速恢复"><span class="toc-number">5.1.1.</span> <span class="toc-text">快速恢复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Chunk-复制"><span class="toc-number">5.1.2.</span> <span class="toc-text">Chunk 复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Master-复制"><span class="toc-number">5.1.3.</span> <span class="toc-text">Master 复制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据完整性"><span class="toc-number">5.2.</span> <span class="toc-text">数据完整性</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-bigdata-gfs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      大数据系列——分布式文件系统GFS
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2020/11/10/bigdata-gfs/" class="article-date">
+	  <time datetime="2020-11-10T07:35:44.000Z" itemprop="datePublished">2020-11-10</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/大数据/">大数据</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2020/11/10/bigdata-gfs/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>GFS<sup><a href="http://static.googleusercontent.com/media/research.google.com/en/us/archive/gfs-sosp2003.pdf" target="_blank" rel="noopener"> [1] </a></sup>使用在可扩展的分布式数据密集性应用，包括 OLAP 类型的海量数据存储数据库 Bigtable。GFS 提供以下特性：</p>
+<ul>
+<li>可根据业务量灵活扩展计算和存储资源</li>
+<li>多副本（replicas）保障系统高可用</li>
+<li>文件原子写入</li>
+</ul>
+<h1 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h1><h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>GFS由 Master、Chunkserver和 Application 三个组件组成，其中：</p>
+<ul>
+<li>Master 协调整个 GFS 的读写和副本复制；</li>
+<li>Chunkserver 实际存储文件数据；</li>
+<li>Application 是 GFS 的客户端 SDK；</li>
+</ul>
+<p>这三个组件逻辑架构如图-1所示。</p>
+<p><img src="/images/gfs_arch.png" alt="GFS架构" title="GFS架构"></p>
+<p><em>图-1 GFS 架构</em></p>
+<p>现在分别以读和写的方式说明三个组件的交互过程。</p>
+<p><strong> 读 </strong></p>
+<ul>
+<li>向 Master 查文件的 chunk 索引和 chunk 位置信息，位置信息包括哪些 chunkserver 存了这些 chunk 的数据</li>
+<li>Application 拿到 chunk 索引和位置信息后缓存在本地（可减少访问 Master 的次数），然后从 chunkserver 读 Chunk 的数据</li>
+</ul>
+<p><strong> 写 </strong></p>
+<ul>
+<li>Application 向 Master 查文件的 Lease （没有时需要分配一个 Lease 给一个 chunkserver）在哪台 chunkserver 上，Master 返回 Lease 的 chunkserver （称为 primary） 和两个副本的 chunkserver（称为 secondary）</li>
+<li>Application 向最近的 primary 和 secondary 节点推送数据，数据是文件的内容，primary 和 secondary 将数据先存在 LRU 缓存上</li>
+<li>数据推完后，向 primary 发送一个或者多个写 chunk 请求，把刚才推送的数据写到一个或者多个 chunk</li>
+<li>primary 按照接收的顺序写完后，把相同顺序的写请求发送到 secondary，让 secondary 写 chunk</li>
+<li>secondary 写完后，回复给 primary</li>
+<li>primary 回复给 Application，通知写成功</li>
+</ul>
+<h2 id="一个-Master"><a href="#一个-Master" class="headerlink" title="一个 Master"></a>一个 Master</h2><p>GFS 使用一个 master 节点协调整个 GFS 系统的工作，优点有：</p>
+<ul>
+<li>容易协调读写和副本复制</li>
+<li>实现简单</li>
+</ul>
+<p>缺点有：</p>
+<ul>
+<li>高可用性降低</li>
+<li>不支持存储太多数量的文件，因为元数据都存在内存，数量多时占内存且文件查询的效率也会降低</li>
+</ul>
+<p>当 Application 向 Master 查文件的 Chunk 信息时，GFS Client 自己首先会根据文件名和 IO 操作的字节偏移地址转换成 Chunk index，GFS Client 通过文件名和 Chunk index 向 Master 查文件的元数据。GFS Client 会将查到的元数据缓存在本地进程中，避免下次再访问 Master，这样可以降低 Master 的负载，也能减少网络传输延时。</p>
+<h2 id="Chunk-大小"><a href="#Chunk-大小" class="headerlink" title="Chunk 大小"></a>Chunk 大小</h2><p>Chunk 的固定大小是 64MB，优点是：</p>
+<ul>
+<li>一次网络连接的建立，可以读取 64MB，读取多个 Chunk 时需要多次网络连接，当 Chunk 越大，读取的 Chunk 数量就越少，RTT 也会降低</li>
+<li>Chunk 数量越少，读取 Chunk 的网络连接数量也减少，网络连接的负载就会降低</li>
+<li>每个 Chunk 都在 Master 占用一定的内存空间，当 Chunk 越大，存储 Chunk 元数据的数量就越少</li>
+</ul>
+<p>缺点是热点问题，当读取一个大 Chunk 文件时，涉及到的磁盘读取和网络传输消耗很大，如果访问量大，流量全部压在一台机器会成为瓶颈，会降低机器性能。解决热点的问题是：</p>
+<ul>
+<li>Chunk 不宜太大，一般 64MB</li>
+<li>提高复制因子，用多个 chunkserver 提供服务，分担压力</li>
+</ul>
+<h2 id="元数据"><a href="#元数据" class="headerlink" title="元数据"></a>元数据</h2><p>Master 存储的元数据包括</p>
+<ul>
+<li>文件和 chunk 名字空间</li>
+<li>文件名到 chunk 的映射</li>
+<li>chunk 的副本位置</li>
+</ul>
+<p>第一、二这两项不仅全部存在内存还需要存储到磁盘，第三项依靠副本上报、Master 只存内存。</p>
+<h3 id="内存数据结构"><a href="#内存数据结构" class="headerlink" title="内存数据结构"></a>内存数据结构</h3><p>元数据放在内存的优点有：</p>
+<ul>
+<li>Master 访问操作速度快</li>
+<li>后期使用垃圾收集和重复制（re-replication）的周期检查机制也很高效</li>
+</ul>
+<p>缺点有：</p>
+<ul>
+<li>元数据内容受到内存大小限制</li>
+</ul>
+<h3 id="Chunk-位置"><a href="#Chunk-位置" class="headerlink" title="Chunk 位置"></a>Chunk 位置</h3><p>Master 不会将 chunk 的副本位置信息写入磁盘，master 只会在 chunkserver 加入集群时询问 chunk 副本位置信息。chunk 副本不存磁盘的原因是：</p>
+<ul>
+<li>chunkserver 周期上报 chunk 副本信息非常简单</li>
+<li>相比 master 存 chunk 副本而言，可以减少当 chunkserver 加入集群、离开机器、修改名字、失败、重启等等信息同步的开销</li>
+<li>哪个 chunk 存在哪台 chunkserver，chunkserver 是最先知道的（或者称为“有最终话语权”）</li>
+</ul>
+<h3 id="操作日志"><a href="#操作日志" class="headerlink" title="操作日志"></a>操作日志</h3><p>GFS 的操作日志记录了对所有文件的修改操作，记录这些操作日志的作用有：</p>
+<ul>
+<li>提高可用性，异常重启可以根据操作日志和检查点重建内存数据</li>
+<li>提高数据一致性，</li>
+</ul>
+<p>操作日志的实现原理如图-2所示。</p>
+<p><img src="/images/gfs_operation_log.png" alt="GFS操作日志和检查点" title="操作日志和检查点"></p>
+<p><em>图-2 GFS 操作日志和检查点</em></p>
+<p>需要注意的点：</p>
+<ul>
+<li>操作日志非常重要，（异常）重启服务时需要重放日志，构建内存元数据</li>
+<li>回复客户端写成功前，Master 必须已经将操作日志写入磁盘并且成功同步到 Master 副本（同步复制，非异步复制）</li>
+<li>每个日志文件的大小有限制</li>
+<li>当日志文件数量多时，重启服务重放日志会非常耗时，因此需要将日志合并成一个检查点文件</li>
+<li>检查点文件需要一个新的后端线程完成</li>
+<li>当检查点文件生成后，可以将这些日志文件删除，未合并的日志文件继续保留</li>
+<li>Master 可以批量将日志队列的数据写入到磁盘或者同步到 Master 副本，提高吞吐量</li>
+</ul>
+<h2 id="一致性模型"><a href="#一致性模型" class="headerlink" title="一致性模型"></a>一致性模型</h2><p>GFS 定义的文件区域（file region）一致性模型有4种：</p>
+<ul>
+<li>consistent 一致</li>
+<li>defined 明确</li>
+<li>undefined 不明确</li>
+<li>inconsistent 不一致</li>
+</ul>
+<p>一致的意思是说多个客户端读同一个文件时内容一致；明确的意思是说客户端能够读到刚刚写入的内容。</p>
+<p>GFS支持两种写入方式：</p>
+<ul>
+<li>Write 应用程序自己指定文件的 offset 写入内容</li>
+<li>Record Append 由 GFS 选出内容追加的 offset ，然后再写入内容</li>
+</ul>
+<p>这两种写入会影响一致性模型，见表-1所示。</p>
+<p><em>表-1 不同写模式影响一致性模型</em></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Write</th>
+<th>Record Append</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>顺序成功</td>
+<td>明确</td>
+<td>明确并伴有不一致</td>
+</tr>
+<tr>
+<td>并发成功</td>
+<td>一致不明确</td>
+<td>明确并伴有不一致</td>
+</tr>
+<tr>
+<td>失败</td>
+<td>不一致</td>
+<td>不一致</td>
+</tr>
+</tbody>
+</table>
+<p>并发写成功造成一致不明确的原因是：并发写成功完成后，所有客户端都能读到相同的内容，但是不知道这个内容是谁写入的。因为并发写入会造成一个客户端写的内容全部或者部分覆盖另一个应用写的内容，当一个应用写成功后，可能它写的内容因被覆盖而丢失。</p>
+<p>在 record append 模式下，顺序写和并发写都会导致明确并伴有不一致的原因是：record append 会填充一个 chunk，而填充的内容每个副本可能不同，导致数据不一致。需要填充的原因是：假如 chunk 最大大小是 64MB，当前已经写满 54 MB，如果还需要以 record append 写入 12 MB 的数据，那么会将此 chunk 填充剩余的 10MB 空间后，申请一个新的 chunk，将 12MB 的数据写入新 chunk 中。</p>
+<p>GFS 将一个 chunk（64MB）划分成多个文件区域（64KB），每一个文件区域都有一个 32 位的检验和，用来判断文件区域是否有效。检验和跟其他元数据一样，写入到日志文件并且存储在内存中。如果应用读取的 chunk 包含无效的文件区域，GFS 并不会返回这些内容，而是继续检查下一个文件区域。</p>
+<h3 id="GFS-保证的一致性和完整性"><a href="#GFS-保证的一致性和完整性" class="headerlink" title="GFS 保证的一致性和完整性"></a>GFS 保证的一致性和完整性</h3><p>下面说明两种写文件区域失败的情况，看看 GFS 是如何处理数据一致性和完整性的。</p>
+<ul>
+<li>primary （拥有写凭证的副本）失败</li>
+</ul>
+<p><img src="/images/gfs_file_region_primary_failure.png" alt="primary 写失败" title="primary 写失败"></p>
+<p><em>图-3 primary 写失败</em></p>
+<ul>
+<li>secondary 失败</li>
+</ul>
+<p>当 secondary 失败，意味者 primary 写成功，primary 的文件指针增加了。当客户端重试，primary 继续接着上次的文件指针位置（或者填充空白来结果对齐）继续写，写成功后，secondary 需要从 primary 的 offset 处继续写，之前的内容同样要填充空白。此时，对于 primary 来说，内容重复。</p>
+<p>通过上面的分析发现 GFS 解决数据数据的一致性和完整性时，会留下两个问题：</p>
+<ul>
+<li>空白填充剂</li>
+<li>文件区域的数据重复</li>
+</ul>
+<p>存储填充剂和重复记录的文件区域，其检验和也是正确的，对于 GFS 服务端而言，它也是正确的数据。那么这些多余的数据该如何鉴别并且丢弃呢？这要留给客户端处理。</p>
+<h3 id="客户端的隐式处理"><a href="#客户端的隐式处理" class="headerlink" title="客户端的隐式处理"></a>客户端的隐式处理</h3><p>客户端写入数据时按照文件区域大小对齐，且每个文件区域包括：</p>
+<ul>
+<li>检验和：检查并丢弃空白填充剂</li>
+<li>文件区域ID：可以过滤重复记录</li>
+</ul>
+<p>客户端也可以自己维护一个文件的检查点，记录文件写入多少数据。</p>
+<p>GFS Client API 已经集成这些功能，因为它比较通用。</p>
+<h1 id="系统交互"><a href="#系统交互" class="headerlink" title="系统交互"></a>系统交互</h1><h2 id="租约和写顺序"><a href="#租约和写顺序" class="headerlink" title="租约和写顺序"></a>租约和写顺序</h2><p>由于修改操作会影响 chunk 内容或者元数据，为了保持数据一致性，客户端写数据前必须向 master 申请写凭证（这里称为 Lease 租约）。master 会保证任意时刻，一个 chunk 至多只有一个租约有效。拥有租约的 chunkserver 称为 primary，primary 的副本（可能存在一个或者多个副本）称为 secondary。一个文件的全局写顺序由 master 分配租约的顺序来保证，而一个 chunk 并发写顺序由 primary 来保证。</p>
+<p>master 如何保证租约分配顺序？步骤如下：</p>
+<ul>
+<li>1 master 接收到租约申请，检查 chunk 是否有存活的租约；</li>
+<li>2 如果没有租约，新分配一个，找出一个副本，将其作为 primary，同时将 chunk version number （CVN）自增；</li>
+<li>3 如果有租约，但是拥有租约的 primary 节点失联，master 需要等待租约过期，过期时间是 60 秒；</li>
+<li>4 如果有存活的租约，直接返回给客户端；</li>
+<li>5 当 primary 的租约快过期时，向 master 续约；</li>
+</ul>
+<p>通过 CVN 可以检测 Lease 是否过期，比如当前 primary 的租约的 CVN 是 5，当客户端请求写入时传的 CVN 是 6，可能是因为异常原因、或者客户端缓存导致当前 primary 没有拿到最新的租约，写入失败，需要客户端重新申请再写入。</p>
+<p>primary 负责管理 chunk 及其副本的写入，维护数据写入的一致性。primary 如何保证写的顺序？步骤如下：</p>
+<ul>
+<li>1 客户端向 master 申请租约成功后，master  返回 primary 和 primary 的副本节点 secondary；</li>
+<li>2 客户端先将文件数据推送到 primary 和 secondary，他们会将数据存在内存中一块 LRU 缓存中；</li>
+<li>3 客户端再将写请求发送到 primary，因为 primary 只有一个节点，数据接收的顺序可以作为它写的顺序；</li>
+<li>4 primary 将相同的写顺序同步到 secondary ，secondary 也按照这样的顺序写 chunk；</li>
+<li>5 primary 和 secondary 都写入成功后，回复客户端写成功；</li>
+<li>6 任意一个节点写失败时，primary 都会通知客户端重试；客户端继续回到第3步重复操作；</li>
+<li>通过上面的方式就可以保证 primary 和 secodnary 写入顺序也是一致的。</li>
+</ul>
+<p>GFS 写数据的流程如图-4所示：</p>
+<p><img src="/images/gfs_mutation_order.png" alt="GFS 写入流程" title="GFS 写入流程"></p>
+<p><em>图-4 GFS 写流程</em></p>
+<h2 id="数据流"><a href="#数据流" class="headerlink" title="数据流"></a>数据流</h2><p>上一节说到，客户端会将文件数据推送到 primary 和 secondary，它们之间的推送顺序也是有讲究的。为了提高传输效率，客户端会从 primary 和 secondary 挑选最近的节点推送数据。如何衡量节点之间的距离呢？GFS 使用 IP 地址的距离来抽象机器物理上的距离。假设 primary 是 S1，secondary 是 S2 和 S3 。客户端挑选最近的节点是 S2（处于推送数据阶段无需关注最近的节点是 primary 还是 secondary），客户端向 S2 推送数据。然后 S2 在剩余的 S1 和 S3 节点，挑选离 S2 最近的节点 S1，向 S1 推送数据。再然后，S1 向 S3 推送数据，这样的数据流就是一个管道数据流。间言之：</p>
+<p><img src="/images/gfs_data_flow.png" alt="GFS 数据流" title="GFS 数据流"></p>
+<p><em>图-5 GFS 数据流</em></p>
+<h2 id="原子记录追加"><a href="#原子记录追加" class="headerlink" title="原子记录追加"></a>原子记录追加</h2><p>GFS 支持两种写入方式：</p>
+<ul>
+<li>随机写：由 client 指定一个文件的 offset，GFS 执行随机写入</li>
+<li>顺序写：由 GFS 来决定 offset（该值是文件的末尾），GFS 执行顺序写入</li>
+</ul>
+<p>顺序写称为原子记录追加（Atomic Record Appends）。</p>
+<p>随机写的缺点（原因已经在“一致性模型”一节讲到）：</p>
+<ul>
+<li>并发写使文件区域处于一致不明确</li>
+<li>写性能降低</li>
+</ul>
+<p>顺序写的优点有（原因已经在“一致性模型”一节讲到）：</p>
+<ul>
+<li>部分文件区域处于不明确，这些不明确的文件区域一般是数据错误，检查和不正确；</li>
+<li>写性能高；</li>
+</ul>
+<p>顺序写的副作用有（原因已经在“一致性模型”一节讲到）：</p>
+<ul>
+<li>空白填充剂</li>
+<li>重复记录</li>
+</ul>
+<h2 id="快照"><a href="#快照" class="headerlink" title="快照"></a>快照</h2><p>GFS 使用 copy-on-write 实现快照，用来支持客户端</p>
+<ul>
+<li>创建检查点</li>
+<li>复制大数据集</li>
+</ul>
+<p>创建快照的流程是：</p>
+<ul>
+<li>1 客户端向 master 请求负责文件或者目录快照</li>
+<li>2 master 通知拥有文件或者目录的租约节点，让租约过期。master 需要等待租约过期操作的回复或者等待租约超时，这样任何对这些文件的写入会再次经过 master 协调</li>
+<li>3 master 将文件或者目录的元数据在内存中复制一份（当然也会记录到操作日志中），同时更新 chunk 的引用计数器，即 reference count 需要加 1。此时客户端可以继续写这个 chunk，阻塞时长只有一个租约过期时间。</li>
+<li>4 客户端写 chunk （假设是 chunk C）时，master 需要检查它的 reference count ，如果大于 1 ，需要将这个所有存储这个 chunk  C 的副本节点都在本地复制一个 chunk C’ 。由于是本地复制，可以节省网络带宽。复制完毕后，master 将 chunk C 的 reference count 减 1。</li>
+<li>5 master 将 chunk C’ 告诉客户端，需要写这个 chunk</li>
+</ul>
+<h1 id="Master-操作"><a href="#Master-操作" class="headerlink" title="Master 操作"></a>Master 操作</h1><p>master 管理所有的元数据，包括文件、目录的命名空间的管理。</p>
+<h2 id="命名空间管理和锁"><a href="#命名空间管理和锁" class="headerlink" title="命名空间管理和锁"></a>命名空间管理和锁</h2><p>master 支持并发写入，命名空间的一致性维护需要使用锁，防止：</p>
+<ul>
+<li>文件删除</li>
+<li>重命名</li>
+<li>新建文件</li>
+<li>创建快照</li>
+</ul>
+<p>时出现冲突。锁分为两种：</p>
+<ul>
+<li>读锁</li>
+<li>写锁</li>
+</ul>
+<p>如果要操作一个文件或者目录 /d1/d2/…/dn/leaf ，master 需要获取 /d1，/d1/d2，/d1/d2/…/dn 的读锁，然后根据操作的类型给 /d1/d2/…/dn/leaf 加读锁还是写锁。</p>
+<p><em>表-2 读写锁</em></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>删除文件</th>
+<th>创建文件</th>
+<th>创建快照</th>
+<th>文件重命名</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>父目录</td>
+<td>读锁</td>
+<td>读锁</td>
+<td>读锁</td>
+<td>读锁</td>
+</tr>
+<tr>
+<td>叶子结点</td>
+<td>写锁</td>
+<td>写锁</td>
+<td>写锁</td>
+<td>写锁</td>
+</tr>
+</tbody>
+</table>
+<p>创建文件时，叶子节点就是要创建的文件。如果在同一个目录下创建多个文件，流程可以并发，因为创建文件是只是对父节点加读锁操作。</p>
+<p>由于 GFS 在内存中构建一个查找表来顺序存放文件名到元数据的映射，文件名还可以做压缩操作，以节省更多空间。</p>
+<h2 id="副本位置"><a href="#副本位置" class="headerlink" title="副本位置"></a>副本位置</h2><p>GFS 集群中的副本节点位置需要遵循一定的策略才能做到：</p>
+<ul>
+<li>可扩展</li>
+<li>可靠</li>
+<li>可用</li>
+</ul>
+<p>策略是：</p>
+<ul>
+<li>副本分布在多个机架</li>
+<li>多级分布式</li>
+</ul>
+<h2 id="创建-重复制-重平衡"><a href="#创建-重复制-重平衡" class="headerlink" title="创建-重复制-重平衡"></a>创建-重复制-重平衡</h2><p>一个 chunk 副本被创建有以下三个原因：</p>
+<ul>
+<li>创建 chunk</li>
+<li>重复制</li>
+<li>重平衡</li>
+</ul>
+<p>当 master 创建一个 chunk 时，master 需要决定这个 chunk 放在哪些 chunkserver 上。规则是：</p>
+<ul>
+<li>磁盘利用率：选择磁盘利用率低于平均数的副本节点</li>
+<li>热点：最近写入操作少的节点</li>
+<li>位置：副本需要分布在多个机架</li>
+</ul>
+<p>当一个 chunk 的副本节点数量小于指定的数值时，master 将会启动重复制，避免拥有 chunk 的唯一节点或者少数节点挂掉后数据永久丢失。一个 chunk 的副本节点数量不够的原因有：</p>
+<ul>
+<li>一个 chunkserver 不可用</li>
+<li>chunkserver 报告它的 chunk 损坏了</li>
+<li>chunkserver 的磁盘不可用</li>
+<li>提高了复制因子</li>
+</ul>
+<p>每个 chunk 需要重复制的优先级可以这么定：</p>
+<ul>
+<li>离复制因子的距离</li>
+<li>复制存活的文件而不是删除的文件</li>
+<li>提高正在阻塞客户端读写流程的 chunk 优先级</li>
+</ul>
+<p>master 根据这些优先级排序，选出需要重复制的 chunk 按照创建一个 chunk 时的逻辑选出 chunkserver。</p>
+<p>执行重平衡的原因是：</p>
+<ul>
+<li>提高磁盘空间利用率</li>
+<li>负载均衡，解决热点问题</li>
+</ul>
+<h2 id="垃圾收集"><a href="#垃圾收集" class="headerlink" title="垃圾收集"></a>垃圾收集</h2><h3 id="机制"><a href="#机制" class="headerlink" title="机制"></a>机制</h3><p>Master 删除一个文件时，它将文件重命名为一个隐藏文件，隐藏文件的文件名带有删除时间戳，这样可以：</p>
+<ul>
+<li>继续读隐藏文件的内容</li>
+<li>将文件重命名回去，恢复文件</li>
+<li>快速返回，客户端可以立即做其他操作</li>
+</ul>
+<p>GFS 垃圾回收是周期性扫描整个文件系统的命名空间，符合下面两种情况的 chunk 都可以删除：</p>
+<ul>
+<li>chunk 是孤儿节点</li>
+<li>隐藏文件的删除时间大于3天（当然这是可配置的）</li>
+<li>CVN是过期数据旧 chunk</li>
+</ul>
+<p>当文件被删除时，内存中的元数据也会清空。master 会将删除信息通过心跳消息发送到包含这些 chunk 的 chunkserver，chunkserver 执行文件清理操作。</p>
+<h3 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h3><p>周期性扫描的垃圾回收机制的优点是：</p>
+<ul>
+<li>在容易出错的分布式系统中，这样做的方式是简单和可靠。试想节点挂机、删除消息丢失、部分节点写入成功时，依然需要一个机制来记住哪些节点需要重发删除消息，然后定期重试，这种机制并没有垃圾回收简单。</li>
+<li>存储资源回收时可以批量进行，一边做 CPU 类型的扫描操作，一遍做 IO 类型的资源回收</li>
+<li>避免不可逆转的删除。当想恢复数据时还有办法</li>
+</ul>
+<h2 id="旧数据检测"><a href="#旧数据检测" class="headerlink" title="旧数据检测"></a>旧数据检测</h2><p>GFS 通过 chunk version number（CVN）来维护 chunk 的版本，可以判断一个 chunk 是旧的还是最新的。</p>
+<p>master 每次分配一个租约 lease 时，都会增加 chunk 的 CVN 版本号，master 和所有的副本节点都使用新的 CVN 来记录这个 chunk 的版本。当客户端写 chunk 时，由于某一个节点不可用时，该节点的 chunk 将不会增长，版本会过期。</p>
+<p>当 chunkserver 报告它所有 chunk 版本时，master 会对比自己存的版本号，如果 chunkserver 的 CVN 比 master 的 CVN 小，表示 chunkserver 中的 chunk 不是最新数据。如果 chunkserver 的 CVN 比 master 的 CVN 大，表示 chunkserver 的 chunk 是最新的数据，master 可能之前挂过机。</p>
+<p>CVN 旧数据将会在周期性扫描的垃圾收集时处理掉。</p>
+<h1 id="容错性和诊断"><a href="#容错性和诊断" class="headerlink" title="容错性和诊断"></a>容错性和诊断</h1><h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><p>GFS 提高两个关键且简单的高可用策略：</p>
+<ul>
+<li>快速恢复</li>
+<li>复制</li>
+</ul>
+<h3 id="快速恢复"><a href="#快速恢复" class="headerlink" title="快速恢复"></a>快速恢复</h3><p>master 和 chunkserver 会记录操作日志和检查点，不管是以何种方式停止，重启时都会恢复检查点数据和重放日志。</p>
+<h3 id="Chunk-复制"><a href="#Chunk-复制" class="headerlink" title="Chunk 复制"></a>Chunk 复制</h3><p>每一个 chunk 都被复制（根据复制因子）到多个 chunkserver，而 chunkserver 按照多机架结构部署，多个 chunkserver 提供服务（多副本），部分机器的服务挂掉也能正常运行。</p>
+<h3 id="Master-复制"><a href="#Master-复制" class="headerlink" title="Master 复制"></a>Master 复制</h3><p>Master 是 GFS 的协调器，是核心节点。由于 master 节点同时只有一个节点提供服务，存在单点故障。为此，GFS 还是做了一些努力。包括：</p>
+<ul>
+<li>master 数据可靠复制：写操作如果被提交，它必须是1）写入到磁盘，2）同步到所有 master 副本</li>
+<li>master 节点使用 DNS 名称，当 master 切换时可以自动跟随</li>
+<li>master 影子节点提供只读功能，它的状态可能会落后 master 节点几秒。对于一些应用要求一致性不高时可以读影子节点的数据。这样可以降低 master 的压力。</li>
+</ul>
+<p>影子节点是如何实现的呢？</p>
+<p>它直接读取 master 的操作日志，将更新操作应用到自己的数据结构中。</p>
+<h2 id="数据完整性"><a href="#数据完整性" class="headerlink" title="数据完整性"></a>数据完整性</h2><p>每个 chunk 被划分为多个 64KB 大小的文件区域，在 master 元数据里用 32 位存储文件区域的检验和（checksum）。不管是客户端还是其他 GFS 节点读取 chunk 时，都会计算检验和是否正确，绝不会返回检验和错误的数据或者 chunk。当 master 发现检验和错误，认为是数据损坏，需要启动重复制机制，从其他正确的节点复制数据。</p>
+<p>由于数据每次读取时都要检查检验和，对读性能还是有点影响，GFS 做了如下优化：</p>
+<ul>
+<li>GFS 客户端将读的范围与检验和的区块边界对齐</li>
+<li>一边读数据一边执行 CPU 计算检验和，可以分摊开销</li>
+<li>顺序写时，只需要计算新区块的检验和，之前的区块检验和不管是错误的还是正确的，在下次读取都会检查出来，并且被 master 通知更新</li>
+<li>随机写时，只需要计算写范围的第一块和最后一块的检验和，判断是否正确，目的是防止新的写入覆盖数据损坏的记录。</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>GFS 值得注意的是 master 节点只有一个，元数据全部存在 master 内存，这样会限制文件的数量。想想，如果很多小文件，它们不仅会占用很多元数据内存甚至吃光内存，还会导致文件空间的查询效率降低（因为文件多，查询时比对的此时就多，遍历也多，效率自然低）。被称为 GFS 二代的文件系统 Colossus 使用 Bigtable 来存储元数据，解决了元数据存储瓶颈。GFS 与 Ceph 实现有本质区别，它们各自都有不同的应用场景，无法替代。</p>
+<p>GFS 使用 Lease （租约）机制和 CVN（chunk verion number）实现分布式场景并发文件写入的一致性。图-3 的 chunk 一致性模型保证数据完整性也设计得非常简约，思路值得借鉴。</p>
+<p>GFS 是一个中心化集群，master 控制集群读写、Chunkserver 负载均衡。如果 master 停止服务，整个集群处于瘫痪状态，不支持中心化集群选主。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2020/11/10/bigdata-gfs/" title="大数据系列——分布式文件系统GFS" target="_blank" rel="external">https://stltqhs.github.io/2020/11/10/bigdata-gfs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2020/12/18/bigdata-bigtable/" title="大数据系列——Bigtable"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2020/11/01/bigdata-mapreduce/" title="大数据系列——MapReduce分布式并行计算框架"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

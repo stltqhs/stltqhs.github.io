@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Java后端开发 - 基础 | 海东青</title>
+  <meta name="description" content="Throwable，Error，Exception，RuntimeException Error和Exception都是Throwable接口的子类 Java分为“受检查异常”（或Checked Exception，这类异常编译器会检查，如果对这类异常既没有try...catch也没throws时编译将不通过）和“未检查异常”（或Unchecked Exception，这类异常编译器不检查），Ru">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java后端开发 - 基础">
+<meta property="og:url" content="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-basic/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="Throwable，Error，Exception，RuntimeException Error和Exception都是Throwable接口的子类 Java分为“受检查异常”（或Checked Exception，这类异常编译器会检查，如果对这类异常既没有try...catch也没throws时编译将不通过）和“未检查异常”（或Unchecked Exception，这类异常编译器不检查），Ru">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.358Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java后端开发 - 基础">
+<meta name="twitter:description" content="Throwable，Error，Exception，RuntimeException Error和Exception都是Throwable接口的子类 Java分为“受检查异常”（或Checked Exception，这类异常编译器会检查，如果对这类异常既没有try...catch也没throws时编译将不通过）和“未检查异常”（或Unchecked Exception，这类异常编译器不检查），Ru">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-basic/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Throwable，Error，Exception，RuntimeException"><span class="toc-number">1.</span> <span class="toc-text">Throwable，Error，Exception，RuntimeException</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#对象克隆"><span class="toc-number">2.</span> <span class="toc-text">对象克隆</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#强引用与弱引用"><span class="toc-number">3.</span> <span class="toc-text">强引用与弱引用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#静态初始化和实例初始化"><span class="toc-number">4.</span> <span class="toc-text">静态初始化和实例初始化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Java8新特性"><span class="toc-number">5.</span> <span class="toc-text">Java8新特性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#序列化与反序列化"><span class="toc-number">6.</span> <span class="toc-text">序列化与反序列化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JDK序列化"><span class="toc-number">6.1.</span> <span class="toc-text">JDK序列化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他序列化工具"><span class="toc-number">6.2.</span> <span class="toc-text">其他序列化工具</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#反射"><span class="toc-number">7.</span> <span class="toc-text">反射</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Statement和PreparedStatement的区别，如何防止SQL注入"><span class="toc-number">8.</span> <span class="toc-text">Statement和PreparedStatement的区别，如何防止SQL注入</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Java命令"><span class="toc-number">9.</span> <span class="toc-text">Java命令</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#NoClassDefFoundError和ClassNotFoundException"><span class="toc-number">10.</span> <span class="toc-text">NoClassDefFoundError和ClassNotFoundException</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#方法动态绑定原理"><span class="toc-number">11.</span> <span class="toc-text">方法动态绑定原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#异常处理原理"><span class="toc-number">12.</span> <span class="toc-text">异常处理原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#泛型原理"><span class="toc-number">13.</span> <span class="toc-text">泛型原理</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-java-programmer-knowledge-basic" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java后端开发 - 基础
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2018/10/13/java-programmer-knowledge-basic/" class="article-date">
+	  <time datetime="2018-10-13T00:14:22.000Z" itemprop="datePublished">2018-10-13</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/java/">java</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/10/13/java-programmer-knowledge-basic/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Throwable，Error，Exception，RuntimeException"><a href="#Throwable，Error，Exception，RuntimeException" class="headerlink" title="Throwable，Error，Exception，RuntimeException"></a>Throwable，Error，Exception，RuntimeException</h1><ul>
+<li><code>Error</code>和<code>Exception</code>都是<code>Throwable</code>接口的子类</li>
+<li>Java分为“受检查异常”（或<code>Checked Exception</code>，这类异常编译器会检查，如果对这类异常既没有<code>try...catch</code>也没<code>throws</code>时编译将不通过）和“未检查异常”（或<code>Unchecked Exception</code>，这类异常编译器不检查），<code>RuntimeException</code>及其子类都是“未检查异常”，如<code>NullPointException</code>，其他为“受检查异常”，如<code>IOException</code>。</li>
+<li><code>Error</code>一般是指与虚拟机相关的错误，程序一般无法自身恢复（堆内存溢出属于特殊情况），比如各种内存溢出（如<code>OutOfMemoryError</code>，<code>StackOverflowError</code>，注意：断言失败是抛出<code>AssertionError</code>）；<code>Exception</code>则表示程序级别的异常，程序可以处理并恢复。</li>
+</ul>
+<p>对于OutOfMemoryError的堆内存溢出，程序不一定无法自身回复，有几点需要注意：</p>
+<ul>
+<li>如果堆内存溢出，表示无法再分配新的对象，而OutOfMemoryError本来也是一个对象，需要分配内存，是否意味着OutOfMemoryError也存在无法分配在内存导致该Error不能抛出。其实JVM的设计者已经考虑到这个问题，所以OutOfMemoryError是JVM启动时就已经分配，并且该错误信息的调用栈是没有意义的<a href="http://lovestblog.cn/blog/2016/08/29/oom/" target="_blank" rel="noopener"> [1] </a>。</li>
+<li>当线程抛出OutOfMemoryError异常时，线程栈会层层弹出，此时有些对象不会被GC Roots引用，会被GC回收，堆空间会释放部分内存。</li>
+</ul>
+<h1 id="对象克隆"><a href="#对象克隆" class="headerlink" title="对象克隆"></a>对象克隆</h1><p><code>Object.clone()</code>方法是<code>native</code>方法，如果类没有实现<code>Cloneable</code>接口时将抛出<code>CloneNotSupportedException</code>，即便是子类重写了<code>clone()</code>，<code>clone()</code>方法签名如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">native</span> Object <span class="title">clone</span><span class="params">()</span> <span class="keyword">throws</span> CloneNotSupportedException</span>;</span><br></pre></td></tr></table></figure>
+<p><code>Object.clone()</code>方法由C++来实现，实现原理是先调用<code>CollectedHeap::array_allocate()</code>或者<code>CollectedHeap::obj_allocate()</code>分配与原对象相同大小的新内存，然后调用<code>Copy::conjoint_jlongs_atomic()</code>将原对象的内存数据复制到新内存当中（所以，该复制方法是<code>浅复制</code>）。</p>
+<p>调用<code>clone()</code>来克隆对象时需要调用到<code>Object.clone()</code>，所以子类重写<code>clone()</code>时，需要调用<code>super.clone()</code>。</p>
+<p>对象克隆分为<code>浅克隆</code>（或<code>浅复制</code>）和<code>深克隆</code>（或<code>深复制</code>），他们的区别就是会不会为引用类型成员变量调用<code>clone()</code>来生成新对象。</p>
+<p>由于<code>Object.clone()</code>方法是复制内存数据来克隆对象的，因此，同样可以使用Java序列化机制来复制内存数据达到克隆的效果，而且是<code>深克隆</code>。</p>
+<h1 id="强引用与弱引用"><a href="#强引用与弱引用" class="headerlink" title="强引用与弱引用"></a>强引用与弱引用</h1><p>在<code>java.lang.ref</code>包中存在三种类型的引用类，分别是<code>SoftReference</code>（软引用），<code>WeakReference</code>（弱引用），<code>PhantomReference</code>（虚引用），Java的引用类型除了这三个，还有一个就是强引用（即Java程序中使用等号赋值的引用），它们的级别由高到低分别为强引用、软引用、弱引用、虚引用，引用类型可以控制JVM回收对象的时机。</p>
+<p>如果一个对象存在强引用，就不会被回收；如果一个对象只存在软引用，当JVM内存不足时，就会被回收；如果一个对象只存在弱引用，当执行垃圾收集时就会被回收；如果一个对象只存在虚引用，任何时候都可能被回收。</p>
+<table>
+<thead>
+<tr>
+<th>引用类型</th>
+<th>回收时间</th>
+<th>用途</th>
+<th>生存时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>强引用</td>
+<td>从来不会</td>
+<td>对象的一般状态</td>
+<td>JVM停止运行时终止</td>
+</tr>
+<tr>
+<td>软引用</td>
+<td>内存不足时</td>
+<td>对象缓存</td>
+<td>内存不足时终止</td>
+</tr>
+<tr>
+<td>弱引用</td>
+<td>垃圾收集时</td>
+<td>对象缓存</td>
+<td>垃圾收集时终止</td>
+</tr>
+<tr>
+<td>虚引用</td>
+<td>Unknown</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+</tbody>
+</table>
+<h1 id="静态初始化和实例初始化"><a href="#静态初始化和实例初始化" class="headerlink" title="静态初始化和实例初始化"></a>静态初始化和实例初始化</h1><ul>
+<li><p>静态初始化</p>
+<p>静态初始化是指<code>&lt;cinit&gt;</code>方法的调用，该方法是编译器自动生成，代码由静态语句块和静态变量（或者类变量）组成。JVM会保证在调用某类的<code>&lt;cinit&gt;</code>方法时先调用其父类的<code>&lt;cinit&gt;</code>方法。<code>&lt;cinit&gt;</code>方法只会被JVM调用一次。</p>
+</li>
+<li><p>实例初始化</p>
+<p>实例创建的方式有：<code>new</code>、<code>Class.newInstance()</code>、<code>Constructor.newInstance()</code>、<code>Object.clone()</code>、<code>ObjectInputStream.readObject()</code>等，从Java虚拟机层面来说是两种：<code>new</code>、<code>invokevirtual</code>。</p>
+<p>实例初始化是指<code>&lt;init&gt;</code>方法的调用，该方法由构造函数、实例代码块和实力变量组成，<code>&lt;init&gt;</code>方法的第一行总是会调用父类的<code>&lt;init&gt;</code>方法。</p>
+</li>
+</ul>
+<h1 id="Java8新特性"><a href="#Java8新特性" class="headerlink" title="Java8新特性"></a>Java8新特性</h1><ul>
+<li><p>Lambda表达式和函数式接口</p>
+<p>Lambda表达式（也称为闭包）可以将函数作为参数传递，语法参考<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html#syntax" target="_blank" rel="noopener">Lambda Expression</a>；函数式接口指只有一个抽象方法的接口，可以使用<code>@FunctionalInterface</code>标记函数式接口，让编译器检查接口是否为有效的函数式接口。</p>
+<p>常用的函数接口有：<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html" target="_blank" rel="noopener">java.lang.Runnable</a>，<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Callable.html" target="_blank" rel="noopener">java.util.concurrent.Callable</a>，<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html" target="_blank" rel="noopener">java.util.function.Function</a>，<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Predicate.html" target="_blank" rel="noopener">java.util.function.Predicate</a>，<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html" target="_blank" rel="noopener">java.util.function.Supplier</a>，<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html" target="_blank" rel="noopener">java.util.function.Consumer</a></p>
+</li>
+<li><p>接口默认方法和静态方法</p>
+<p>接口的默认方法使用<code>default</code>修饰并且包括方法体，它不需要接口实现类实现，但可以重写；静态方法的语法同一般类的静态方法。</p>
+</li>
+<li><p>方法引用</p>
+<p>方法引用必须与Lambda表达式结合使用，不能直接将方法引用赋值给一个变量。方法引用的类型有：</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>引用静态方法</td>
+<td>ContainingClasss::staticMethodName</td>
+</tr>
+<tr>
+<td>引用实例方法</td>
+<td>containingObject::instanceMethodName</td>
+</tr>
+<tr>
+<td>引用任意类型的实例方法</td>
+<td>ContainingType::methodName</td>
+</tr>
+<tr>
+<td>引用构造器方法</td>
+<td>ClassName::new</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>重复注解</p>
+<p>可使用<code>@Repeatable</code>添加多个相同的注解</p>
+</li>
+<li><p>更好的类型推断</p>
+<p>编译器增强了类型推断功能，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Value</span>&lt; <span class="title">T</span> &gt; </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span>&lt; T &gt; <span class="function">T <span class="title">defaultValue</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>; </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">getOrDefault</span><span class="params">( T value, T defaultValue )</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> ( value != <span class="keyword">null</span> ) ? value : defaultValue;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TypeInference</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Value&lt; String &gt; value = <span class="keyword">new</span> Value&lt;&gt;();</span><br><span class="line">        value.getOrDefault( <span class="string">"22"</span>, Value.defaultValue() ); <span class="comment">// 这里不需要强制转换类型，编译器可以推断出来</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>拓宽注解应用场景</p>
+<p>Java8添加了<code>ElementType.TYPE_USER</code>和<code>ElementType.TYPE_PARAMETER</code>用来描述注解的使用场景。</p>
+</li>
+<li><p>参数名称</p>
+<p>当编译时加上<code>-parameters</code>参数时，编译器不会擦除方法的参数名称，此时可以使用<code>Parameter.getName()</code>获取参数名称。</p>
+</li>
+<li><p>Optional</p>
+<p>为了解决大量的<code>NullPointerException</code>添加了一个容器类型<code>Optional</code>，其常用方法如下：</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>isPresent()</td>
+<td>如果<code>Optional</code>实例持有一个非空值，该方法返回<code>true</code>，否则返回<code>false</code></td>
+</tr>
+<tr>
+<td>orElseGet()</td>
+<td>如果<code>Optional</code>实例持有一个空值，则返回lambda表达式的值，如：<code>name.orElseGet(() -&gt; &quot;anonymous&quot;)</code></td>
+</tr>
+<tr>
+<td>map()</td>
+<td>map()可以将现有的<code>Optional</code>实例转换为新值，如：<code>name.map(n -&gt; &#39;Hi &#39; + n + &quot;!&quot;).orElse(&quot;Hi Stranger!&quot;)</code></td>
+</tr>
+<tr>
+<td>orElse()</td>
+<td><code>orElse()</code>与<code>orElseGet()</code>类似，区别是<code>orElse()</code>参数为一个类型T，<code>orElseGet()</code>为一个lambda表达式。</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Streams</p>
+<p>Java8新增了Stream API，可以方便灵活处理容器的<code>filter</code>、<code>map</code>、<code>reduce</code>、<code>sort</code>等串行和并行的聚合操作，Stream由流管道组成，一个流管道由源数据（如数组和集合）、中间操作（产生新的stream对象）、终止操作（产生一个结果）详细参考<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html" target="_blank" rel="noopener">java.util.stream.Stream</a>。</p>
+</li>
+<li><p>Date/Time API</p>
+<p>时间支持以纳秒级表示。</p>
+</li>
+<li><p>Nashorn Javascript引擎</p>
+<p>添加了<code>jjs</code>来运行javascript代码文件，也可以运行javascript字符串格式，如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ScriptEngineManager manager = <span class="keyword">new</span> ScriptEngineManager();</span><br><span class="line">ScriptEngine engine = manager.getEngineByName( <span class="string">"JavaScript"</span> );</span><br><span class="line">        </span><br><span class="line">System.out.println( engine.getClass().getName() );</span><br><span class="line">System.out.println( <span class="string">"Result:"</span> + engine.eval( <span class="string">"function f() &#123; return 1; &#125;; f() + 1;"</span> ) );</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Base64</p>
+<p>添加了<code>java.util.Base64</code>，支持<code>Base64</code>功能。</p>
+</li>
+<li><p>并行数组</p>
+<p>可支持并行数组处理，如<code>Arrays.parallelSetAll()</code>、<code>Arrays.parallelSort()</code>。</p>
+</li>
+<li><p>并发性</p>
+<p>改进了<code>java.util.concurrent.ConcurrentHashMap</code>，添加了<code>java.util.concurrent.locks.StampedLock</code>替代<code>java.util.concurrent.locks.ReadWriteLock</code>。</p>
+</li>
+<li><p>JVM新特性</p>
+<p>使用Metaspace替代PermGen Space，G1垃圾收集器作为默认收集器。</p>
+</li>
+</ul>
+<h1 id="序列化与反序列化"><a href="#序列化与反序列化" class="headerlink" title="序列化与反序列化"></a>序列化与反序列化</h1><p>序列化与反序列化的作用是运行允许对象的数据通过一个JVM进程传到另一个JVM进程。Java世界里可以分为JDK序列化（或称内部序列化）和外部序列化。选择序列化工具时，需要考虑前后兼容问题和序列化效率问题。向前兼容的意思是指旧代码可以反序列化新代码序列化的记录，向后兼容是指新代码可以反序列化旧代码序列化的记录。序列化效率问题指序列化后的字节大小，越小效率越高。</p>
+<h2 id="JDK序列化"><a href="#JDK序列化" class="headerlink" title="JDK序列化"></a>JDK序列化</h2><p>JDK序列化规则：</p>
+<ul>
+<li>类实现了<code>java.io.Serializable</code>接口时，其对象就可以序列化；</li>
+<li><code>java.io.Externalizable</code>优先级高于<code>java.io.Serializable</code>，</li>
+<li>对象序列化不会关注类中的静态变量，被<code>transient</code>修饰的变量不会被序列化存储，当反序列化时需要负责初始化<code>transient</code>变量，比如<a href="https://hg.openjdk.java.net/jdk8/jdk8/jdk/file/tip/src/share/classes/java/util/ArrayList.java" target="_blank" rel="noopener">java.util.ArrayList</a>对成员变量<code>elementData</code>的初始化工作；</li>
+<li><code>java.io.ObjectInputStream</code>处理反序列化工作；</li>
+<li><code>java.io.ObjectOutputStream</code>处理序列化工作；</li>
+<li>自定义反序列化的方式是通过定义<code>readObject(ObjectInputStream in)</code>；</li>
+<li>自定义序列化的方式是通过定义<code>writeObject(ObjectOutputSteam out)</code>；</li>
+<li><code>serialVersionUID</code>控制对象序列化和反序列化的版本是否兼容，缺省时编译器会自动生成，只要类改变，即便是方法体少了一行代码，<code>serialVersionUID</code>都会变化；</li>
+<li>对象序列化为字节数组时，类名和字段名都会保留，当反序列化时，不允许少字段，可以多字段；</li>
+</ul>
+<p><code>serialVersionUID</code>是唯一控制着能否反序列化成功的标志，只要这个值不一样，就无法反序列化成功。但只要这个值相同，无论如何都将反序列化，在这个过程中，对于向前兼容性，新数据流中的多余的内容将会被忽略；对于向后兼容性而言，旧的数据流中所包含的所有内容都将会被恢复，新版本的类中没有涉及到的部分将保持默认值。一旦将新版本中的老的内容拿掉，即使UID保持不变，也会引发异常。比如当我们重写<code>writeObject</code>和<code>readObject</code>时，写入或读取的字段是按照顺序操作，一旦顺序更改，反序列化失败。因此可以总结为只要新版本不减少字段，不更改字段类型，仅增加字段，JDK序列化支持前后兼容。</p>
+<p>由于JDK序列化时需要将类名，字段名写入到序列化结果中，因此序列化效率不高。</p>
+<h2 id="其他序列化工具"><a href="#其他序列化工具" class="headerlink" title="其他序列化工具"></a>其他序列化工具</h2><p>Thrift、Protobuf、Avro在序列化效率上远高于JDK序列化，它们只需要写入字段序号、用特定的位来表示类型，前后兼容略灵活<a href="https://vonng.gitbooks.io/ddia-cn/content/ch4.html" target="_blank" rel="noopener"> [2] </a>。</p>
+<h1 id="反射"><a href="#反射" class="headerlink" title="反射"></a>反射</h1><p>反射机制是程序可以在运行时获取类型或者实例或类的字段描述信息和方法描述信息，然后进行字段的<code>get/set</code>操作以及方法的调用。通过反射可以获取对象字段的值，也可以使用<code>sun.misc.Unsafe</code>来快速读取对象的字段值。</p>
+<p>以反射调用<code>Object.hashCode</code>方法为例，叙述反射的原理，样例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Object o = <span class="keyword">new</span> Object();</span><br><span class="line">Class clazz = o.getClass();</span><br><span class="line">Method hashCode = clazz.getMethod(<span class="string">"hashCode"</span>, <span class="keyword">null</span>);</span><br><span class="line">System.out.println(hashCode.invoke(o, <span class="keyword">null</span>));</span><br></pre></td></tr></table></figure>
+<p>要通过反射获取对象的方法或者字段，首先需要获取Class对象。在静态编码情况下，可以确定Class对象，比如样例代码第二行，可以直接写成<code>Class clazz = Object.class</code>，当在运行时情况下，可以通过调用对象的<code>getClass</code>方法获取对象的Class对象。<code>getClass</code>方法在<code>Object</code>类中声明，方法签名如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> Class&lt;?&gt; getClass();</span><br></pre></td></tr></table></figure>
+<p><code>getClass</code>方法是本地方法，由C++来实现，C++方法定义在<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/java/lang/Object.c" target="_blank" rel="noopener">Object.c</a>文件中，方法定义如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">JNIEXPORT jclass JNICALL</span><br><span class="line">Java_java_lang_Object_getClass(JNIEnv *env, jobject <span class="keyword">this</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        JNU_ThrowNullPointerException(env, <span class="literal">NULL</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (*env)-&gt;GetObjectClass(env, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>GetObjectClass</code>方法的核心代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">klassOop k = JNIHandles::resolve_non_null(obj)-&gt;klass();</span><br><span class="line">jclass ret =</span><br><span class="line">  (jclass) JNIHandles::make_local(env, Klass::cast(k)-&gt;java_mirror());</span><br></pre></td></tr></table></figure>
+<p>指向对象的指针称为<code>Ordinary Object Pointer</code>(OOP)，Java实例对象使用C++中的<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/oop.hpp" target="_blank" rel="noopener">oopDesc</a>来表示，<code>oop</code>就是指向<code>oopDesc</code>类型的指针。在JVM中，Java对象的头部由下列两个字段组成：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> markOop  _mark;</span><br><span class="line">  <span class="keyword">union</span> _metadata &#123;</span><br><span class="line">    wideKlassOop    _klass;</span><br><span class="line">    narrowOop       _compressed_klass;</span><br><span class="line">  &#125; _metadata;</span><br></pre></td></tr></table></figure>
+<p><code>_metadata</code>就是指向实例对象的<code>java.lang.Class</code>的对象，对应C++中的<code>klassOop</code>。<code>JNIHandles::resolve_non_null(obj)-&gt;klass()</code>就是要获取<code>_metadata</code>的<code>klassOop</code>对象，它指向方法区中的类实例对象，类实例对象就是<code>Class</code>对象。所以<code>o.getClass()</code>方法的原理就是<code>o</code>对象存在指向类实例对象的引用，通过该引用可以获取<code>o</code>对象的<code>Class</code>对象。</p>
+<p>获得了<code>Class</code>对象，就可以通过<code>getMethod</code>获得<code>Method</code>方法引用。<code>getMethod</code>的调用链为<code>Class.getMethod</code>-&gt;<code>Class.getMethod0</code>-&gt;<code>Class.privateGetMethodRecursive</code>-&gt;<code>Class.privateGetDeclaredMethods</code>-&gt;<code>Class.searchMethods</code>。在<code>privateGetDeclaredMethods</code>方法中使用了一个重要的字段，<code>private volatile transient SoftReference&lt;ReflectionData&lt;T&gt;&gt; reflectionData</code>，<code>ReflectionData</code>是<code>Class</code>的内部类，定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectionData</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">volatile</span> Field[] declaredFields;</span><br><span class="line">    <span class="keyword">volatile</span> Field[] publicFields;</span><br><span class="line">    <span class="keyword">volatile</span> Method[] declaredMethods;</span><br><span class="line">    <span class="keyword">volatile</span> Method[] publicMethods;</span><br><span class="line">    <span class="keyword">volatile</span> Constructor&lt;T&gt;[] declaredConstructors;</span><br><span class="line">    <span class="keyword">volatile</span> Constructor&lt;T&gt;[] publicConstructors;</span><br><span class="line">    <span class="comment">// Intermediate results for getFields and getMethods</span></span><br><span class="line">    <span class="keyword">volatile</span> Field[] declaredPublicFields;</span><br><span class="line">    <span class="keyword">volatile</span> Method[] declaredPublicMethods;</span><br><span class="line">    <span class="keyword">volatile</span> Class&lt;?&gt;[] interfaces;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Value of classRedefinedCount when we created this ReflectionData instance</span></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> redefinedCount;</span><br><span class="line"></span><br><span class="line">    ReflectionData(<span class="keyword">int</span> redefinedCount) &#123;</span><br><span class="line">        <span class="keyword">this</span>.redefinedCount = redefinedCount;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，<code>reflectionData</code>字段是软引用，而<code>reflectionData</code>指向的<code>ReflectionData</code>实例对象在内存使用苛刻时就会被GC回收。因此，在获取类对象的方法或者字段时，都需要判断<code>reflectionData</code>执行的对象是否为<code>null</code>，如果为<code>null</code>，表示被回收，需要重新创建，然后通过<code>Atomic.casReflectionData(this, oldReflectionData, new SoftReference&lt;&gt;(rd))</code>（CAS操作）设置<code>reflectionData</code>字段。其次，<code>privateGetDeclaredMethods</code>会判断<code>ReflectionData</code>对象的<code>declaredPublicMethods</code>或者<code>declaredMethods</code>字段是否为<code>null</code>，如果为<code>null</code>，表示还未获取类对象的方法，需要调用<code>getDeclaredMethods0</code>方法获取类对象的方法，并设置到<code>ReflectionData</code>对象的<code>declaredPublicMethods</code>或者<code>declaredMethods</code>字段。</p>
+<p>通过<code>privateGetDeclaredMethods</code>方法可以获取到类实例的方法表，接下来通过<code>searchMethods</code>搜索需要获取的方法，该方法定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Method <span class="title">searchMethods</span><span class="params">(Method[] methods,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    String name,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    Class&lt;?&gt;[] parameterTypes)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Method res = <span class="keyword">null</span>;</span><br><span class="line">    String internedName = name.intern();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; methods.length; i++) &#123;</span><br><span class="line">        Method m = methods[i];</span><br><span class="line">        <span class="keyword">if</span> (m.getName() == internedName</span><br><span class="line">            &amp;&amp; arrayContentsEq(parameterTypes, m.getParameterTypes())</span><br><span class="line">            &amp;&amp; (res == <span class="keyword">null</span></span><br><span class="line">                || res.getReturnType().isAssignableFrom(m.getReturnType())))</span><br><span class="line">            res = m;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (res == <span class="keyword">null</span> ? res : getReflectionFactory().copyMethod(res));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>searchMethods</code>方法首先迭代<code>Method[]</code>方法表，如果期望的<code>Method</code>方法被找到，需要将<code>Method</code>方法复制一份，然后返回给样例代码中的<code>hashcode</code>变量。复制的实现方法<code>copy</code>定义在<code>Method.java</code>中。由此可见，每次通过调用<code>getMethod</code>方法返回的Method对象其实都是一个新的对象，如果调用频繁最好缓存起来。</p>
+<p>获取到<code>Method</code>对象后，接下来就是调用<code>invoke</code>方法，与<code>invoke</code>方法相关的字段和方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Method              root;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> MethodAccessor methodAccessor;</span><br><span class="line"><span class="meta">@CallerSensitive</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object obj, Object... args)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> IllegalAccessException, IllegalArgumentException,</span></span><br><span class="line"><span class="function">       InvocationTargetException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!override) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!Reflection.quickCheckMemberAccess(clazz, modifiers)) &#123;</span><br><span class="line">            Class&lt;?&gt; caller = Reflection.getCallerClass();</span><br><span class="line">            checkAccess(caller, clazz, obj, modifiers);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    MethodAccessor ma = methodAccessor;             <span class="comment">// read volatile</span></span><br><span class="line">    <span class="keyword">if</span> (ma == <span class="keyword">null</span>) &#123;</span><br><span class="line">        ma = acquireMethodAccessor();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ma.invoke(obj, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>root</code>字段指向<code>ReflectionData</code>对象中方法表的某个<code>Method</code>实例（因为获得的<code>Method</code>对象是从<code>ReflectionData</code>复制而来，所以<code>root</code>保留了被复制的对象或者说原对象）。<code>Method.invoke</code>方法调用<code>methodAccessor</code>的<code>invoke</code>方法。如果<code>root</code>的<code>methodAccessor</code>存在，则赋值给<code>methodAccessor</code>这个属性，否则就创建一个。<code>MethodAccessor</code>本身就是一个接口，其主要有三种实现</p>
+<ul>
+<li>DelegatingMethodAccessorImpl</li>
+<li>NativeMethodAccessorImpl</li>
+<li>GeneratedMethodAccessorXXX</li>
+</ul>
+<p><code>Method</code>的<code>methodAccessor</code>的对象类型就是<code>DelegatingMethodAccessorImpl</code>，也就是某个<code>Method</code>的所有的<code>invoke</code>方法都会调用到这个<code>DelegatingMethodAccessorImpl.invoke</code>，正如其名一样的，是做代理的，也就是真正的实现可以是<code>NativeMethodAccessorImpl</code>和<code>GeneratedMethodAccessorXXX</code>两种。如果是<code>NativeMethodAccessorImpl</code>，顾名思义，由本地代码C++实现，而<code>GeneratedMethodAccessorXXX</code>是为每个需要反射调用的<code>Method</code>动态生成的类，后缀XXX是一个不断递增的数值。并且所有的方法反射都是先走<code>NativeMethodAccessorImpl</code>，默认调了15次之后，才生成一个<code>GeneratedMethodAccessorXXX</code>类，生成好之后就会走这个生成的类的<code>invoke</code>方法。<code>NativeMethodAccessorImpl</code>的<code>invoke</code>方法定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object obj, Object[] args)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> IllegalArgumentException, InvocationTargetException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (++numInvocations &gt; ReflectionFactory.inflationThreshold()) &#123;</span><br><span class="line">        MethodAccessorImpl acc = (MethodAccessorImpl)</span><br><span class="line">            <span class="keyword">new</span> MethodAccessorGenerator().</span><br><span class="line">                generateMethod(method.getDeclaringClass(),</span><br><span class="line">                               method.getName(),</span><br><span class="line">                               method.getParameterTypes(),</span><br><span class="line">                               method.getReturnType(),</span><br><span class="line">                               method.getExceptionTypes(),</span><br><span class="line">                               method.getModifiers());</span><br><span class="line">        parent.setDelegate(acc);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> invoke0(method, obj, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>generateMethod</code>会生成一个<code>GeneratedMethodAccessorXXX</code>实例，它的<code>invoke</code>方法就是调用样例代码中的<code>o.hashCode()</code>。通过字节码直接调用对象的方法，称为Java字节码拼接技术，用来在运行时生成Java类。<a href="http://www.javassist.org/" target="_blank" rel="noopener">javassist</a>和<a href="https://github.com/cglib/cglib" target="_blank" rel="noopener">cglib</a>都是基于字节码拼接技术实现，在<code>Spring</code>中就是使用<code>cglib</code>来动态的生成代理类，实现<code>AOP</code>功能。<code>GeneratedMethodAccessorXXX</code>的类加载器是一个<code>DelegatingClassLoader</code>类加载器，使用新的类加载器是为了性能考虑，在某些情况下可以卸载这些生成的类。<code>invoke0</code>方法是本地方法，由C实现，方法定义在<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/jdk/src/share/native/sun/reflect/NativeAccessors.c" target="_blank" rel="noopener">NativeAccessors.c</a>如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">JNIEXPORT jobject JNICALL Java_sun_reflect_NativeMethodAccessorImpl_invoke0</span><br><span class="line">(JNIEnv *env, jclass unused, jobject m, jobject obj, jobjectArray args)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> JVM_InvokeMethod(env, m, obj, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际方法调用交给JVM执行即可。</p>
+<p>当执行命令<code>java JavaApplication</code>时，JVM内部也是通过反射获取<code>JavaApplication</code>的<code>main</code>方法的<code>Method</code>对象，然后调用<code>Method.invoke</code>方法执行<code>main</code>方法的代码。</p>
+<p>对反射使用不当，会造成反射类加载器导致Perm溢出<a href="https://mp.weixin.qq.com/s/5H6UHcP6kvR2X5hTj_SBjA" target="_blank" rel="noopener"> [3] </a>。</p>
+<h1 id="Statement和PreparedStatement的区别，如何防止SQL注入"><a href="#Statement和PreparedStatement的区别，如何防止SQL注入" class="headerlink" title="Statement和PreparedStatement的区别，如何防止SQL注入"></a>Statement和PreparedStatement的区别，如何防止SQL注入</h1><p>JDBC执行SQL语句可以使用三个类，分别是<code>Statement</code>、<code>PreparedStatement</code>、<code>CallableStatement</code>，描述如下表：</p>
+<table>
+<thead>
+<tr>
+<th>类名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Statement</td>
+<td>通用查询</td>
+</tr>
+<tr>
+<td>PreparedStatemnt</td>
+<td>预编译语句查询，可以解决SQL注入问题，由于是预编译，所以可以减少数据库对SQL代码的解析操作，提高效率</td>
+</tr>
+<tr>
+<td>CallableStatement</td>
+<td>存储过程查询</td>
+</tr>
+</tbody>
+</table>
+<h1 id="Java命令"><a href="#Java命令" class="headerlink" title="Java命令"></a>Java命令</h1><ul>
+<li><p>java</p>
+<p>启动JVM运行Java字节码的工具；</p>
+</li>
+<li><p>javac</p>
+<p>编译Java代码的工具，或者称为java编译器（javac就是java compiler的缩写）；</p>
+</li>
+<li><p>jar</p>
+<p>操作jar文件的工具；</p>
+</li>
+<li><p>jdb</p>
+<p>java调试器工具，作用和用法与gnu的gdb类似；</p>
+</li>
+<li><p>javah</p>
+<p>开发JNI时使用的工具，它可以根据Java代码声明的<code>native</code>方法自动生成C的头文件；</p>
+</li>
+<li><p>javap</p>
+<p>java字节码反编译工具；</p>
+</li>
+<li><p>jps</p>
+<p>Java Virtual Machine Process Status Tool，用来查看java虚拟机进程状态；</p>
+</li>
+<li><p>jjs</p>
+<p>运行javascript代码的工具；</p>
+</li>
+<li><p>jdeps</p>
+<p>分析java依赖的工具；</p>
+</li>
+<li><p>jinfo</p>
+<p>查看JVM配置信息的工具；</p>
+</li>
+<li><p>jstack</p>
+<p>查看JVM线程栈工具；</p>
+</li>
+<li><p>jmap</p>
+<p>导出JVM内存的工具；</p>
+</li>
+<li><p>jhat</p>
+<p>分析jmap导出的文件的工具；</p>
+</li>
+<li><p>jconsole</p>
+<p>查看虚拟机内存、线程等信息的工具；</p>
+</li>
+<li><p>jvisualvm</p>
+<p>jconsole的增强工具；</p>
+</li>
+<li><p>javadoc</p>
+<p>生成java api文档的工具；</p>
+</li>
+<li><p>keytool</p>
+<p>操作RSA或者证书相关的工具；</p>
+</li>
+<li><p>rmiregistry</p>
+<p>RMI相关工具。</p>
+</li>
+</ul>
+<p>详细见<a href="https://docs.oracle.com/javase/7/docs/technotes/tools/index.html" target="_blank" rel="noopener">JDK Tools and Utilities</a>。</p>
+<h1 id="NoClassDefFoundError和ClassNotFoundException"><a href="#NoClassDefFoundError和ClassNotFoundException" class="headerlink" title="NoClassDefFoundError和ClassNotFoundException"></a>NoClassDefFoundError和ClassNotFoundException</h1><p><code>NoClassDefFoundError</code>和<code>ClassNotFoundException</code>都是由于在<code>CLASSPATH</code>下找不到对应的类而引起的，通常是缺少对应的jar包或者jar包冲突导致，具体如下：</p>
+<ul>
+<li><code>ClassNotFoundException</code>是在代码中显示调用加载类的方法导致，如<code>Class.forName</code>、<code>ClassLoader.findSystemClass()</code>和<code>ClassLoader.loadClass()</code>等；</li>
+<li><code>NoClassDefFoundError</code>是JVM链接时找不到类时抛出的错误，如<code>new</code>一个实例或者调用静态方法等。</li>
+</ul>
+<p>可以简言之：如果找不到类要抛异常时，ClassNotFoundException是类名作为字符串，而NoClassDefFoundError是类名作为符号。</p>
+<h1 id="方法动态绑定原理"><a href="#方法动态绑定原理" class="headerlink" title="方法动态绑定原理"></a>方法动态绑定原理</h1><p>在Java中， <code>final</code>，<code>static</code>，<code>private</code>以及构造方法与类的绑定关系是在编译期确定，称之为“前期绑定”或者“静态绑定”，对于实例“静态绑定”的方法，采用<code>invokespecial</code>指令调用。对于其他实例方法，则需要在运行时根据对象类型再行决议，我们称之为“后期绑定”或“动态绑定”，采用<code>invokevirtual</code>指令调用方法。</p>
+<p>以下列代码为例，叙述方法动态绑定原理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VtableExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">int</span> i = <span class="number">1</span>;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Father</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            print();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"i="</span> + i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">int</span> i = <span class="number">2</span>;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Son</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"i="</span> + i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Father fa = <span class="keyword">new</span> Son();</span><br><span class="line">        fa.print();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码的输出结果为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">i=0</span><br><span class="line">i=2</span><br></pre></td></tr></table></figure>
+<p>Java方法的动态绑定原理源自C++的虚方法调用，使用一张虚方法表<code>vtable</code>来控制方法调用，所不同的是C++在编译时就创建了类的虚方法表，而Java在运行时加载类才创建虚方法表。</p>
+<p>当第一次加载类时，JVM会调用<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/classfile/classFileParser.cpp" target="_blank" rel="noopener">classFileParser.cpp::parseClassFile()</a>函数对类的字节码解析，调用<code>parseMethods()</code>函数解析类的所有方法，之后再调用<code>klassVtable::compute_vtable_size_and_num_mirandas()</code>函数计算当前类的<code>vtable</code>大小。计算<code>vtable</code>大小的过程是首先获取父类的<code>vtable</code>大小，再循环当前类的方法，调用<code>needs_new_vtable_entry</code>方法判断方法是否需要加入到<code>vtable</code>（如果方法被声明为<code>public</code>或者<code>protected</code>且不是<code>static</code>或者<code>final</code>时，称此方法为虚方法，此时该方法返回<code>true</code>），如果返回true，则<code>vtable</code>大小加1。当类解析完成后，就需要调用<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlassKlass.cpp" target="_blank" rel="noopener">InstanceKlass::allocate_instance_klass()</a>方法分配内存，存储类信息，这些信息就包括<code>vtable</code>大小。当类信息创建完成后就可以准备方法调用了。在执行真正的方法调用前，需要调用<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/instanceKlass.cpp" target="_blank" rel="noopener">instanceKlass::link_class</a>进行方法链接，此时将会初始化虚方法表。初始化虚方法表的方法在<code>instanceKlass::link_class_impl</code>中执行，代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Initialize the vtable and interface table after</span></span><br><span class="line"><span class="comment">// methods have been rewritten since rewrite may</span></span><br><span class="line"><span class="comment">// fabricate new methodOops.</span></span><br><span class="line"><span class="comment">// also does loader constraint checking</span></span><br><span class="line"><span class="keyword">if</span> (!this_oop()-&gt;is_shared()) &#123;</span><br><span class="line">  <span class="function">ResourceMark <span class="title">rm</span><span class="params">(THREAD)</span></span>;</span><br><span class="line">  this_oop-&gt;vtable()-&gt;initialize_vtable(<span class="literal">true</span>, CHECK_false);</span><br><span class="line">  this_oop-&gt;itable()-&gt;initialize_itable(<span class="literal">true</span>, CHECK_false);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/klassVtable.cpp" target="_blank" rel="noopener">initialize_vtable</a>方法中，先复制父类的虚方法表到当前类的虚方法表。然后在<code>update_inherited_vtable</code>方法中将子类重写的方法入口地址通过<code>klassVtable::put_method_at(Method* m, int index)</code>方法写回到虚方法表中，以替换父类方法地址。如果不是重写父类的虚方法，需要在虚方法表中插入一个新元素。</p>
+<p>当执行<code>invokevirtual</code>调用虚方法时，由<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/interpreter/linkResolver.cpp" target="_blank" rel="noopener">LinkResolver::resolve_invoke</a>完成解析任务，该方法定义如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> LinkResolver::resolve_invoke(CallInfo&amp; result, Handle recv, constantPoolHandle pool, <span class="keyword">int</span> index, Bytecodes::Code byte, TRAPS) &#123;</span><br><span class="line">  <span class="keyword">switch</span> (byte) &#123;</span><br><span class="line">    <span class="keyword">case</span> Bytecodes::_invokestatic   : resolve_invokestatic   (result,       pool, index, CHECK); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Bytecodes::_invokespecial  : resolve_invokespecial  (result,       pool, index, CHECK); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Bytecodes::_invokevirtual  : resolve_invokevirtual  (result, recv, pool, index, CHECK); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Bytecodes::_invokehandle   : resolve_invokehandle   (result,       pool, index, CHECK); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Bytecodes::_invokedynamic  : resolve_invokedynamic  (result,       pool, index, CHECK); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Bytecodes::_invokeinterface: resolve_invokeinterface(result, recv, pool, index, CHECK); <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在样例代码中，当执行<code>new Son()</code>时，先创建<code>Father</code>的虚方法表，假设<code>print</code>方法在虚方法表位置为<code>n</code>，父类初始化完成后，开始初始化子类<code>Son</code>，然后创建<code>Son</code>的虚方法表。创建<code>Son</code>的虚方法表时，先将父类的虚方法表复制到子类的虚方法表中，此时子类虚方法表位置为<code>n</code>的方法是<code>Father.print</code>。当执行<code>update_inherited_vtable</code>方法时会将子类的<code>print</code>方法入口写入到虚方法表位置为<code>n</code>的地方，此时虚方法表位置为<code>n</code>的方法是<code>Son.print</code>。所有类信息构造完成后，开始执行<code>Son</code>的构造函数，它首先调用<code>Father</code>的构造函数，在此函数中，会调用<code>print</code>方法，实际上是<code>invokevirtual print</code>指令。通过<code>instanceKlass::uncached_lookup_method</code>方法在<code>Father</code>类中查询<code>print</code>方法，可以找到该方法，该方法使用<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/methodOop.cpp" target="_blank" rel="noopener">methodOopDesc*</a>表示，即<code>methodOop</code>指针，指向<code>Father.print</code>，它记录了通过<code>klassVtable::put_method_at(Method* m, int index)</code>放入虚方法表的位置<code>n</code>。然后在<code>LinkResolver::runtime_resolve_virtual_method</code>方法中通过位置<code>n</code>在<code>Son</code>的虚方法表中找到真正要执行的方法，即<code>Son.print</code>。最后调用<code>Son.print</code>方法。</p>
+<h1 id="异常处理原理"><a href="#异常处理原理" class="headerlink" title="异常处理原理"></a>异常处理原理</h1><p>当使用<code>javac</code>编译java源码时，会为方法内的<code>try/catch/finally</code>语句块生成一个异常表（<code>exception_table</code>），异常表指定了当出现异常时代码需要跳转到何处执行<a href="[https://blog.takipi.com/the-surprising-truth-of-java-exceptions-what-is-really-going-on-under-the-hood/"> [4] </a>。</p>
+<p>以如下代码为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> Exception();</span><br><span class="line">      &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">          System.out.print(<span class="string">"Caught!"</span>);</span><br><span class="line">      &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">          System.out.print(<span class="string">"Finally!"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>当使用<code>javac</code>编译时，会生成如下字节码(<code>javap</code>)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> 0: new           #17                 // class java/lang/Exception</span><br><span class="line"> 3: dup</span><br><span class="line"> 4: invokespecial #19                 // Method java/lang/Exception.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line"> 7: athrow</span><br><span class="line"> 8: astore_1</span><br><span class="line"> 9: getstatic     #20                 // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">12: ldc           #26                 // String Caught!</span><br><span class="line">14: invokevirtual #28                 // Method java/io/PrintStream.print:(Ljava/lang/String;)V</span><br><span class="line">17: getstatic     #20                 // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">20: ldc           #34                 // String Finally!</span><br><span class="line">22: invokevirtual #28                 // Method java/io/PrintStream.print:(Ljava/lang/String;)V</span><br><span class="line">25: goto          39</span><br><span class="line">28: astore_2</span><br><span class="line">29: getstatic     #20                 // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">32: ldc           #34                 // String Finally!</span><br><span class="line">34: invokevirtual #28                 // Method java/io/PrintStream.print:(Ljava/lang/String;)V</span><br><span class="line">37: aload_2</span><br><span class="line">38: athrow</span><br><span class="line">39: return</span><br></pre></td></tr></table></figure>
+<p>异常表内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">from  to  target type</span><br><span class="line">0     8     8   Class java/lang/Exception</span><br><span class="line">0    17    28   any</span><br></pre></td></tr></table></figure>
+<p>异常表的内容由四部分组成：</p>
+<ul>
+<li>from 抛出异常的开始行</li>
+<li>to 抛出异常的结束行</li>
+<li>target 需要跳转的行</li>
+<li>type 异常类型</li>
+</ul>
+<p>异常表内容的第一行表示如果在第0行（此处的行指程序地址，比如第3行是指程序地址为3的指令，即<code>dup</code>）和第8行抛出<code>java.lang.Exception</code>异常时，跳转到第8行执行代码。如果在第0行和第17号抛出代码时，跳转到第28行执行代码。如果当前方法未找到合适的异常处理器时，当前方法弹栈，交给栈顶方法处理。如果线程栈方法全部弹出也未找到异常处理器，则线程结束。</p>
+<h1 id="泛型原理"><a href="#泛型原理" class="headerlink" title="泛型原理"></a>泛型原理</h1><p>泛型可以对类和接口的类型参数化，使用比较多的是容器类，比如<code>List&lt;String&gt;</code>就是将<code>List</code>的元素参数化为<code>String</code>。使用泛型的作用有：</p>
+<ul>
+<li>编译器强类型检查</li>
+<li>去掉强制类型转换的代码</li>
+<li>支持泛型算法的实现</li>
+</ul>
+<p>类型参数的命名习惯如下：</p>
+<ul>
+<li>E - Element (used extensively by the Java Collections Framework)</li>
+<li>K - Key</li>
+<li>N - Number</li>
+<li>T - Type</li>
+<li>V - Value</li>
+<li>S,U,V etc. - 2nd, 3rd, 4th types</li>
+</ul>
+<p>泛型示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Generic</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> T t;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Generic&lt;String&gt; g = <span class="keyword">new</span> Generic&lt;String&gt;();</span><br><span class="line">        g.t = <span class="string">"Hello"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译上述代码，然后反编译后得到如下信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">public class Generic&lt;T extends java.lang.Object&gt; extends java.lang.Object</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line">   #1 = Methodref          #6.#20         // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 = Class              #21            // Generic</span><br><span class="line">   #3 = Methodref          #2.#20         // Generic.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #4 = String             #22            // Hello</span><br><span class="line">   #5 = Fieldref           #2.#23         // Generic.t:Ljava/lang/Object;</span><br><span class="line">   #6 = Class              #24            // java/lang/Object</span><br><span class="line">   ...</span><br><span class="line">&#123;</span><br><span class="line">  public Generic();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 1: 0</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=2, args_size=1</span><br><span class="line">         0: new           #2                  // class Generic</span><br><span class="line">         3: dup</span><br><span class="line">         4: invokespecial #3                  // Method &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         7: astore_1</span><br><span class="line">         8: aload_1</span><br><span class="line">         9: ldc           #4                  // String Hello</span><br><span class="line">        11: putfield      #5                  // Field t:Ljava/lang/Object;</span><br><span class="line">        14: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从反编译代码中可以看到，字段<code>t</code>的类型是<code>Object</code>，而代码<code>Generic&lt;String&gt; g = new Generic&lt;String&gt;();</code>的泛型信息被擦除，变为<code>Generic g = new Generic();</code>，此时已经看不到泛型信息。对于类型元信息，即类、字段和方法（包括参数和返回值）不会擦除泛型信息，因此可以通过反射来获取泛型信息。上述代码<code>Generic&lt;T&gt;</code>变编译后，泛型信息是<code>Generic&lt;T extends java.lang.Object&gt;</code>，而变量<code>g</code>由于泛型类型被擦除，无法通过反射获取其泛型类型。可以通过<code>new Generic&lt;String&gt;(){}</code>构造一个子类，此时可以通过反射获取泛型信息。这种方式使用的比较多的是在json解析中，当要解析一串json文本为带有泛型的类型时使用如fastjson的用法<code>JSONObject.parseObject(json, new TypeReference&lt;List&lt;Person&gt;&gt;(){})</code>。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-basic/" title="Java后端开发 - 基础" target="_blank" rel="external">https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-basic/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2018/10/13/java-programmer-knowledge-container-class/" title="Java后端开发 - 容器类"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2018/07/12/java-programmer-knowledge/" title="Java后端开发"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Java后端开发 - 线程 | 海东青</title>
+  <meta name="description" content="线程生命周期  Thread.threadStatus变量记录了线程状态，包括是否处于等待监视锁，是否处于等待Object.wait()，可选的值如下： 12345678910111213141516171819// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.henum">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java后端开发 - 线程">
+<meta property="og:url" content="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-thread/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="线程生命周期  Thread.threadStatus变量记录了线程状态，包括是否处于等待监视锁，是否处于等待Object.wait()，可选的值如下： 12345678910111213141516171819// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.henum">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://i.stack.imgur.com/FTHOR.png">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.364Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java后端开发 - 线程">
+<meta name="twitter:description" content="线程生命周期  Thread.threadStatus变量记录了线程状态，包括是否处于等待监视锁，是否处于等待Object.wait()，可选的值如下： 12345678910111213141516171819// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.henum">
+<meta name="twitter:image" content="https://i.stack.imgur.com/FTHOR.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-thread/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#线程生命周期"><span class="toc-number">1.</span> <span class="toc-text">线程生命周期</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#wait-、sleep-、notify-区别"><span class="toc-number">2.</span> <span class="toc-text">wait()、sleep()、notify()区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ThreadPoolExecutor原理"><span class="toc-number">3.</span> <span class="toc-text">ThreadPoolExecutor原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ThreadLocal实现方式"><span class="toc-number">4.</span> <span class="toc-text">ThreadLocal实现方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#中断机制"><span class="toc-number">5.</span> <span class="toc-text">中断机制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#活跃性"><span class="toc-number">6.</span> <span class="toc-text">活跃性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#协程"><span class="toc-number">7.</span> <span class="toc-text">协程</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-java-programmer-knowledge-thread" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java后端开发 - 线程
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2018/10/13/java-programmer-knowledge-thread/" class="article-date">
+	  <time datetime="2018-10-13T00:14:49.000Z" itemprop="datePublished">2018-10-13</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/java/">java</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/10/13/java-programmer-knowledge-thread/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="线程生命周期"><a href="#线程生命周期" class="headerlink" title="线程生命周期"></a>线程生命周期</h1><p>  <code>Thread.threadStatus</code>变量记录了线程状态，包括是否处于等待监视锁，是否处于等待<code>Object.wait()</code>，可选的值如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.h</span></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    JVMTI_THREAD_STATE_ALIVE = <span class="number">0x0001</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_TERMINATED = <span class="number">0x0002</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_RUNNABLE = <span class="number">0x0004</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER = <span class="number">0x0400</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_WAITING = <span class="number">0x0080</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_WAITING_INDEFINITELY = <span class="number">0x0010</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT = <span class="number">0x0020</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_SLEEPING = <span class="number">0x0040</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_IN_OBJECT_WAIT = <span class="number">0x0100</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_PARKED = <span class="number">0x0200</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_SUSPENDED = <span class="number">0x100000</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_INTERRUPTED = <span class="number">0x200000</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_IN_NATIVE = <span class="number">0x400000</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_VENDOR_1 = <span class="number">0x10000000</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_VENDOR_2 = <span class="number">0x20000000</span>,</span><br><span class="line">    JVMTI_THREAD_STATE_VENDOR_3 = <span class="number">0x40000000</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>Thread.threadStatus</code>与<code>Thread.State</code>的转换规则如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://github.com/stltqhs/openjdk/blob/jdk7u/jdk7u/jdk/src/share/javavm/export/jvmti.h</span></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_MASK = JVMTI_THREAD_STATE_TERMINATED | JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_RUNNABLE | JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER | JVMTI_THREAD_STATE_WAITING | JVMTI_THREAD_STATE_WAITING_INDEFINITELY | JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT,</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_NEW = <span class="number">0</span>,</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_TERMINATED = JVMTI_THREAD_STATE_TERMINATED,</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_RUNNABLE = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_RUNNABLE,</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_BLOCKED = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER,</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_WAITING = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_WAITING | JVMTI_THREAD_STATE_WAITING_INDEFINITELY,</span><br><span class="line">    JVMTI_JAVA_LANG_THREAD_STATE_TIMED_WAITING = JVMTI_THREAD_STATE_ALIVE | JVMTI_THREAD_STATE_WAITING | JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>  从上可以看到<code>Thread.State</code>定义了六种状态，分别为：</p>
+<ul>
+<li><p>New（新建）</p>
+<p>当构造一个线程时（如<code>new Thread()</code>），则该线程的状态是<code>New</code>，此时<code>Thread.threadStatus = 0</code>，当调用<code>Thread.getState()</code>时返回<code>Thread.State.NEW</code>；</p>
+</li>
+<li><p>Runnable（运行）</p>
+<p>该状态线的线程可能正在执行或者正在等待线程调度器选中，一般会将该状态拆分为Ready（就绪）和Running（运行），而Ready状态到Runnable状态是操作系统控制；</p>
+</li>
+<li><p>Waiting（无限期等待）</p>
+<p>线程处于无限期等待某一个条件触发，处于该状态的原因是调用了<code>Object.wait()</code>、<code>Thread.join()</code>、<code>LockSupport.park()</code>方法。</p>
+</li>
+<li><p>Timed_Waiting（限期等待）</p>
+<p>线程处于限期等待，处于该状态的原因是调用了<code>Object.wait(long)</code>、<code>Thread.join(long)</code>、<code>LockSupport.parkNanos(long)</code>、<code>LockSupport.parkUntil(long)</code>。</p>
+</li>
+<li><p>Blocked（阻塞）</p>
+<p>线程正在等待监视锁以进入到<code>synchronized</code>方法和语句快；</p>
+</li>
+<li><p>Terminated（结束）</p>
+<p>线程<code>run()</code>方法或者主线程<code>main()</code>方法结束或者抛出未捕获的异常时；</p>
+</li>
+</ul>
+<p>某些资料或者书籍会将Waiting、Timed_Waiting以及Blocked合并为一个状态，称为Blocked，即阻塞。</p>
+<p>下图展示线程状态转换流程。</p>
+<p><img src="https://i.stack.imgur.com/FTHOR.png" alt="线程状态机" title="线程状态机"></p>
+<h1 id="wait-、sleep-、notify-区别"><a href="#wait-、sleep-、notify-区别" class="headerlink" title="wait()、sleep()、notify()区别"></a>wait()、sleep()、notify()区别</h1><ul>
+<li><p>wait</p>
+<p>使线程处于Waiting或者Timed_Waiting，该线程进入wait queue，而且会释放对象的监视锁。使用wait方法时，该线程必须拥有wait对象的监视锁，即wait方法只能放在对象的同步方法或者同步语句块中，如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Object mon = ...;</span><br><span class="line"><span class="keyword">synchronized</span> (mon) &#123;</span><br><span class="line">    mon.wait();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>wait方法是在Object中定义的native方法。</p>
+</li>
+<li><p>sleep</p>
+<p>使线程处于Waiting或者Timed_Waiting，但是不会使线程释放监视锁，且该方法为Thread的静态方法；</p>
+</li>
+<li><p>notify</p>
+<p>释放该对象的监视锁，从对象的wait queue中唤醒一个线程或者多个线程（此时调用notifyAll方法），被唤醒的线程需要重新获取该对象的监视锁，以进入同步块。使用notify方法时，该线程必须拥有notify对象的监视锁，即notify方法只能放在对象的同步方法或者同步语句块中，如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Object mon = ...;</span><br><span class="line"><span class="keyword">synchronized</span>(mon) &#123;</span><br><span class="line">    mon.notify();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>需要理解为什么wait或者notify需要获得锁才能调用。</p>
+<h1 id="ThreadPoolExecutor原理"><a href="#ThreadPoolExecutor原理" class="headerlink" title="ThreadPoolExecutor原理"></a>ThreadPoolExecutor原理</h1><p>线程的创建和销毁是一个重量级操作，涉及到操作系统底层调用和资源分配问题。操作系统可创建的线程数量有内存限制，即当线程越多消耗的内存越大，且操作系统线程调度的开销也越多。依靠线程池技术可以有效解决这些问题。</p>
+<p>Java提供了两个线程池实现类，分别是ThreadPoolExecutor和ScheduledThreadPoolExecutor，继承关系如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">                +-------------------+</span><br><span class="line">                |     Executor      |</span><br><span class="line">                +-------------------+</span><br><span class="line">                          ^</span><br><span class="line">                          |</span><br><span class="line">              +-----------+------------+</span><br><span class="line">              |    ExecutorService     |</span><br><span class="line">              +------------------------+</span><br><span class="line">                          ^</span><br><span class="line">                          |</span><br><span class="line">             +------------+--------------+</span><br><span class="line">             |  AbstractExecutorService  |</span><br><span class="line">             +---------------------------+</span><br><span class="line">                          ^</span><br><span class="line">                          |</span><br><span class="line">         +----------------+-------------------+</span><br><span class="line">         |                                    |</span><br><span class="line">+--------+-------+                  +---------+----------+</span><br><span class="line">|  ForkJoinPool  |                  | ThreadPoolExecutor |</span><br><span class="line">+----------------+                  +--------------------+</span><br><span class="line">                                              ^</span><br><span class="line">                                              |</span><br><span class="line">                                +-------------+----------------+       </span><br><span class="line">                                | ScheduledThreadPoolExecutor  |</span><br><span class="line">                                +------------------------------+</span><br></pre></td></tr></table></figure>
+<p>其中Executor和ExecutorService为接口。</p>
+<p>ThreadPoolExecutor的构造函数如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize, // 线程池基本大小</span></span></span><br><span class="line"><span class="function"><span class="params">                              <span class="keyword">int</span> maximumPoolSize, // 线程池最大线程数</span></span></span><br><span class="line"><span class="function"><span class="params">                              <span class="keyword">long</span> keepAliveTime, // 空闲线程允许存活的时间</span></span></span><br><span class="line"><span class="function"><span class="params">                              TimeUnit unit, // keepAliveTime的时间单位</span></span></span><br><span class="line"><span class="function"><span class="params">                              BlockingQueue&lt;Runnable&gt; workQueue, // 任务队列</span></span></span><br><span class="line"><span class="function"><span class="params">                              ThreadFactory threadFactory, // 线程工厂，用于创建线程</span></span></span><br><span class="line"><span class="function"><span class="params">                              RejectedExecutionHandler handler<span class="comment">/*workQueue满时的拒绝策略*/</span>)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>当调用<code>ThreadPoolExecutor.execute(Runnable command)</code>时，先检查<code>corePoolSize</code>是否已满，如果不是，创建一个线程执行<code>command</code>任务，如果已满，检查<code>workQueue</code>是否已满，如果不是，则将<code>command</code>加入到<code>workQueue</code>中，如果已满，检查<code>maximumPoolSize</code>是否已满，如果是，执行拒绝策略，如果不是，创建新线程执行<code>command</code>任务。</p>
+<p>当创建新线程执行<code>command</code>任务时，需要构建一个<code>Worker</code>对象，<code>Worker</code>的声明如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Worker</span></span></span><br><span class="line"><span class="class">        <span class="keyword">extends</span> <span class="title">AbstractQueuedSynchronizer</span></span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="comment">/** Thread this worker is running in.  Null if factory fails. */</span></span><br><span class="line">        <span class="keyword">final</span> Thread thread;</span><br><span class="line">        <span class="comment">/** Initial task to run.  Possibly null. */</span></span><br><span class="line">        Runnable firstTask;</span><br><span class="line">        <span class="comment">/** Per-thread task counter */</span></span><br><span class="line">        <span class="keyword">volatile</span> <span class="keyword">long</span> completedTasks;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Creates with given first task and thread from ThreadFactory.</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@param</span> firstTask the first task (null if none)</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        Worker(Runnable firstTask) &#123;</span><br><span class="line">            setState(-<span class="number">1</span>); <span class="comment">// inhibit interrupts until runWorker</span></span><br><span class="line">            <span class="keyword">this</span>.firstTask = firstTask;</span><br><span class="line">            <span class="keyword">this</span>.thread = getThreadFactory().newThread(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** Delegates main run loop to outer runWorker  */</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            runWorker(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p><code>Worker</code>继承了<code>AbstractQueuedSynchronizer</code>，所以<code>Worker</code>也具备锁的功能，且<code>Worker</code>实现了<code>Runnable</code>接口，可以用于创建线程。从<code>this.thread = getThreadFactory().newThread(this);</code>可以看到，线程运行时将会执行<code>Worker</code>的<code>run</code>方法。<code>runWorker</code>方法在<code>ThreadPoolExecutor</code>中定义，作用是循环的向<code>workQueue</code>中取出任务并运行任务（实现<code>Runnable</code>接口的任务，执行该任务时直接调用<code>run</code>方法即可）。</p>
+<p><code>AbstractExecutorService.submit(Callable&lt;T&gt; Task)</code>用于执行带返回值的任务，该方法内部会执行<code>new FutureTask&lt;T&gt;(callable)</code>来构造一个<code>Runnable</code>任务，调用<code>execute</code>方法执行。<code>FutureTask</code>同时实现了<code>Runnable</code>和<code>Future</code>接口，其中<code>Future</code>接口表示一个异步计算的结果。</p>
+<p>线程池线程数量的规划需要根据任务的性质决定。如果是CPU密集型任务，应配置尽可能小的线程数，一般配置Ncpu+1个线程的线程池；如果是IO密集型任务，由于IO密集型任务线程并不是一直在执行任务，则应配置尽可能多的线程，如2*Ncpu。混合型的任务，如果可以拆分，将其拆分成一个CPU密集型任务  和一个IO密集型任务，只要这两个任务执行的时间相差不是太大，那么分解后执行的吞吐量将高于串行执行的吞吐量。如果这两个任务执行时间相差太大，则没必要进行分解。</p>
+<h1 id="ThreadLocal实现方式"><a href="#ThreadLocal实现方式" class="headerlink" title="ThreadLocal实现方式"></a>ThreadLocal实现方式</h1><p>在多线程环境中，如果多个线程并发操作同一个共享变量，由于Java内存模型的原因，存在脏读、丢失更新等内存数据不一致的情况，解决该问题的方式是使用互斥锁。但是使用互斥锁时会降低线程执行的效率，因此在某些情况下可以不使用共享变量，而是使用局部变量。对于方法级别的局部变量，不存在<code>race condition</code>（竟态条件），因为该变量只能被该线程访问，但是如果方法调用频繁会造成对象创建过多，导致垃圾回收效率慢。如果可以将变量与某个线程绑定，该变量同样只能被该线程访问，不存在<code>race condition</code>，而且对象创建的数量也不会太多，这样线程的执行的效率将会大大提高。</p>
+<p><code>Thread</code>类中定义了<code>ThreadLocal.ThreadLocalMap threadLocals = null;</code>，表示一个线程的局部变量。<code>ThreadLocal.ThreadLocalMap</code>的实现方式类似<code>HashMap</code>，该类的<code>Entry</code>继承了<code>WeakReference</code>，定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span> <span class="keyword">extends</span> <span class="title">WeakReference</span>&lt;<span class="title">ThreadLocal</span>&gt; </span>&#123;</span><br><span class="line">            <span class="comment">/** The value associated with this ThreadLocal. */</span></span><br><span class="line">            Object value;</span><br><span class="line"></span><br><span class="line">            Entry(ThreadLocal k, Object v) &#123;</span><br><span class="line">                <span class="keyword">super</span>(k);</span><br><span class="line">                value = v;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>从上可知，<code>ThreadLocal.ThreadLocalMap</code>的键是<code>ThreadLocal</code>，而且键是<strong>弱引用</strong>，值为强引用。</p>
+<p>调用<code>ThreadLocal.get()</code>方法时，首先获取当前线程的<code>threadLocals</code>变量，类型是<code>ThreadLocal.ThreadLocalMap</code>，如果为<code>null</code>，则调用<code>createMap</code>创建（<code>t.threadLocals = new ThreadLocalMap(this, firstValue);</code>），然后返回初始值。如果<code>threadLocals</code>不为<code>null</code>，则调用<code>ThreadLocal.ThreadLocalMap.getEntry(ThreadLocal)</code>方法，根据<code>ThreadLocal</code>的哈希值获取<code>Entry</code>，如果<code>Entry.get()</code>（由于<code>Entry</code>继承了<code>WeakReference</code>，<code>Entry.get()</code>实际上是调用了<code>WeakReference.get()</code>方法，由于<code>Entry</code>在构造函数中调用了<code>super(k)</code>，将键作为弱引用对象，所以<code>Entry.get()</code>返回的是键的引用）返回为<code>null</code>，表示垃圾收集器回收了键对象，为避免<strong>内存泄漏</strong>，需要调用<code>ThreadLocal.ThreadLocalMap.expungeStaleEntry</code>方法回收<code>Entry</code>所占用的<code>slot</code>，将<code>value</code>清空，然后再重哈希。</p>
+<p><code>ThreadLocal.set()</code>方法类似<code>ThreadLocal.get()</code>方法。</p>
+<h1 id="中断机制"><a href="#中断机制" class="headerlink" title="中断机制"></a>中断机制</h1><p>Java中断机制是一种协作方式，仅仅是通知一个线程可以中断执行，但是线程本身也可以忽略中断信息什么也不做。从设计上来说，一个线程不应该由其他线程来强制中断或停止，而是应该由线程自己自行停止。所以使用中断机制来替代<code>Thread.stop()</code>, <code>Thread.suspend()</code>, <code>Thread.resume()</code>。</p>
+<p>当调用<code>Thread.interrupt()</code>方法时，可以为某个线程对象设置中断标记位，即<code>Thread.threadStatus</code>的<code>JVMTI_THREAD_STATE_INTERRUPTED</code>标记位被打开，此时被设置中断标记位的线程调用<code>Thread.isInterrupted()</code>方法会返回<code>true</code>。此时如果被设置中断标记位的线程调用<code>Thread.interrupted()</code>方法时，返回<code>true</code>的同时还会清除中断标记位。</p>
+<p>线程需要自己检查是否被中断，检查的方法一般是调用<code>Thread.interrupted()</code>方法。如果检查到自己被中断了，可以根据业务规则处理该中断，也可以将中断信息往线程调用栈上报，方式是抛出<code>InterruptedException</code>。如果捕获到了<code>InterruptedException</code>时，不能什么也不做（除非自己知道业务无需关注中断），要么将异常再抛出，要么再设置中断信息，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">    Thread.currentThread().interrupt(); <span class="comment">// or throw e;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一般来说，当方法声明了要跑出<code>InterruptedException</code>则暗示该方法可中断，即方法内部会检查中断标记位，然后抛出异常，并且清除中断标记位。Java中很多阻塞方法如<code>BlockingQueue.put</code>、<code>BlockingQueue.take</code>、<code>Object.wait</code>、<code>Thread.sleep</code>都支持中断。</p>
+<h1 id="活跃性"><a href="#活跃性" class="headerlink" title="活跃性"></a>活跃性</h1><ul>
+<li><p>死锁</p>
+<p>如果多个线程以固定的顺序来获取锁时，那么他们将不会存在死锁的问题。死锁发生表示获取锁的顺序不一致导致互相占用各自需要获取的锁。死锁的解决方法有：1)限制锁的调用顺序，2)缩小锁的范围，3)使用显示锁替换内置锁，灵活控制锁策略。</p>
+</li>
+<li><p>饥饿</p>
+<p>由于线程得不到需要的资源，不能正常执行，就会造成线程饥饿。如对线程的优先级设置不当，造成线程不能获得CPU周期执行导致饥饿，或者其他线程长时间持有锁，导致其他线程长时间等待，造成的饥饿。</p>
+</li>
+<li><p>活锁</p>
+<p>活锁问题不会导致线程阻塞，但是活锁会导致线程不能继续正常执行。比如这样一个消息系统中，从队列里边取的消息，然后执行，但是由于某种业务原因，失败了，那么把它放到队列头，然后再拿出来执行，自然还是失败的，这样线程虽然没有阻塞，但是也不能正常的处理其他的消息。</p>
+</li>
+</ul>
+<p>  当出现活跃性故障时，除了终止应用程序之外没有其他任何机制可以帮助从这种故障恢复过来。</p>
+<h1 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h1><p>在Linux操作系统中，进程或者线程都称为任务，使用<a href="https://github.com/torvalds/linux/blob/master/include/linux/sched.h" target="_blank" rel="noopener">task_struct</a>表示，操作系统的进程或者线程调度器都是抢占类型，上下文切换相比协程调度器属于重量级操作，且用户程序不能干预。</p>
+<p>协程将所有子程序（或者子任务）线性执行，多个子程序由协程调度器负责调度执行。协程的有点有：</p>
+<ul>
+<li>协程调度器调度子程序时属于轻量级操作</li>
+<li>由于是线性执行，不存在并发访问共享资源的情况，即不存在锁等待、加锁操作，CPU资源可充分利用；</li>
+<li>协程是单线程执行，可以使用多进程来跑协程任务，充分利用CPU资源；</li>
+<li>协程非常适合运用在网络编程；</li>
+</ul>
+<p>协程的执行流程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">---subprogram1---|----subprogram2-----|-----subprogram1-----|----subprogram3-----|</span><br></pre></td></tr></table></figure>
+<p>JDK不支持协程。</p>
+<p><a href="https://github.com/Tencent/libco" target="_blank" rel="noopener">libco</a>是开源的C++协程框架。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-thread/" title="Java后端开发 - 线程" target="_blank" rel="external">https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-thread/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2018/10/13/java-programmer-knowledge-concurrent/" title="Java后端开发 - 并发"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2018/10/13/java-programmer-knowledge-container-class/" title="Java后端开发 - 容器类"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

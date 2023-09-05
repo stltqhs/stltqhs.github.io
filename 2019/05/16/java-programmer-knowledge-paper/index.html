@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Java后端开发 - 优秀论文 | 海东青</title>
+  <meta name="description" content="ACM SIGOPS名人堂系列ACM SIGOPS名人堂（第一期） The Structure of the “THE”-Multiprogramming The Working Set Model for Program The UNIX TimeSharing System Hints for Computer System Design ACM SIGOPS名人堂（第二期） Safe Ker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java后端开发 - 优秀论文">
+<meta property="og:url" content="https://stltqhs.github.io/2019/05/16/java-programmer-knowledge-paper/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="ACM SIGOPS名人堂系列ACM SIGOPS名人堂（第一期） The Structure of the “THE”-Multiprogramming The Working Set Model for Program The UNIX TimeSharing System Hints for Computer System Design ACM SIGOPS名人堂（第二期） Safe Ker">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.364Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java后端开发 - 优秀论文">
+<meta name="twitter:description" content="ACM SIGOPS名人堂系列ACM SIGOPS名人堂（第一期） The Structure of the “THE”-Multiprogramming The Working Set Model for Program The UNIX TimeSharing System Hints for Computer System Design ACM SIGOPS名人堂（第二期） Safe Ker">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2019/05/16/java-programmer-knowledge-paper/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ACM-SIGOPS名人堂系列"><span class="toc-number">1.</span> <span class="toc-text">ACM SIGOPS名人堂系列</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#资源调度"><span class="toc-number">2.</span> <span class="toc-text">资源调度</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分布式"><span class="toc-number">3.</span> <span class="toc-text">分布式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#大数据系列"><span class="toc-number">4.</span> <span class="toc-text">大数据系列</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础"><span class="toc-number">4.1.</span> <span class="toc-text">基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件存储"><span class="toc-number">4.2.</span> <span class="toc-text">文件存储</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据存储"><span class="toc-number">4.3.</span> <span class="toc-text">数据存储</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据处理"><span class="toc-number">4.4.</span> <span class="toc-text">数据处理</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-java-programmer-knowledge-paper" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java后端开发 - 优秀论文
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/05/16/java-programmer-knowledge-paper/" class="article-date">
+	  <time datetime="2019-05-16T01:24:25.000Z" itemprop="datePublished">2019-05-16</time>
+	</a>
+</span>
+        
+        
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/05/16/java-programmer-knowledge-paper/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="ACM-SIGOPS名人堂系列"><a href="#ACM-SIGOPS名人堂系列" class="headerlink" title="ACM SIGOPS名人堂系列"></a>ACM SIGOPS名人堂系列</h1><p><a href="https://mp.weixin.qq.com/s/vwDz3JB_erocP9drwc7IEA" target="_blank" rel="noopener">ACM SIGOPS名人堂（第一期）</a></p>
+<p><a href="https://klevas.mif.vu.lt/~liutauras/books/Dijkstra%20-%20The%20structure%20of%20the%20THE%20multiprogramming%20system.pdf" target="_blank" rel="noopener">The Structure of the “THE”-Multiprogramming</a></p>
+<p><a href="https://pdfs.semanticscholar.org/0212/2a57e7f533595e079a329ef33a519e6c529b.pdf" target="_blank" rel="noopener">The Working Set Model for Program</a></p>
+<p><a href="https://people.eecs.berkeley.edu/~brewer/cs262/unix.pdf" target="_blank" rel="noopener">The UNIX TimeSharing System</a></p>
+<p><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-17.pdf" target="_blank" rel="noopener">Hints for Computer System Design</a></p>
+<p><a href="https://mp.weixin.qq.com/s/A_Nzp25R5y9mFuxp7gqdJg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第二期）</a></p>
+<p><a href="https://www.utdallas.edu/~hamlen/Papers/necula96safe.pdf" target="_blank" rel="noopener">Safe Kernel Extensions Without Run-Time Checking</a></p>
+<p><a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf" target="_blank" rel="noopener">Time, Clocks, and the Ordering of Events in a Distributed System</a></p>
+<p><a href="http://bitsavers.org/pdf/xerox/parc/techReports/CSL-83-7_Implementing_Remote_Procedure_Calls.pdf" target="_blank" rel="noopener">Implementing Remote Procedure Calls</a></p>
+<p><a href="https://mp.weixin.qq.com/s/fsuEIHOQfwdWEZ4NEn8Ivg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第三期）</a></p>
+<p><a href="http://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf" target="_blank" rel="noopener">End-To-End Arguments in System Design</a></p>
+<p><a href="https://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-39.pdf" target="_blank" rel="noopener">A Logic of Authentication</a></p>
+<p><a href="https://www.cs.cornell.edu/fbs/publications/SMSurvey.pdf" target="_blank" rel="noopener">Implementing Fault-Tolerant Services Using the State Machine Approach: A Tutorial</a></p>
+<p><a href="https://mp.weixin.qq.com/s/nxBquDWvov1WTCO6tfQ2Tg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第四期）</a></p>
+<p><a href="http://web.cs.wpi.edu/~cs4513/d07/Papers/Birrell,%20Levin,%20et.%20al.,%20Grapevine.pdf" target="_blank" rel="noopener">an exercise in distributed computing</a></p>
+<p><a href="https://www.cs.cmu.edu/~satya/docdir/howard-tocs-afs-1988.pdf" target="_blank" rel="noopener">Scale and performance in a distributed file system</a></p>
+<p><a href="http://pages.cs.wisc.edu/~remzi/Classes/838/Spring2013/Papers/bugnion97disco.pdf" target="_blank" rel="noopener">Disco : Running commodity operating system on scalable multiprocessor</a></p>
+<p><a href="http://www.eecg.toronto.edu/~yuan/teaching/gradOS/papers/mach-vm.pdf" target="_blank" rel="noopener">Machine-independent virtual memory management for paged uniprocessor and multiprocessor architectures</a></p>
+<p><a href="https://mp.weixin.qq.com/s/E6PYyQazvajmLy93Eo4JSg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第五期）</a></p>
+<p><a href="https://courses.cs.washington.edu/courses/cse551/09au/papers/CSE550.Multics.pdf" target="_blank" rel="noopener">The Multics Virtual Memory: Concepts and Design</a></p>
+<p><a href="https://web.stanford.edu/class/cs240/readings/89-leases.pdf" target="_blank" rel="noopener">Leases: An Efficient Fault-Tolerant Mechanism for Distributed File Cache Consistency</a></p>
+<p><a href="https://people.eecs.berkeley.edu/~brewer/cs262/Mesa.pdf" target="_blank" rel="noopener">Experience with processes and monitors in Mesa</a></p>
+<p><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.74.727&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">VAXclusters: A Closely-Coupled Distributed System</a></p>
+<p><a href="https://mp.weixin.qq.com/s/-5PvFLVwDg_wlw0v90vPDg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第六期）</a></p>
+<p><a href="http://cs.unc.edu/~fabian/course_papers/needham.pdf" target="_blank" rel="noopener">Using Encryption for Authentication in Large Networks of Computers</a></p>
+<p><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-21.pdf" target="_blank" rel="noopener">Crash Recovery in a Distributed Data Storage System</a></p>
+<p><a href="https://courses.cs.washington.edu/courses/cse550/09au/papers/CSE550.GrayTM.pdf" target="_blank" rel="noopener">The Recovery Manager of the System R Database Manager</a></p>
+<p><a href="https://mp.weixin.qq.com/s/iBG7er_3UBaY5102-qkI5Q" target="_blank" rel="noopener">ACM SIGOPS名人堂（第七期）</a></p>
+<p><a href="https://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf" target="_blank" rel="noopener">Why Do Computers Stop and What Can Be Done About It?</a></p>
+<p><a href="https://www.archive.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf" target="_blank" rel="noopener">Reflections on Trusting Trust</a></p>
+<p><a href="https://www.princeton.edu/~rblee/ELE572Papers/Fall04Readings/ProgramSemantics_DennisvanHorn.pdf" target="_blank" rel="noopener">Programming Semantics for Multiprogrammed Computations</a></p>
+<p><a href="https://www.cs.cmu.edu/~garth/RAIDpaper/Patterson88.pdf" target="_blank" rel="noopener">A Case for Redundant Arrays of Inexpensive Disks(RAID)</a></p>
+<p><a href="https://mp.weixin.qq.com/s/DOgt8tS1ZnvuIxL5xiQGwA" target="_blank" rel="noopener">ACM SIGOPS名人堂（第八期）</a></p>
+<p><a href="http://pmg.csail.mit.edu/papers/vr.pdf" target="_blank" rel="noopener">A New Primary Copy Method to Support Highly-Available Distributed Systems</a></p>
+<p><a href="https://lamport.azurewebsites.net/pubs/lamport-paxos.pdf" target="_blank" rel="noopener">The Part Time Parliament</a></p>
+<p><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.80.5091&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">Memory Coherence in Shared Virtual Memory Systems</a></p>
+<p><a href="https://people.eecs.berkeley.edu/~brewer/cs262/LFS.pdf" target="_blank" rel="noopener">The Design and Implementation of a Log-Structured File System</a></p>
+<p><a href="https://mp.weixin.qq.com/s/DZZFd2HZrAPTDq-XnGuwvQ" target="_blank" rel="noopener">ACM SIGOPS名人堂（第九期）</a></p>
+<p><a href="http://www.eecg.toronto.edu/~yuan/teaching/gradOS/papers/tenex.pdf" target="_blank" rel="noopener">Tenex, A Paged Time Sharing System for the PDP-10</a></p>
+<p><a href="https://lamport.azurewebsites.net/pubs/chandy.pdf" target="_blank" rel="noopener">Distributed Snapshots: Determining Global States of a Distributed System</a></p>
+<p><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.626.6107&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">A NonStop Kernel</a></p>
+<p><a href="https://www.cs.cornell.edu/home/rvr/sys/p123-birman.pdf" target="_blank" rel="noopener">Exploiting Virtual Synchrony in Distributed Systems</a></p>
+<p><a href="https://mp.weixin.qq.com/s/SwiP-U5513lEUX5QDZ3J1A" target="_blank" rel="noopener">ACM SIGOPS名人堂（第十期）</a></p>
+<p><a href="https://pdos.csail.mit.edu/papers/click:tocs00/paper.pdf" target="_blank" rel="noopener">The Click Modular Router</a></p>
+<p><a href="https://www.seltzer.com/margo/teaching/CS508.19/papers/meyer-1970.pdf" target="_blank" rel="noopener">A virtual machine time-sharing system</a></p>
+<p><a href="https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf" target="_blank" rel="noopener">On the criteria to be used in decomposing systems into modules</a></p>
+<p><a href="https://www.eecs.harvard.edu/~htk/publication/1981-tods-kung-robinson.pdf" target="_blank" rel="noopener">On optimistic methods for concurrency control</a></p>
+<p><a href="https://mp.weixin.qq.com/s/CopyXdsr1H-SEwjdjIQT1w" target="_blank" rel="noopener">ACM SIGOPS名人堂（第十一期）</a></p>
+<p><a href="https://people.eecs.berkeley.edu/~brewer/cs262/FFS.pdf" target="_blank" rel="noopener">A fast file system for UNIX</a></p>
+<p><a href="https://www.cs.cmu.edu/~satya/docdir/kistler-tocs-coda-1992.pdf" target="_blank" rel="noopener">Disconnected operation in the Coda File System</a></p>
+<p><a href="https://www.scss.tcd.ie/Jeremy.Jones/CS4021/herlihy93transactional.pdf" target="_blank" rel="noopener">Transactional memory: architectural support for lock-free data structures</a></p>
+<p><a href="https://courses.cs.washington.edu/courses/cse551/19wi/readings/sfi-sosp93.pdf" target="_blank" rel="noopener">Efficient software-based fault isolation</a></p>
+<p><a href="https://mp.weixin.qq.com/s/xRmAclbaB4iIfpkcyLKNSg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第十二期）</a></p>
+<p><a href="https://web.eecs.umich.edu/~pmchen/papers/dunlap02.pdf" target="_blank" rel="noopener">ReVirt: Enabling Intrusion Analysis through Virtual-Machine Logging and Replay</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/gfs-sosp2003.pdf" target="_blank" rel="noopener">The Google File System</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf" target="_blank" rel="noopener">MapReduce : Simplified Data Processing on Large Clusters</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/bigtable-osdi06.pdf" target="_blank" rel="noopener">Bigtable : A Distributed Storage System for Structured Data</a></p>
+<p><a href="https://mp.weixin.qq.com/s/YQ4P0iQj96cQc9_sQ03Txg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第十三期）</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/chubby-osdi06.pdf" target="_blank" rel="noopener">The Chubby lock service for loosely-coupled distributed systems</a></p>
+<p><a href="https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf" target="_blank" rel="noopener">Dynamo: Amazon’s Highly Available Key-value Store</a></p>
+<p><a href="https://mp.weixin.qq.com/s/1tBuNIhWPMbrZ_J5jOs1dg" target="_blank" rel="noopener">ACM SIGOPS名人堂（第十四期）</a></p>
+<p><a href="https://people.cs.umass.edu/~mcorner/courses/691M/papers/terry.pdf" target="_blank" rel="noopener">Managing Update Conflicts in Bayou, a Weakly Connected Replicated Storage System</a></p>
+<p><a href="http://www.cs.fsu.edu/~awang/courses/cop5611_s2004/microkernel.pdf" target="_blank" rel="noopener">On micro-kernel construction</a></p>
+<p><a href="https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf" target="_blank" rel="noopener">Chord: A Scalable Peer-to-peer Lookup Service for Internet Applications</a></p>
+<p><a href="https://www.vmware.com/pdf/usenix_resource_mgmt.pdf" target="_blank" rel="noopener">Memory resource management in VMware ESX server</a></p>
+<h1 id="资源调度"><a href="#资源调度" class="headerlink" title="资源调度"></a>资源调度</h1><p><a href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/43438.pdf" target="_blank" rel="noopener">Large-scale cluster management at Google with Borg</a></p>
+<p><a href="https://www.cse.ust.hk/~weiwa/teaching/Fall15-COMP6611B/reading_list/YARN.pdf" target="_blank" rel="noopener">YARN</a></p>
+<p><a href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/41684.pdf" target="_blank" rel="noopener">Omega</a></p>
+<p><a href="https://www.usenix.org/legacy/event/nsdi11/tech/full_papers/Hindman.pdf" target="_blank" rel="noopener">Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center</a></p>
+<p><a href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/44843.pdf" target="_blank" rel="noopener">Borg, Omega, and Kubernetes</a></p>
+<h1 id="分布式"><a href="#分布式" class="headerlink" title="分布式"></a>分布式</h1><p><a href="https://lamport.azurewebsites.net/pubs/paxos-simple.pdf" target="_blank" rel="noopener">Paxos Made Simple</a></p>
+<p><a href="https://marcoserafini.github.io/papers/zab.pdf" target="_blank" rel="noopener">Zab</a></p>
+<p><a href="https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14" target="_blank" rel="noopener">Raft</a></p>
+<p><a href="http://pmg.csail.mit.edu/papers/vr.pdf" target="_blank" rel="noopener">Viewstamped Replication: A New Primary Copy Method to Support Highly-Available Distributed Systems</a></p>
+<p><a href="https://www.cs.cornell.edu/home/rvr/papers/flowgossip.pdf" target="_blank" rel="noopener">Gossip</a>（<a href="http://disi.unitn.it/~montreso/ds/papers/montresor17.pdf" target="_blank" rel="noopener">Gossip and Epidemic Protocols</a> , <a href="http://users.ece.utexas.edu/~dimakis/Gossip_Survey.pdf" target="_blank" rel="noopener">Gossip Survy</a>）</p>
+<p><a href="https://lamport.azurewebsites.net/pubs/implementation.pdf" target="_blank" rel="noopener">The implementation of reliable distributed multiprocess systems</a></p>
+<p><a href="https://lamport.azurewebsites.net/pubs/byz.pdf" target="_blank" rel="noopener">The byzantine generals problem</a></p>
+<p><a href="https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf" target="_blank" rel="noopener">Impossibility of Distributed Consensus with One Faulty<br>Process</a></p>
+<p><a href="https://www.cs.cornell.edu/fbs/publications/viveLaDifference.pdf" target="_blank" rel="noopener">Paxos vs. Viewstamped Replication vs. Zab</a></p>
+<p><a href="http://www.sosp.org/2001/papers/welsh.pdf" target="_blank" rel="noopener">SEDA: An Architecture for Well-Conditioned, Scalable Internet Services</a></p>
+<p><a href="https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf" target="_blank" rel="noopener">SAGAS</a></p>
+<h1 id="大数据系列"><a href="#大数据系列" class="headerlink" title="大数据系列"></a>大数据系列</h1><h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><p><a href="http://paperhub.s3.amazonaws.com/18e91eb4db2114a06ea614f0384f2784.pdf" target="_blank" rel="noopener">LSMTree</a></p>
+<p><a href="http://ranger.uta.edu/~sjiang/pubs/papers/wang14-LSM-SDF.pdf" target="_blank" rel="noopener">An Efficient Design and Implementation of LSM-Tree based Key-Value Store on Open-Channel SSD</a></p>
+<h2 id="文件存储"><a href="#文件存储" class="headerlink" title="文件存储"></a>文件存储</h2><p><a href="http://static.googleusercontent.com/media/research.google.com/en/us/archive/gfs-sosp2003.pdf" target="_blank" rel="noopener">The Google File System</a></p>
+<p><a href="http://zoo.cs.yale.edu/classes/cs422/2014fa/readings/papers/shvachko10hdfs.pdf" target="_blank" rel="noopener">The Hadoop Distributed File System</a></p>
+<p><a href="https://ceph.com/wp-content/uploads/2016/08/weil-ceph-osdi06.pdf" target="_blank" rel="noopener">Ceph: A Scalable, High-Performance Distributed File System</a></p>
+<p><a href="https://people.csail.mit.edu/matei/papers/2014/socc_tachyon.pdf" target="_blank" rel="noopener">Tachyon: Reliable, Memory Speed Storage for Cluster Computing Frameworks</a></p>
+<p><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.324.2739&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">Column-Stores vs. Row-Stores: How Different Are They Really?</a></p>
+<p><a href="http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf" target="_blank" rel="noopener">RCFile: A Fast and Space-efficient Data Placement Structure in MapReduce-based Warehouse Systems</a></p>
+<h2 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h2><p><a href="https://sites.cs.ucsb.edu/~agrawal/fall2009/dynamo.pdf" target="_blank" rel="noopener">Dynamo: Amazon’s Highly Available Key-value Store</a></p>
+<p><a href="https://www.cs.cornell.edu/projects/ladis2009/papers/lakshman-ladis2009.pdf" target="_blank" rel="noopener">Cassandra - A Decentralized Structured Storage System</a></p>
+<p><a href="http://static.usenix.org/events/fast/tech/full_papers/Sumbaly.pdf" target="_blank" rel="noopener">Serving Large-scale Batch Computed Data with Project Voldemort</a></p>
+<p><a href="http://static.googleusercontent.com/media/research.google.com/en/us/archive/bigtable-osdi06.pdf" target="_blank" rel="noopener">Bigtable: A Distributed Storage System for Structured Data</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/spanner-osdi2012.pdf" target="_blank" rel="noopener">Spanner: Google’s Globally-Distributed Database</a></p>
+<p><a href="http://www.hypertable.com/collateral/whitepaper-hypertable-architecture.pdf" target="_blank" rel="noopener">Hypertable Architecture Overview</a></p>
+<p><a href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/36971.pdf" target="_blank" rel="noopener">Megastore: Providing Scalable, Highly Available Storage for Interactive Services</a></p>
+<h2 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h2><p><a href="http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf" target="_blank" rel="noopener">MapReduce: Simplified Data Processing on Large Clusters</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36632.pdf" target="_blank" rel="noopener">Dremel: Interactive Analysis of Web-Scale Datasets</a></p>
+<p><a href="https://kowshik.github.io/JPregel/pregel_paper.pdf" target="_blank" rel="noopener">Pregel: A System for Large-Scale Graph Processing</a></p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36726.pdf" target="_blank" rel="noopener">Large-scale Incremental Processing Using Distributed Transactions and Notifications</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2019/05/16/java-programmer-knowledge-paper/" title="Java后端开发 - 优秀论文" target="_blank" rel="external">https://stltqhs.github.io/2019/05/16/java-programmer-knowledge-paper/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/06/06/java-programmer-knowledge-book/" title="Java后端开发 - 优秀书籍"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2018/10/13/java-programmer-knowledge-algorithm/" title="Java后端开发 - 算法和数据结构"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

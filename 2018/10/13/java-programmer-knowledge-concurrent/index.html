@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Java后端开发 - 并发 | 海东青</title>
+  <meta name="description" content="死锁、活锁和饥饿死锁产生的原因是：  系统资源不足 进程运行推进的顺序不正确 资源分配不当等  如果系统资源充足，进程的资源请求都能够得到满足，死锁出现的可能性就很低，否则就会因争夺有限的资源而陷入死锁。其次，进程运行推进顺序与速度不同，也可能产生死锁。 产生死锁的四个必要条件：  互斥条件：一个资源每次只能被一个进程使用 请求与保持条件：一个进程因请求资源而阻塞时，对已获得的资源保持不放 不剥夺">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java后端开发 - 并发">
+<meta property="og:url" content="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-concurrent/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="死锁、活锁和饥饿死锁产生的原因是：  系统资源不足 进程运行推进的顺序不正确 资源分配不当等  如果系统资源充足，进程的资源请求都能够得到满足，死锁出现的可能性就很低，否则就会因争夺有限的资源而陷入死锁。其次，进程运行推进顺序与速度不同，也可能产生死锁。 产生死锁的四个必要条件：  互斥条件：一个资源每次只能被一个进程使用 请求与保持条件：一个进程因请求资源而阻塞时，对已获得的资源保持不放 不剥夺">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.360Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java后端开发 - 并发">
+<meta name="twitter:description" content="死锁、活锁和饥饿死锁产生的原因是：  系统资源不足 进程运行推进的顺序不正确 资源分配不当等  如果系统资源充足，进程的资源请求都能够得到满足，死锁出现的可能性就很低，否则就会因争夺有限的资源而陷入死锁。其次，进程运行推进顺序与速度不同，也可能产生死锁。 产生死锁的四个必要条件：  互斥条件：一个资源每次只能被一个进程使用 请求与保持条件：一个进程因请求资源而阻塞时，对已获得的资源保持不放 不剥夺">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-concurrent/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#死锁、活锁和饥饿"><span class="toc-number">1.</span> <span class="toc-text">死锁、活锁和饥饿</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#happens-before原则"><span class="toc-number">2.</span> <span class="toc-text">happens-before原则</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#volatile作用"><span class="toc-number">3.</span> <span class="toc-text">volatile作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CAS"><span class="toc-number">4.</span> <span class="toc-text">CAS</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#LockSupport原理"><span class="toc-number">5.</span> <span class="toc-text">LockSupport原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AQS原理"><span class="toc-number">6.</span> <span class="toc-text">AQS原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ReentrantLock-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier的原理"><span class="toc-number">7.</span> <span class="toc-text">ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#BlockingQueue原理"><span class="toc-number">8.</span> <span class="toc-text">BlockingQueue原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#synchronized原理"><span class="toc-number">9.</span> <span class="toc-text">synchronized原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#锁的升级和降级"><span class="toc-number">10.</span> <span class="toc-text">锁的升级和降级</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#多种方式实现生产者和消费者模式"><span class="toc-number">11.</span> <span class="toc-text">多种方式实现生产者和消费者模式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RingBuffer"><span class="toc-number">12.</span> <span class="toc-text">RingBuffer</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-java-programmer-knowledge-concurrent" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java后端开发 - 并发
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2018/10/13/java-programmer-knowledge-concurrent/" class="article-date">
+	  <time datetime="2018-10-13T00:14:57.000Z" itemprop="datePublished">2018-10-13</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/java/">java</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/10/13/java-programmer-knowledge-concurrent/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="死锁、活锁和饥饿"><a href="#死锁、活锁和饥饿" class="headerlink" title="死锁、活锁和饥饿"></a>死锁、活锁和饥饿</h1><p>死锁产生的原因是：</p>
+<ul>
+<li>系统资源不足</li>
+<li>进程运行推进的顺序不正确</li>
+<li>资源分配不当等</li>
+</ul>
+<p>如果系统资源充足，进程的资源请求都能够得到满足，死锁出现的可能性就很低，否则就会因争夺有限的资源而陷入死锁。其次，进程运行推进顺序与速度不同，也可能产生死锁。</p>
+<p>产生死锁的四个必要条件：</p>
+<ul>
+<li>互斥条件：一个资源每次只能被一个进程使用</li>
+<li>请求与保持条件：一个进程因请求资源而阻塞时，对已获得的资源保持不放</li>
+<li>不剥夺条件:进程已获得的资源，在末使用完之前，不能强行剥夺</li>
+<li>循环等待条件:若干进程之间形成一种头尾相接的循环等待资源关系</li>
+</ul>
+<p>这四个条件是死锁的必要条件，只要系统发生死锁，这些条件必然成立，而只要上述条件之<br>一不满足，就不会发生死锁。</p>
+<p>死锁的解除与预防：<br>理解了死锁的原因，尤其是产生死锁的四个必要条件，就可以最大可能地避免、预防和<br>解除死锁。所以，在系统设计、进程调度等方面注意如何不让这四个必要条件成立，如何确<br>定资源的合理分配算法，避免进程永久占据系统资源。此外，也要防止进程在处于等待状态<br>的情况下占用资源。因此，对资源的分配要给予合理的规划。</p>
+<p>MySQL中比较常出现死锁问题，解决这类问题的方法是保证不同事物加锁的顺序一致，其次，不要使用共享锁（即select … lock in share mode和外健）。</p>
+<p>活锁和饥饿见<a href="https://docs.oracle.com/javase/tutorial/essential/concurrency/starvelive.html" target="_blank" rel="noopener">Starvation and Livelock</a>。饥饿是指在没有锁互相等待时也长时间获取不到锁，造成线程等待。活锁是指线程并未互相等待，而是一直在执行“重试”或者“谦让”的过程，线程状态还是RUN。</p>
+<h1 id="happens-before原则"><a href="#happens-before原则" class="headerlink" title="happens-before原则"></a>happens-before原则</h1><p>在共享内存的多处理器体系结构中，每个处理器都拥有自己的缓存，并且定期地与主内存进行协调。此时就存在处理器P1修改变量A时，在同步变量A到主内存之前，处理器P2读取变量A将是一个旧值。此类问题只能由程序来控制这种<strong>内存不一致</strong>的问题。</p>
+<p>Java为各种处理器体系不同的内存模型，抽象了Java自身的内存模型（Java Memory Model，或简称JMM）。所以Java内存模型不是一个具体的内存，而是抽象的内存，包括处理器多级缓存、寄存器缓存、处理器指令重排序、JVM指令重排序等。</p>
+<p>为了解决上述<strong>内存不一致</strong>的情况，Java需要根据自身的语言要求在特定位置插入内存栅栏来刷新缓存数据，保证内存数据和处理器中的缓存数据一致，或者禁止处理器重排序。</p>
+<p><strong>要想保证执行操作B的线程看到操作A的结果（无论A和B是否在同一个线程中执行），那么在A和B之间必须满足Happens-Before关系</strong>。如果两个操作之间缺乏Happends-Before关系，那么JVM可以对他们任意地重排序。</p>
+<p>Happens-Before的规则包括：</p>
+<ul>
+<li><strong>程序顺序规则</strong> 如果程序中操作A在操作B之前，那么线程中A操作将在B操作之前执行。如果A happens- before B，JMM并不要求A一定要在B之前执行。JMM仅仅要求前一个操作（执行的结果）对后一个操作可见，且前一个操作按顺序排在第二个操作之前；</li>
+<li><strong>监视器锁规则</strong> 在监视器锁上的解锁操作必须在同一个监视器锁上的加锁操作之前执行；</li>
+<li><strong>volatile变量规则</strong> 对volatile变量的写入操作必须在对该变量的读取操作之前执行；</li>
+<li><strong>线程启动规则</strong> 在线程上对<code>Thread.start()</code>的调用必须在该线程中执行任何操作之前执行；</li>
+<li><strong>线程结束规则</strong> 线程中的任何操作都必须在其他线程检测到该线程已经结束之前执行，或者从<code>Thread.join()</code>中成功返回，或者在调用<code>Thread.isAlive()</code>时返回<code>false</code>；</li>
+<li><strong>中断规则</strong> 当一个线程在另一个线程上调用<code>interrupt</code>时，必须在被中断线程检测到<code>interrupt</code>调用之前执行（通过抛出<code>InterruptedException</code>，或者调用<code>isInterrupted()</code>或<code>interrupted()</code>）；</li>
+<li><strong>终结器规则</strong> 对象的构造函数必须在启动该对象的终结器之前执行完成；</li>
+<li><strong>传递性</strong> 如果操作A在操作B之前执行，并且操作B在操作C之前执行，那么操作A必须在操作C之前执行。</li>
+</ul>
+<p>JVM可以保证在调用任何类的静态方法或者静态字段时，JVM都已经对类正确的执行了静态初始化，即调用类的静态初始化函数（<code>&lt;cinit&gt;</code>方法）是原子操作。</p>
+<p>JVM可以保证<code>final</code>字段可以在构造函数退出前完成初始化，不会把<code>final</code>字段初始化重排序到构造函数外执行（这里有个前提是在构造函数中没有把<code>this</code>逸出）。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FinalFieldExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> j;</span><br><span class="line">    <span class="keyword">private</span> FinalFieldExample self;</span><br><span class="line">    <span class="keyword">private</span> FinalFieldExample obj;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">FinalFieldExample</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        i = <span class="number">2</span>; <span class="comment">// JVM可能将 i = 2 重排序到构造函数外</span></span><br><span class="line">        j = <span class="number">5</span>; <span class="comment">// JVM不回将 j = 5 重排序到构造函数外</span></span><br><span class="line">        self = <span class="keyword">this</span>; <span class="comment">// this逸出，不安全的操作，因为该操作可能被重排序到 j = 5之前执行</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        obj = <span class="keyword">new</span> FinalFieldExample();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">read</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (obj == <span class="keyword">null</span>);</span><br><span class="line">        System.out.println(obj.i);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            FinalFieldExample.write();</span><br><span class="line">        &#125;);</span><br><span class="line">        t1.start();</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            FinalFieldExample.read();</span><br><span class="line">        &#125;);</span><br><span class="line">        t2.start();</span><br><span class="line">        <span class="comment">// t2线程调用read时会检查obj是否为null，如果不为null，打印变量i的值</span></span><br><span class="line">        <span class="comment">// t1线程调用write，由于write操作可能执行的是先将引用赋值给obj，然后执行 i = 2的初始化</span></span><br><span class="line">        <span class="comment">// 而当t1线程执行将引用赋值给obj值执行t2，t2读到obj引用存在，于是打印i，但此时i还未初始化</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于指令重排序的原因，对于<a href="https://blog.csdn.net/jiankunking/article/details/73012648" target="_blank" rel="noopener">“双重检查加锁“（double check lock）</a>也是不安全的操作。</p>
+<p>延伸阅读：</p>
+<ul>
+<li><a href="http://www.infoq.com/cn/articles/java-memory-model-1" target="_blank" rel="noopener">深入理解Java内存模型（一）——基础</a></li>
+<li><a href="http://www.infoq.com/cn/articles/java-memory-model-2" target="_blank" rel="noopener">深入理解Java内存模型（二）——重排序</a></li>
+<li><a href="http://www.infoq.com/cn/articles/java-memory-model-3" target="_blank" rel="noopener">深入理解Java内存模型（三）——顺序一致性</a></li>
+<li><a href="http://www.infoq.com/cn/articles/java-memory-model-4" target="_blank" rel="noopener">深入理解Java内存模型（四）——volatile</a></li>
+<li><a href="http://www.infoq.com/cn/articles/java-memory-model-5" target="_blank" rel="noopener">深入理解Java内存模型（五）——锁</a></li>
+<li><a href="http://www.infoq.com/cn/articles/java-memory-model-6" target="_blank" rel="noopener">深入理解Java内存模型（六）——final</a></li>
+</ul>
+<h1 id="volatile作用"><a href="#volatile作用" class="headerlink" title="volatile作用"></a>volatile作用</h1><p>volatile有两个作用，一个是将long和double类型的读取和写入操作原子化（由于long和double是64位，JVM内部会将long和double的操作分为两个32位的操作，而且不是原子操作），另一个是控制变量线程间的可见性（<strong>volatile变量规则</strong>规定对volatile变量的写入操作必须在对该变量的读取操作之前执行）。</p>
+<p>如果一个int类型变量i被volatile修饰，那么<code>i++</code>操作并不是线程安全的操作。<code>volatile</code>只能保证变量读取和写入是原子性，且读取变量时会刷新缓存，保证线程间的可见性。而<code>i++</code>操作包含3个操作，首先是读取变量到临时变量中，然后临时变量加1，再将临时变量写入，这3个操作合起来并不是原子操作，所以不是线程安全的。</p>
+<h1 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h1><p>CAS是“Compare And Swap”的简称，中文含义是“比较并交换”。CAS操作基于CPU提供的原子操作指令实现。</p>
+<p>从intel的<a href="https://c9x.me/x86/html/file_module_x86_id_41.html" target="_blank" rel="noopener">CMPXCHG</a>指令来看，CAS的操作流程是比较旧值是否与期望的值一致，如果一致将ZF程序状态字打开，将新值写入。如果与期望的值不一致将ZF程序状态字清除。因此程序可以通过检查ZF来判断CAS操作是否为预期操作，如果不是，读取新写入的值，再次进行CAS操作。所以CAS操作一般都是放在循环中执行。</p>
+<p>Java实现CAS操作依然是靠底层处理器来完成，CAS操作方法定义在<code>sun.misc.Unsafe</code>，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically update Java variable to &lt;tt&gt;x&lt;/tt&gt; if it is currently</span></span><br><span class="line"><span class="comment"> * holding &lt;tt&gt;expected&lt;/tt&gt;.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &lt;tt&gt;true&lt;/tt&gt; if successful</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapObject</span><span class="params">(Object o, <span class="keyword">long</span> offset,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                 Object expected,</span></span></span><br><span class="line"><span class="function"><span class="params">                                                 Object x)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically update Java variable to &lt;tt&gt;x&lt;/tt&gt; if it is currently</span></span><br><span class="line"><span class="comment"> * holding &lt;tt&gt;expected&lt;/tt&gt;.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &lt;tt&gt;true&lt;/tt&gt; if successful</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapInt</span><span class="params">(Object o, <span class="keyword">long</span> offset,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              <span class="keyword">int</span> expected,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              <span class="keyword">int</span> x)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically update Java variable to &lt;tt&gt;x&lt;/tt&gt; if it is currently</span></span><br><span class="line"><span class="comment"> * holding &lt;tt&gt;expected&lt;/tt&gt;.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &lt;tt&gt;true&lt;/tt&gt; if successful</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapLong</span><span class="params">(Object o, <span class="keyword">long</span> offset,</span></span></span><br><span class="line"><span class="function"><span class="params">                                               <span class="keyword">long</span> expected,</span></span></span><br><span class="line"><span class="function"><span class="params">                                               <span class="keyword">long</span> x)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>方法都是<code>native</code>，会调用C++代码来完成。</p>
+<p>程序中会要求很多计算操作（比如自增）为原子操作，而就算一个int类型变量被声明为<code>volatile</code>也不能保证<code>++</code>操作是原子性，一般就会使用加锁的方式来保证原子性。但是加锁效率太低，因此需要使用CAS操作，因为CAS操作是无锁操作，并发性高。Java提供了<code>AtomicInteger</code>（还有<code>AtomicLong</code>）类，它提供了很多CAS操作（比如自增）。<code>getAndIncrement</code>是自增操作的方法，定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getAndIncrement</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">           <span class="keyword">int</span> current = get();</span><br><span class="line">           <span class="keyword">int</span> next = current + <span class="number">1</span>;</span><br><span class="line">           <span class="keyword">if</span> (compareAndSet(current, next))</span><br><span class="line">               <span class="keyword">return</span> current;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码表明CAS操作是放在一个for循环中完成，每次循环都是获取变量的最新值，然后加1，CAS操作，如果不成功，再循环一次，总有一次会成功。</p>
+<p><strong>ABA</strong>问题是无锁结构实现中常见的一种问题，可基本表述为：</p>
+<ol>
+<li>进程P1读取了一个数值A</li>
+<li>P1被挂起(时间片耗尽、中断等)，进程P2开始执行</li>
+<li>P2修改数值A为数值B，然后又修改回A</li>
+<li>P1被唤醒，比较后发现数值A没有变化，程序继续执行。</li>
+</ol>
+<p>ABA问题可能会导致灾难性的后果，因此在某些场景需要使用特殊的方法解决<strong>ABA</strong>问题。目前解决<strong>ABA</strong>问题的方法是使用一个修改次数的变量作为版本号。Java提供的<code>AtomicStampedReference</code>也是基于版本控制来解决<strong>ABA</strong>问题。<code>AtomicStampedReference</code>的比较替换方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">compareAndSet</span><span class="params">(V   expectedReference,</span></span></span><br><span class="line"><span class="function"><span class="params">                             V   newReference,</span></span></span><br><span class="line"><span class="function"><span class="params">                             <span class="keyword">int</span> expectedStamp,</span></span></span><br><span class="line"><span class="function"><span class="params">                             <span class="keyword">int</span> newStamp)</span> </span>&#123;</span><br><span class="line">    Pair&lt;V&gt; current = pair;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">        expectedReference == current.reference &amp;&amp;</span><br><span class="line">        expectedStamp == current.stamp &amp;&amp;</span><br><span class="line">        ((newReference == current.reference &amp;&amp;</span><br><span class="line">          newStamp == current.stamp) ||</span><br><span class="line">         casPair(current, Pair.of(newReference, newStamp)));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">casPair</span><span class="params">(Pair&lt;V&gt; cmp, Pair&lt;V&gt; val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> UNSAFE.compareAndSwapObject(<span class="keyword">this</span>, pairOffset, cmp, val);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="LockSupport原理"><a href="#LockSupport原理" class="headerlink" title="LockSupport原理"></a>LockSupport原理</h1><p>LockSupport提供了<code>park</code>和<code>unpark</code>方法用于阻塞线程和解除线程阻塞，调用<code>park</code>方法时还可以传一个<code>Blocker</code>参数，指明线程阻塞的对象，可以用于线程调试。使用<code>jstack</code>来dump线程栈信息时看到<code>parking to wait for  &lt;0x0000000708f32990&gt;</code>，0x0000000708f32990这个地址的对象就是<code>Blocker</code>，如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&quot;scheduler-200&quot; prio=10 tid=0x00007fbfc8018000 nid=0x48d9 waiting on condition [0x00007fbe6d7d6000]</span><br><span class="line">   java.lang.Thread.State: WAITING (parking)</span><br><span class="line">        at sun.misc.Unsafe.park(Native Method)</span><br><span class="line">        - parking to wait for  &lt;0x0000000708f32990&gt; (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)</span><br><span class="line">        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)</span><br><span class="line">        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)</span><br><span class="line">        at java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1085)</span><br><span class="line">        at java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:807)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1068)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)</span><br><span class="line">        at java.lang.Thread.run(Thread.java:745)</span><br></pre></td></tr></table></figure>
+<p><code>park</code>和<code>unpark</code>方法分别调用<code>sun.misc.Unsafe</code>的<code>park</code>和<code>unpark</code>方法，这两个方法的签名如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">unpark</span><span class="params">(Object thread)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">park</span><span class="params">(<span class="keyword">boolean</span> isAbsolute, <span class="keyword">long</span> time)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sun.misc.Unsafe.park</code>和<code>sun.misc.Unsafe.unpark</code>都是native方法，由C++代码调用操作系统API实现。不同操作系统有不同实现方式，本文以Linux平台的实现方式叙述<code>sun.misc.Unsafe.park</code>和<code>sun.misc.Unsafe.unpark</code>是如何实现的。Linux实现的代码在文件<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/os/linux/vm/os_linux.cpp" target="_blank" rel="noopener">hotspot/src/os/linux/vm/os_linux.cpp</a>中，方法定义如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> Parker::park(<span class="keyword">bool</span> isAbsolute, jlong time) &#123;</span><br><span class="line">  <span class="comment">// Ideally we'd do something useful while spinning, such</span></span><br><span class="line">  <span class="comment">// as calling unpackTime().</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Optional fast-path check:</span></span><br><span class="line">  <span class="comment">// Return immediately if a permit is available.</span></span><br><span class="line">  <span class="comment">// We depend on Atomic::xchg() having full barrier semantics</span></span><br><span class="line">  <span class="comment">// since we are doing a lock-free update to _counter.</span></span><br><span class="line">  <span class="keyword">if</span> (Atomic::xchg(<span class="number">0</span>, &amp;_counter) &gt; <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  Thread* thread = Thread::current();</span><br><span class="line">  assert(thread-&gt;is_Java_thread(), <span class="string">"Must be JavaThread"</span>);</span><br><span class="line">  JavaThread *jt = (JavaThread *)thread;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Optional optimization -- avoid state transitions if there's an interrupt pending.</span></span><br><span class="line">  <span class="comment">// Check interrupt before trying to wait</span></span><br><span class="line">  <span class="keyword">if</span> (Thread::is_interrupted(thread, <span class="literal">false</span>)) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Next, demultiplex/decode time arguments</span></span><br><span class="line">  timespec absTime;</span><br><span class="line">  <span class="keyword">if</span> (time &lt; <span class="number">0</span> || (isAbsolute &amp;&amp; time == <span class="number">0</span>) ) &#123; <span class="comment">// don't wait at all</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (time &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    unpackTime(&amp;absTime, isAbsolute, time);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Enter safepoint region</span></span><br><span class="line">  <span class="comment">// Beware of deadlocks such as 6317397.</span></span><br><span class="line">  <span class="comment">// The per-thread Parker:: mutex is a classic leaf-lock.</span></span><br><span class="line">  <span class="comment">// In particular a thread must never block on the Threads_lock while</span></span><br><span class="line">  <span class="comment">// holding the Parker:: mutex.  If safepoints are pending both the</span></span><br><span class="line">  <span class="comment">// the ThreadBlockInVM() CTOR and DTOR may grab Threads_lock.</span></span><br><span class="line">  <span class="function">ThreadBlockInVM <span class="title">tbivm</span><span class="params">(jt)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Don't wait if cannot get lock since interference arises from</span></span><br><span class="line">  <span class="comment">// unblocking.  Also. check interrupt before trying wait</span></span><br><span class="line">  <span class="keyword">if</span> (Thread::is_interrupted(thread, <span class="literal">false</span>) || pthread_mutex_trylock(_mutex) != <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> status ;</span><br><span class="line">  <span class="keyword">if</span> (_counter &gt; <span class="number">0</span>)  &#123; <span class="comment">// no wait needed</span></span><br><span class="line">    _counter = <span class="number">0</span>;</span><br><span class="line">    status = pthread_mutex_unlock(_mutex);</span><br><span class="line">    assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">    <span class="comment">// Paranoia to ensure our locked and lock-free paths interact</span></span><br><span class="line">    <span class="comment">// correctly with each other and Java-level accesses.</span></span><br><span class="line">    OrderAccess::fence();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> ASSERT</span></span><br><span class="line">  <span class="comment">// Don't catch signals while blocked; let the running threads have the signals.</span></span><br><span class="line">  <span class="comment">// (This allows a debugger to break into the running thread.)</span></span><br><span class="line">  <span class="keyword">sigset_t</span> oldsigs;</span><br><span class="line">  <span class="keyword">sigset_t</span>* allowdebug_blocked = os::Linux::allowdebug_blocked_signals();</span><br><span class="line">  pthread_sigmask(SIG_BLOCK, allowdebug_blocked, &amp;oldsigs);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">  OSThreadWaitState osts(thread-&gt;osthread(), false /* not Object.wait() */);</span><br><span class="line">  jt-&gt;set_suspend_equivalent();</span><br><span class="line">  <span class="comment">// cleared by handle_special_suspend_equivalent_condition() or java_suspend_self()</span></span><br><span class="line">  assert(_cur_index == <span class="number">-1</span>, <span class="string">"invariant"</span>);</span><br><span class="line">  <span class="keyword">if</span> (time == <span class="number">0</span>) &#123;</span><br><span class="line">    _cur_index = REL_INDEX; <span class="comment">// arbitrary choice when not timed</span></span><br><span class="line">    status = pthread_cond_wait (&amp;_cond[_cur_index], _mutex) ;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    _cur_index = isAbsolute ? ABS_INDEX : REL_INDEX;</span><br><span class="line">    status = os::Linux::safe_cond_timedwait (&amp;_cond[_cur_index], _mutex, &amp;absTime) ;</span><br><span class="line">    <span class="keyword">if</span> (status != <span class="number">0</span> &amp;&amp; WorkAroundNPTLTimedWaitHang) &#123;</span><br><span class="line">      pthread_cond_destroy (&amp;_cond[_cur_index]) ;</span><br><span class="line">      pthread_cond_init    (&amp;_cond[_cur_index], isAbsolute ? <span class="literal">NULL</span> : os::Linux::condAttr());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  _cur_index = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  assert_status(status == <span class="number">0</span> || status == EINTR ||</span><br><span class="line">                status == ETIME || status == ETIMEDOUT,</span><br><span class="line">                status, <span class="string">"cond_timedwait"</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> ASSERT</span></span><br><span class="line">  pthread_sigmask(SIG_SETMASK, &amp;oldsigs, <span class="literal">NULL</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">  _counter = <span class="number">0</span> ;</span><br><span class="line">  status = pthread_mutex_unlock(_mutex) ;</span><br><span class="line">  assert_status(status == <span class="number">0</span>, status, <span class="string">"invariant"</span>) ;</span><br><span class="line">  <span class="comment">// Paranoia to ensure our locked and lock-free paths interact</span></span><br><span class="line">  <span class="comment">// correctly with each other and Java-level accesses.</span></span><br><span class="line">  OrderAccess::fence();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// If externally suspended while waiting, re-suspend</span></span><br><span class="line">  <span class="keyword">if</span> (jt-&gt;handle_special_suspend_equivalent_condition()) &#123;</span><br><span class="line">    jt-&gt;java_suspend_self();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> Parker::unpark() &#123;</span><br><span class="line">  <span class="keyword">int</span> s, status ;</span><br><span class="line">  status = pthread_mutex_lock(_mutex);</span><br><span class="line">  assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">  s = _counter;</span><br><span class="line">  _counter = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">if</span> (s &lt; <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="comment">// thread might be parked</span></span><br><span class="line">    <span class="keyword">if</span> (_cur_index != <span class="number">-1</span>) &#123;</span><br><span class="line">      <span class="comment">// thread is definitely parked</span></span><br><span class="line">      <span class="keyword">if</span> (WorkAroundNPTLTimedWaitHang) &#123;</span><br><span class="line">        status = pthread_cond_signal (&amp;_cond[_cur_index]);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">        status = pthread_mutex_unlock(_mutex);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        status = pthread_mutex_unlock(_mutex);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">        status = pthread_cond_signal (&amp;_cond[_cur_index]);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      pthread_mutex_unlock(_mutex);</span><br><span class="line">      assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    pthread_mutex_unlock(_mutex);</span><br><span class="line">    assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当调用<code>Parker::unpark</code>方法时，首先获取<code>_mutex</code>的锁，<code>pthread_mutex_lock</code>函数是阻塞方法，只有线程获取了<code>_mutex</code>的锁时函数才会返回0，否则阻塞，直到获取<code>_mutex</code>的锁。获取了<code>_mutex</code>的锁后将许可<code>_counter</code>备份在本地变量<code>s</code>中，将其赋值为1。如果许可<code>_counter</code>旧值<code>s</code>小于1，表示线程可能调用了<code>Parker::park</code>方法。如果<code>_cur_index</code>的值大于等于0，表示线程已经调用了<code>Parker::park</code>方法并通过系统函数<code>pthread_cond_wait</code>将该线程阻塞等待<code>_cur_index</code>条件变量的信号通知。此时需要调用<code>pthread_cond_signal</code>函数向阻塞的线程发送信号通知，解除线程阻塞。</p>
+<p>当调用<code>Parker::park</code>方法时，先将许可<code>_counter</code>置为0，实现的方式是使用<code>Atomic::xchg</code>方法完成，该方法的定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> jint     Atomic::xchg    (jint     exchange_value, <span class="keyword">volatile</span> jint*     dest) &#123;</span><br><span class="line">  __<span class="function">asm__ <span class="title">volatile</span> <span class="params">(  <span class="string">"xchgl (%2),%0"</span></span></span></span><br><span class="line"><span class="function"><span class="params">                    : <span class="string">"=r"</span> (exchange_value)</span></span></span><br><span class="line">                    : "0" (exchange_value), "r" (dest)</span><br><span class="line">                    : <span class="string">"memory"</span>);</span><br><span class="line">  <span class="keyword">return</span> exchange_value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Atomic::xchg</code>的方法的工作方式类似于<code>swap</code>置换变量的方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dest -&gt; TEMP</span><br><span class="line">exchange_value -&gt; dest</span><br><span class="line">TEMP -&gt; exchange_value</span><br></pre></td></tr></table></figure>
+<p><code>xchg</code>汇编指令描述可参考<a href="https://docs.oracle.com/cd/E19620-01/805-4693/instructionset-124/index.html" target="_blank" rel="noopener">Exchange Register / Memory With Register (xchg)</a>，<code>__asm__</code>语法可参考<a href="http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html" target="_blank" rel="noopener">GCC Inline Assembly HOWTO</a>。</p>
+<p>如果<code>Atomic::xchg(0, &amp;_counter) &gt; 0</code>为<code>true</code>时，表示许可<code>_counter</code>值为1，表示该线程处于<code>unpark</code>状态，此时函数返回，并未让线程阻塞。这需要上层程序在循环中判断线程是否可以获取某个资源，不能获取资源时则调用<code>park</code>方法，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Block while not first in queue or cannot acquire lock</span></span><br><span class="line"><span class="keyword">while</span> (waiters.peek() != current ||</span><br><span class="line">       !locked.compareAndSet(<span class="keyword">false</span>, <span class="keyword">true</span>)) &#123;</span><br><span class="line">   LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">   <span class="keyword">if</span> (Thread.interrupted()) <span class="comment">// ignore interrupts while waiting</span></span><br><span class="line">     wasInterrupted = <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当第一次执行循环体，调用<code>LockSupport.park(this);</code>时线程未阻塞，则<code>while</code>循环的条件需要让该线程继续获取资源，如果获取失败，则继续调用<code>LockSupport.park(this)</code>方法。此时<code>Atomic::xchg(0, &amp;_counter) &gt; 0</code>为<code>false</code>，此时<code>Parker::park</code>方法将会尝试阻塞该线程。事实上，<strong><code>park</code> 方法还可以在其他任何时间“毫无理由”地返回，因此通常必须在重新检查返回条件的循环里调用此方法</strong>。可以认为当调用<code>Parker::unpark</code>时，许可<code>_counter</code>置为1，当调用<code>Parker::park</code>时，如果许可<code>_counter</code>为1，将许可<code>_counter</code>置为0并返回，否则等待许可<code>_counter</code>。这个过程类似于信号量，不同的是许可不能累加，最大值为1。</p>
+<p><code>ThreadBlockInVM</code>的功能是插入内存栅栏，防止CPU对代码进行重排序，将线程的工作内存都刷新。<code>ThreadBlockInVM</code>在<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/interfaceSupport.hpp" target="_blank" rel="noopener">hotspot/src/share/vm/runtime/interfaceSupport</a>中定义，如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ThreadBlockInVM</span> :</span> <span class="keyword">public</span> ThreadStateTransition &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ThreadBlockInVM(JavaThread *thread)</span><br><span class="line">  : ThreadStateTransition(thread) &#123;</span><br><span class="line">    <span class="comment">// Once we are blocked vm expects stack to be walkable</span></span><br><span class="line">    thread-&gt;frame_anchor()-&gt;make_walkable(thread);</span><br><span class="line">    trans_and_fence(_thread_in_vm, _thread_blocked);</span><br><span class="line">  &#125;</span><br><span class="line">  ~ThreadBlockInVM() &#123;</span><br><span class="line">    trans_and_fence(_thread_blocked, _thread_in_vm);</span><br><span class="line">    <span class="comment">// We don't need to clear_walkable because it will happen automagically when we return to java</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>Parker::park</code>方法会调用<code>pthread_mutex_trylock</code>函数尝试获取<code>_mutex</code>的锁，该函数并非阻塞模式，因此如果无法获取锁，<code>Parker::park</code>方法会立即返回。此时调用<code>LockSupport.park(this)</code>的循环体会一直执行，要么该线程能够获得资源，否则继续调用<code>LockSupport.park(this)</code>方法，<code>Parker::park</code>将再次尝试获取<code>_mutex</code>的锁。如果<code>_mutex</code>的锁获取成功，检查许可<code>_counter</code>的值，如果大于0，表示该线程执行了<code>Parker::unpark</code>方法将许可<code>_counter</code>置为1，函数释放锁后立即返回，在下次循环中将许可<code>_counter</code>置为0；如果小于0，则调用<code>pthread_cond_wait</code>函数阻塞该线程，此时完成了线程阻塞操作。</p>
+<p><code>unpark</code>方法可以先于<code>park</code>调用。使用<code>os::Linux::safe_cond_timedwait</code>方法可以设置等待一个互斥变量的超时时间。</p>
+<h1 id="AQS原理"><a href="#AQS原理" class="headerlink" title="AQS原理"></a>AQS原理</h1><p>AQS是<code>AbstractQueuedSynchronizer</code>类的简称，它是<code>java.concurrent.util</code>包里各种独占锁或者共享锁（包括<code>ReentrantLock</code>和<code>Semaphore</code>等）实现的基础。</p>
+<p>AQS使用一个<code>volatile int state</code>表示同步状态，并使用CAS操作保证条件判断与值更新的原子性。线程阻塞和唤醒使用<code>LockSupport.park()</code>和<code>LockSupport.unpark()</code>完成，使用FIFO队列管理阻塞的线程。</p>
+<p>AQS使用下列方法实现独占锁和共享锁：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 独占锁</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">release</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 共享锁</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquireShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">releaseShared</span><span class="params">(<span class="keyword">int</span> arg)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>独占锁或者共享锁是否能够获取（<code>acquire</code>或者<code>acquireShared</code>）或者释放（<code>release</code>或者<code>releaseShared</code>），需要由子类实现下列抽象方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 独占锁</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> arg)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">tryRelease</span><span class="params">(<span class="keyword">int</span> arg)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 共享锁</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">tryAcquireShared</span><span class="params">(<span class="keyword">int</span> arg)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">tryReleaseShared</span><span class="params">(<span class="keyword">int</span> arg)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这是典型的<code>模板方法</code>使用案例。</p>
+<p>操作<code>state</code>的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getState</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">compareAndSetState</span><span class="params">(<span class="keyword">int</span> expect, <span class="keyword">int</span> update)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">setState</span><span class="params">(<span class="keyword">int</span> newState)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>AQS的<code>release</code>方法的实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">release</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (tryRelease(arg)) &#123;</span><br><span class="line">        Node h = head;</span><br><span class="line">        <span class="keyword">if</span> (h != <span class="keyword">null</span> &amp;&amp; h.waitStatus != <span class="number">0</span>)</span><br><span class="line">            unparkSuccessor(h);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">unparkSuccessor</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * If status is negative (i.e., possibly needing signal) try</span></span><br><span class="line"><span class="comment">     * to clear in anticipation of signalling.  It is OK if this</span></span><br><span class="line"><span class="comment">     * fails or if status is changed by waiting thread.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">int</span> ws = node.waitStatus;</span><br><span class="line">    <span class="keyword">if</span> (ws &lt; <span class="number">0</span>)</span><br><span class="line">        compareAndSetWaitStatus(node, ws, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * Thread to unpark is held in successor, which is normally</span></span><br><span class="line"><span class="comment">     * just the next node.  But if cancelled or apparently null,</span></span><br><span class="line"><span class="comment">     * traverse backwards from tail to find the actual</span></span><br><span class="line"><span class="comment">     * non-cancelled successor.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    Node s = node.next;</span><br><span class="line">    <span class="keyword">if</span> (s == <span class="keyword">null</span> || s.waitStatus &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        s = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">for</span> (Node t = tail; t != <span class="keyword">null</span> &amp;&amp; t != node; t = t.prev)</span><br><span class="line">            <span class="keyword">if</span> (t.waitStatus &lt;= <span class="number">0</span>)</span><br><span class="line">                s = t;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s != <span class="keyword">null</span>)</span><br><span class="line">        LockSupport.unpark(s.thread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AQS的<code>acquire</code>方法的实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">        selfInterrupt();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">addWaiter</span><span class="params">(Node mode)</span> </span>&#123;</span><br><span class="line">    Node node = <span class="keyword">new</span> Node(Thread.currentThread(), mode);</span><br><span class="line">    <span class="comment">// Try the fast path of enq; backup to full enq on failure</span></span><br><span class="line">    Node pred = tail;</span><br><span class="line">    <span class="keyword">if</span> (pred != <span class="keyword">null</span>) &#123;</span><br><span class="line">        node.prev = pred;</span><br><span class="line">        <span class="keyword">if</span> (compareAndSetTail(pred, node)) &#123;</span><br><span class="line">            pred.next = node;</span><br><span class="line">            <span class="keyword">return</span> node;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    enq(node);</span><br><span class="line">    <span class="keyword">return</span> node;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">enq</span><span class="params">(<span class="keyword">final</span> Node node)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        Node t = tail;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="keyword">null</span>) &#123; <span class="comment">// Must initialize</span></span><br><span class="line">            <span class="keyword">if</span> (compareAndSetHead(<span class="keyword">new</span> Node()))</span><br><span class="line">                tail = head;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            node.prev = t;</span><br><span class="line">            <span class="keyword">if</span> (compareAndSetTail(t, node)) &#123;</span><br><span class="line">                t.next = node;</span><br><span class="line">                <span class="keyword">return</span> t;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">acquireQueued</span><span class="params">(<span class="keyword">final</span> Node node, <span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">            <span class="keyword">if</span> (p == head &amp;&amp; tryAcquire(arg)) &#123;</span><br><span class="line">                setHead(node);</span><br><span class="line">                p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                failed = <span class="keyword">false</span>;</span><br><span class="line">                <span class="keyword">return</span> interrupted;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                parkAndCheckInterrupt())</span><br><span class="line">                interrupted = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (failed)</span><br><span class="line">            cancelAcquire(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">parkAndCheckInterrupt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">return</span> Thread.interrupted();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AQS的<code>acquireShare</code>方法的实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquireShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (tryAcquireShared(arg) &lt; <span class="number">0</span>)</span><br><span class="line">        doAcquireShared(arg);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doAcquireShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Node node = addWaiter(Node.SHARED);</span><br><span class="line">    <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">            <span class="keyword">if</span> (p == head) &#123;</span><br><span class="line">                <span class="keyword">int</span> r = tryAcquireShared(arg);</span><br><span class="line">                <span class="keyword">if</span> (r &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                    setHeadAndPropagate(node, r);</span><br><span class="line">                    p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                    <span class="keyword">if</span> (interrupted)</span><br><span class="line">                        selfInterrupt();</span><br><span class="line">                    failed = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                parkAndCheckInterrupt())</span><br><span class="line">                interrupted = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (failed)</span><br><span class="line">            cancelAcquire(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setHeadAndPropagate</span><span class="params">(Node node, <span class="keyword">int</span> propagate)</span> </span>&#123;</span><br><span class="line">    Node h = head; <span class="comment">// Record old head for check below</span></span><br><span class="line">    setHead(node);</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * Try to signal next queued node if:</span></span><br><span class="line"><span class="comment">     *   Propagation was indicated by caller,</span></span><br><span class="line"><span class="comment">     *     or was recorded (as h.waitStatus) by a previous operation</span></span><br><span class="line"><span class="comment">     *     (note: this uses sign-check of waitStatus because</span></span><br><span class="line"><span class="comment">     *      PROPAGATE status may transition to SIGNAL.)</span></span><br><span class="line"><span class="comment">     * and</span></span><br><span class="line"><span class="comment">     *   The next node is waiting in shared mode,</span></span><br><span class="line"><span class="comment">     *     or we don't know, because it appears null</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * The conservatism in both of these checks may cause</span></span><br><span class="line"><span class="comment">     * unnecessary wake-ups, but only when there are multiple</span></span><br><span class="line"><span class="comment">     * racing acquires/releases, so most need signals now or soon</span></span><br><span class="line"><span class="comment">     * anyway.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (propagate &gt; <span class="number">0</span> || h == <span class="keyword">null</span> || h.waitStatus &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        Node s = node.next;</span><br><span class="line">        <span class="keyword">if</span> (s == <span class="keyword">null</span> || s.isShared())</span><br><span class="line">            doReleaseShared();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AQS的<code>releaseShare</code>方法的实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">releaseShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (tryReleaseShared(arg)) &#123;</span><br><span class="line">        doReleaseShared();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doReleaseShared</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * Ensure that a release propagates, even if there are other</span></span><br><span class="line"><span class="comment">     * in-progress acquires/releases.  This proceeds in the usual</span></span><br><span class="line"><span class="comment">     * way of trying to unparkSuccessor of head if it needs</span></span><br><span class="line"><span class="comment">     * signal. But if it does not, status is set to PROPAGATE to</span></span><br><span class="line"><span class="comment">     * ensure that upon release, propagation continues.</span></span><br><span class="line"><span class="comment">     * Additionally, we must loop in case a new node is added</span></span><br><span class="line"><span class="comment">     * while we are doing this. Also, unlike other uses of</span></span><br><span class="line"><span class="comment">     * unparkSuccessor, we need to know if CAS to reset status</span></span><br><span class="line"><span class="comment">     * fails, if so rechecking.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        Node h = head;</span><br><span class="line">        <span class="keyword">if</span> (h != <span class="keyword">null</span> &amp;&amp; h != tail) &#123;</span><br><span class="line">            <span class="keyword">int</span> ws = h.waitStatus;</span><br><span class="line">            <span class="keyword">if</span> (ws == Node.SIGNAL) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!compareAndSetWaitStatus(h, Node.SIGNAL, <span class="number">0</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;            <span class="comment">// loop to recheck cases</span></span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (ws == <span class="number">0</span> &amp;&amp;</span><br><span class="line">                     !compareAndSetWaitStatus(h, <span class="number">0</span>, Node.PROPAGATE))</span><br><span class="line">                <span class="keyword">continue</span>;                <span class="comment">// loop on failed CAS</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (h == head)                   <span class="comment">// loop if head changed</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当调用<code>tryAcquire()</code>返回true或者<code>tryAcquireShared()</code>返回值大于0时，线程不需要阻塞。否则需要向FIFO队列添加一个节点（包括当前线程对象信息），阻塞该线程，然后进入<code>acquireQueued</code>循环，不停的尝试获取锁。当获取锁成功时，需要退出<code>acquireQueued</code>，同时需要判断后续节点是否为共享模式，如果是，需要将后续线程也唤醒。</p>
+<p>当调用<code>tryRelease()</code>返回true或者<code>tryReleaseShared()</code>返回值大于0时，唤醒FIFO队列head的线程。</p>
+<p><code>Condition</code>是AQS定义的内部类<code>ConditionObject</code>，必须与独占锁一起使用，它提供了<code>await</code>、<code>signal</code>和<code>signalAll</code>方法来弥补<code>Object.wait()</code>、<code>Object.notify()</code>和<code>Object.notifyAll()</code>的缺陷。<code>Condition</code>内部也提供了一个FIFO队列。当调用<code>await</code>方法时，释放锁，将当前线程添加到<code>Condition</code>的FIFO队列中，阻塞线程，当线程唤醒时需要判断该节点是否进入了AQS的FIFO锁等待队列，如果已入队列，则进入<code>acquireQueued</code>循环获取锁，否则线程继续阻塞。当调用<code>signal</code>时，需要将<code>Condition</code>的FIFO队列的第一个线程移动到AQS的FIFO队列中，进入锁等待队列。</p>
+<p><code>ConditionObject</code>的<code>wait</code>方法和<code>signal</code>方法实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (Thread.interrupted())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">    Node node = addConditionWaiter();</span><br><span class="line">    <span class="keyword">int</span> savedState = fullyRelease(node);</span><br><span class="line">    <span class="keyword">int</span> interruptMode = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (!isOnSyncQueue(node)) &#123;</span><br><span class="line">        LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> ((interruptMode = checkInterruptWhileWaiting(node)) != <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)</span><br><span class="line">        interruptMode = REINTERRUPT;</span><br><span class="line">    <span class="keyword">if</span> (node.nextWaiter != <span class="keyword">null</span>) <span class="comment">// clean up if cancelled</span></span><br><span class="line">        unlinkCancelledWaiters();</span><br><span class="line">    <span class="keyword">if</span> (interruptMode != <span class="number">0</span>)</span><br><span class="line">        reportInterruptAfterWait(interruptMode);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">signal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!isHeldExclusively())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalMonitorStateException();</span><br><span class="line">    Node first = firstWaiter;</span><br><span class="line">    <span class="keyword">if</span> (first != <span class="keyword">null</span>)</span><br><span class="line">        doSignal(first);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doSignal</span><span class="params">(Node first)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> ( (firstWaiter = first.nextWaiter) == <span class="keyword">null</span>)</span><br><span class="line">            lastWaiter = <span class="keyword">null</span>;</span><br><span class="line">        first.nextWaiter = <span class="keyword">null</span>;</span><br><span class="line">    &#125; <span class="keyword">while</span> (!transferForSignal(first) &amp;&amp;</span><br><span class="line">             (first = firstWaiter) != <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">transferForSignal</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * If cannot change waitStatus, the node has been cancelled.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (!compareAndSetWaitStatus(node, Node.CONDITION, <span class="number">0</span>))</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * Splice onto queue and try to set waitStatus of predecessor to</span></span><br><span class="line"><span class="comment">     * indicate that thread is (probably) waiting. If cancelled or</span></span><br><span class="line"><span class="comment">     * attempt to set waitStatus fails, wake up to resync (in which</span></span><br><span class="line"><span class="comment">     * case the waitStatus can be transiently and harmlessly wrong).</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    Node p = enq(node);</span><br><span class="line">    <span class="keyword">int</span> ws = p.waitStatus;</span><br><span class="line">    <span class="keyword">if</span> (ws &gt; <span class="number">0</span> || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))</span><br><span class="line">        LockSupport.unpark(node.thread);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="ReentrantLock-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier的原理"><a href="#ReentrantLock-Semaphore-ReadWriteLock-CountDownLatch-CyclicBarrier的原理" class="headerlink" title="ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理"></a>ReentrantLock,Semaphore,ReadWriteLock,CountDownLatch,CyclicBarrier的原理</h1><p><strong>1).ReentrantLock</strong></p>
+<p><code>ReentrantLock</code>是可重入互斥锁，使用AQS独占锁实现。<code>ReentrantLock</code>的成员变量<code>Sync</code>实现了<code>AbstractQueuedSynchronizier</code>，内部类<code>FairSync</code>和<code>NonfairSync</code>分别实现了公平锁和非公平锁。可重入机制需要使用<code>setExclusiveOwnerThread</code>和<code>getExclusiveOwnerThread</code>方法设置和获取独占锁的线程。</p>
+<p>非公平锁的实现方式比较简单，首先尝试抢占锁（<code>compareAndSetState(0, 1)</code>），如果抢占失败时进入等待队列；如果抢占成功则不进入等待队列，线程继续执行。</p>
+<p>公平锁则需要检查等待队列是否存在前驱节点，如果存在，则进入等待队列，否则尝试获取锁。</p>
+<p>从效率上来说，非公平锁高于公平锁，因为非公平锁如果抢占成功就少了入队操作，也少了线程阻塞和唤醒的操作系统API调用过程。</p>
+<p><strong>2).Semaphore</strong></p>
+<p>信号量Semaphore使用AQS共享锁实现，维护一个许可集，获取n个许可时，许可集减少n，当小于0时则线程阻塞。释放n个许可时，许可集加上n，同时需要唤醒等待许可的线程。</p>
+<p>Semaphore使用AQS的state来表示许可集，Semaphore的构造函数接收一个许可集初始容量大小的值。</p>
+<p><strong>3).ReadWriteLock</strong></p>
+<p><code>ReadWriteLock</code>是读写锁的接口，实现该接口的类有<code>ReentrantReadWriteLock</code>，这里讲述<code>ReentrantReadWriteLock</code>的实现方式。写锁是独占锁，读锁是共享锁，而且读、写锁互斥。<code>ReentrantReadWriteLock</code>使用AQS的state字段的高16位为读锁计数器，低16位为写锁计数器。<code>ReentrantReadWriteLock</code>内部存在两个实现了<code>Lock</code>接口的内部类，分别是<code>ReadLock</code>和<code>WriteLock</code>，表示读锁和写锁。<code>ReadLock</code>的获取和释放锁的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.acquireShared(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span>  <span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.releaseShared(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的方法调用可以看到<code>ReadLock</code>是调用AQS的共享锁方法。获取读锁时要求state的低16位必须为0，即写锁没有被任何线程获取。如果低16位大于0，表示写锁被线程获取，如果获取写锁的线程不是自己，则线程阻塞。如果线程可以获取读锁，则state的高16位加1（<code>compareAndSetState(c, c + SHARED_UNIT)</code>，其中<code>SHARED_UNIT</code>为<code>1 &lt;&lt; SHARED_SHIFT</code>），同时线程局部变量<code>HoldCounter</code>（<code>ThreadLocal</code>）的计数器count字段需要加1，用来保存线程占用的共享读锁的数量。<code>HoldCounter</code>保存的计数器的作用是用来判断当前线程在获得写锁的情况下，是否又再获取读锁，此时读锁能够被获取，支持重入机制。当写锁释放时，该线程就降级为只获取读锁。</p>
+<p><code>WriteLock</code>的获取和释放锁的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.acquire(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.release(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取写锁时，需要判断<code>state</code>是否存在写锁或者读锁，如果存在且不是当前线程获取时，当前线程需要阻塞。</p>
+<p><strong>4).CountDownLatch</strong></p>
+<p>闭锁CountDownLatch能够使一个线程等待其他线程完成各自的工作后再执行。</p>
+<p>CountDownLatch使用AQS共享锁实现，构造函数的参数<code>count</code>作为AQS的state的值。调用<code>await</code>方法时，如果state不为0则线程阻塞。调用<code>count</code>方法时，state减小，当state为0时则唤醒等待的线程。</p>
+<p><strong>5).CyclicBarrier</strong></p>
+<p>循环屏障CyclicBarrier类似一个可循环使用的CountDownLatch，可以让一组线程达到一个屏障时被阻塞，直到最后一个线程达到屏障时，所有被阻塞的线程才能继续执行。 CyclicBarrier好比一扇门，默认情况下是关闭状态，堵住了线程执行的道路，直到所有线程都就位，门才打开，让所有线程一起通过。</p>
+<p>CyclicBarrier几个重要的成员变量如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** The lock for guarding barrier entry */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"><span class="comment">/** Condition to wait on until tripped */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition trip = lock.newCondition();</span><br><span class="line"><span class="comment">/** The number of parties */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> parties;</span><br><span class="line"><span class="comment">/* The command to run when tripped */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Runnable barrierCommand;</span><br><span class="line"><span class="comment">/** The current generation */</span></span><br><span class="line"><span class="keyword">private</span> Generation generation = <span class="keyword">new</span> Generation();</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Number of parties still waiting. Counts down from parties to 0</span></span><br><span class="line"><span class="comment"> * on each generation.  It is reset to parties on each new</span></span><br><span class="line"><span class="comment"> * generation or when broken.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> count;</span><br></pre></td></tr></table></figure>
+<p><code>lock</code>用于保护屏障信息，<code>trip</code>用于阻塞线程，<code>parties</code>表示屏障数量，<code>count</code>表示当前消耗的屏障数量。当调用<code>wait</code>方法时，<code>lock</code>需要调用<code>lock()</code>方法获取锁，然后将count减少，如果count不为0，则当前线程进入trip的Condition等待队列。如果count为0，需要生成一个新的<code>generation</code>对象，表示新的一轮循环屏障，同时会调用<code>condition.signalAll()</code>方法通知所有等待线程。</p>
+<p><strong>6).StampedLock</strong></p>
+<p><code>ReadWriteLock</code>是基于悲观锁的设计，如果有线程正在读，写线程需要等待读线程释放锁后才能获取写锁，即读的过程中不允许写。</p>
+<p>乐观锁的意思就是乐观地估计读的过程中大概率不会有写入，因此被称为乐观锁。反过来，悲观锁则是读的过程中拒绝有写入，也就是写入必须等待。显然乐观锁的并发效率更高，但一旦有小概率的写入导致读取的数据不一致，需要能检测出来，再读一遍就行。</p>
+<p>JDK8对<code>ReadWriteLock</code>的优化是<code>StampedLock</code>，它将读锁分为乐观读锁和悲观读锁，获取乐观读锁时，实际上是获取版本号，使用者最后还需要验证在访问受保护资源时版本号是否变更，如果有变更，则获取悲观读锁，悲观读锁与写锁互斥，使用<code>StampedLock</code>时还需要注意与线程中断带来的CPU使用率高的问题<a href="https://blog.csdn.net/zcl_love_wx/article/details/94856005" target="_blank" rel="noopener"> [1] </a>。</p>
+<h1 id="BlockingQueue原理"><a href="#BlockingQueue原理" class="headerlink" title="BlockingQueue原理"></a>BlockingQueue原理</h1><p>BlockingQueue接口有两个重要方法，分别是取元素<code>take</code>和加入元素<code>put</code>。以ArrayBlockingQueue为例，<code>put</code>方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(E e)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    checkNotNull(e);</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (count == items.length)</span><br><span class="line">            notFull.await();</span><br><span class="line">        enqueue(e);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(E x)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert lock.getHoldCount() == 1;</span></span><br><span class="line">    <span class="comment">// assert items[putIndex] == null;</span></span><br><span class="line">    <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">    items[putIndex] = x;</span><br><span class="line">    <span class="keyword">if</span> (++putIndex == items.length)</span><br><span class="line">        putIndex = <span class="number">0</span>;</span><br><span class="line">    count++;</span><br><span class="line">    notEmpty.signal();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上可以看到<code>put</code>方法使用<code>ReentrantLock</code>来实现线程安全操作，当数组元素数量为数组长度时，表示队列已经满了，需要等待队列不满，所以<code>put</code>方法也是阻塞方法，而等待的方式使用的是AQS的等待队列。<code>ArrayBlockingQueue</code>使用两个变量来存储等待队列不为空和等待队列不为满的线程。如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">notEmpty = lock.newCondition();</span><br><span class="line">notFull =  lock.newCondition();</span><br></pre></td></tr></table></figure>
+<p>当添加元素成功时，需要通知<code>notEmpty</code>等待的线程，表示队列不是空的。</p>
+<p><code>take</code>方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (count == <span class="number">0</span>)</span><br><span class="line">            notEmpty.await();</span><br><span class="line">        <span class="keyword">return</span> dequeue();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> E <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert lock.getHoldCount() == 1;</span></span><br><span class="line">    <span class="comment">// assert items[takeIndex] != null;</span></span><br><span class="line">    <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    E x = (E) items[takeIndex];</span><br><span class="line">    items[takeIndex] = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">if</span> (++takeIndex == items.length)</span><br><span class="line">        takeIndex = <span class="number">0</span>;</span><br><span class="line">    count--;</span><br><span class="line">    <span class="keyword">if</span> (itrs != <span class="keyword">null</span>)</span><br><span class="line">        itrs.elementDequeued();</span><br><span class="line">    notFull.signal();</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上可以看到<code>take</code>方法使用<code>ReentrantLock</code>来实现线程安全操作，当数组元素数量为0时，表示队列已经为空，需要等待队列不为空，所以<code>take</code>方法也是阻塞方法。当取出元素成功时，需要通知<code>notFull</code>表示线程不是满的。</p>
+<h1 id="synchronized原理"><a href="#synchronized原理" class="headerlink" title="synchronized原理"></a>synchronized原理</h1><p>Java同步机制使用<code>synchronized</code>关键字实现。<code>synchronized</code>有两种用法，第一种是修饰方法，即同步方法块，第二种是同步代码块，同步代码块和同步方法块被称为临界区。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">syncMethodBlock</span><span class="params">()</span> </span>&#123;&#125; <span class="comment">// 同步方法块</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">syncCodeBlock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123; <span class="comment">// 同步代码块</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于同步代码块，当源代码编译成字节码时，会存在<code>monitorenter</code>和<code>monitorexit</code>两个字节指令，所表示的意思就是进入临界区和退出临界区。而同步方法块没有这两个指令，由JVM内部判断方法修饰符是否存在<code>ACC_SYNCHRONIZED</code>标志，如果存在，JVM内部处理进入临界区和退出临界区的逻辑。</p>
+<p>在JVM中，Java对象在内存中的布局分为三块：对象头，实例数据和对齐填充数据（字节对齐在计算机中经常使用，它的作用有解决不同处机器架构内存访问的问题、提高内存访问速度）。指向对象的指针称为<code>Ordinary Object Pointer</code>(OOP)，Java对象使用C++中的<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/oop.hpp" target="_blank" rel="noopener">oopDesc</a>来表示，该类定义了一个变量<code>volatile markOop  _mark</code>，而<code>markOop</code>是一个指向<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/oops/markOop.hpp" target="_blank" rel="noopener">markOopDesc</a>类型的指针，<code>markOopDesc</code>就是上述所说的对象头，称为<code>Mark Word</code>。在32位JVM中，<code>markOopDesc</code>所表示的字节是32位，布局如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hash:25 —&gt;| age:4 biased_lock:1 lock:2</span><br></pre></td></tr></table></figure>
+<p>hash就是<code>Object.hashCode()</code>的返回值，age表示对象在垃圾收集过程中幸存的年龄，biased_lock表示是否是偏向锁，lock表示标志位。<code>Mark Word</code>是JVM实现同步机制的基础。程序进入临界区时需要获取的锁的结构是<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.hpp" target="_blank" rel="noopener">ObjectMonitor</a>，称为监视锁。监视锁是重量级锁，因为它需要调用操作系统方法来完成，涉及到操作系统“用户态”向“内核态”的切换，需要一些开销。JVM对锁进行了一系列优化来降低使用重量级锁的开销，在没有必要使用重量级锁的场景时使用其他锁来完成同步操作，其他锁包括偏向锁、轻量级锁。使用biased_lock和lock位来表示锁的状态，锁的状态从低到高分别是无锁状态、偏向锁、轻量级锁、重量级锁。<code>ObjectMonitor</code>的3个重要字段为<code>_count</code>，它是记录获取锁的数量，因为JVM同步锁机制支持重入，每次重入，该计数器都要加1；<code>_WaitSet</code>，它是等待线程的集合，调用<code>Object.wait()</code>时线程被放入该集合中；<code>_cxq</code>，它是FILO竞争队列，应对多线程竞争锁的时候，使用CAS操作替换队列头部；<code>_EntryList</code>，cxq中的合适线程可以被放入EntryList，Wait Set中的线程被notify()之后，也会放入EntryList中，准备竞争锁。</p>
+<p>各种锁状态的变化过程如下：</p>
+<ul>
+<li><p>偏向锁</p>
+<p>引入偏向锁是为了在无多线程竞争的情况下尽量减少不必要的轻量级锁执行路径，因为轻量级锁的获取及释放依赖多次CAS原子指令，而偏向锁只需要在置换ThreadID的时候依赖一次CAS原子指令（由于一旦出现多线程竞争的情况就必须撤销偏向锁，所以偏向锁的撤销操作的性能损耗必须小于节省下来的CAS原子指令的性能消耗）。</p>
+<p>获取偏向锁的过程如下：</p>
+<p>（1）访问Mark Word中偏向锁的标识是否设置成1，锁标志位是否为01——确认为可偏向状态；</p>
+<p>（2）如果为可偏向状态，则检查线程ID是否指向当前线程，如果是，进入步骤（5），否则进入步骤（3）；</p>
+<p>（3）如果线程ID并未指向当前线程，则通过CAS操作竞争锁。如果竞争成功，则将Mark Word中线程ID设置为当前线程ID，然后执行（5）；如果竞争失败，执行（4）；</p>
+<p>（4）如果CAS获取偏向锁失败，则表示有竞争。当到达全局安全点（safepoint）时获得偏向锁的线程被挂起，偏向锁升级为轻量级锁，然后被阻塞在安全点的线程继续往下执行同步代码；</p>
+<p>（5）执行同步代码。</p>
+<p>偏向锁的释放：</p>
+<p>偏向锁只有遇到其他线程尝试竞争偏向锁时，持有偏向锁的线程才会释放锁，线程不会主动去释放偏向锁。偏向锁的撤销，需要等待全局安全点（在这个时间点上没有字节码正在执行），它会首先暂停拥有偏向锁的线程，判断锁对象是否处于被锁定状态，撤销偏向锁后恢复到未锁定（标志位为“01”）或轻量级锁（标志位为“00”）的状态。</p>
+</li>
+<li><p>轻量级锁</p>
+<p>“轻量级”是相对于使用操作系统互斥量来实现的传统锁而言的（重量级锁锁），轻量级锁并不是用来代替重量级锁的，它的本意是在没有多线程竞争的前提下，减少传统的重量级锁使用产生的性能消耗。轻量级锁所适应的场景是线程交替执行同步块的情况，如果存在同一时间访问同一锁的情况，就会导致轻量级锁膨胀为重量级锁。</p>
+<p>轻量级锁的加锁过程如下：</p>
+<p>（1）在代码进入同步块的时候，如果同步对象锁状态为无锁状态（锁标志位为“01”状态，是否为偏向锁为“0”），虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的<code>Mark Word</code>的拷贝，称之为 <code>Displaced Mark Word</code>；</p>
+<p>（2）拷贝对象头中的<code>Mark Word</code>复制到锁记录中；</p>
+<p>（3）拷贝成功后，虚拟机将使用CAS操作尝试将对象的<code>Mark Word</code>更新为指向Lock Record的指针，并将Lock record里的owner指针指向object mark word。如果更新成功，则执行步骤（4），否则执行步骤（5）；</p>
+<p>（4）如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象<code>Mark Word</code>的锁标志位设置为“00”，即表示此对象处于轻量级锁定状态；</p>
+<p>（5）如果这个更新操作失败了，虚拟机首先会检查对象的<code>Mark Word</code>是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行。否则说明多个线程竞争锁，轻量级锁就要膨胀为重量级锁，锁标志的状态值变为“10”，<code>Mark Word</code>中存储的就是指向重量级锁（互斥量）的指针，后面等待锁的线程也要进入阻塞状态。 而当前线程便尝试使用自旋来获取锁，自旋就是为了不让线程阻塞，而采用循环去获取锁的过程。</p>
+<p>轻量级锁的释放过程如下：</p>
+<p>（1）通过CAS操作尝试把线程中复制的Displaced Mark Word对象替换当前的<code>Mark Word</code>。</p>
+<p>（2）如果替换成功，整个同步过程就完成了。</p>
+<p>（3）如果替换失败，说明有其他线程尝试过获取该锁（此时锁已膨胀），那就要在释放锁的同时，唤醒被挂起的线程。</p>
+</li>
+<li><p>重量级锁</p>
+<p>重量级锁的实现在<a href="https://github.com/dmlloyd/openjdk/blob/jdk7u/jdk7u/hotspot/src/share/vm/runtime/objectMonitor.cpp" target="_blank" rel="noopener">ObjectMonitor.cpp</a>中完成，获取锁的方法为<code>void ATTR ObjectMonitor::enter(TRAPS)</code>，释放锁的方法为<code>void ATTR ObjectMonitor::exit(bool not_suspended, TRAPS)</code>。</p>
+<p>获取锁的过程如下：</p>
+<p>（1）设置<code>ObjectMonitor</code>的<code>_owner</code>字段为当前线程，如果设置失败时需要检查是否重入，设置成功时则表示获取锁成功；</p>
+<p>（2）通过自旋执行<code>void ATTR ObjectMonitor::EnterI (TRAPS)</code>方法等待锁的释放进入方法中。该方法的逻辑是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a.当前线程被封装成ObjectWaiter对象node，状态设置成ObjectWaiter::TS_CXQ；</span><br><span class="line">    </span><br><span class="line">b.在for循环中，通过CAS把node节点push到`_cxq`列表中，同一时刻可能有多个线程把自己的node节点push到`_cxq`列表中；</span><br><span class="line">    </span><br><span class="line">c.node节点push到`_cxq`列表之后，通过自旋尝试获取锁，如果还是没有获取到锁，则通过park将当前线程挂起，等待被唤醒；</span><br><span class="line">    </span><br><span class="line">d.当该线程被唤醒时，会从挂起的点继续执行，通过`ObjectMonitor::TryLock`尝试获取锁。</span><br></pre></td></tr></table></figure>
+<p>其本质就是通过CAS设置monitor的_owner字段为当前线程，如果CAS成功，则表示该线程获取了锁，跳出自旋操作，执行同步代码，否则继续被挂起；</p>
+<p>当某个持有锁的线程执行完同步代码块时，会进行锁的释放，给其它线程机会执行同步代码，在HotSpot中，通过退出monitor的方式实现锁的释放，并通知被阻塞的线程，具体实现位于<code>ObjectMonitor::exit</code>方法中。</p>
+<p>释放锁的过程如下：</p>
+<p>（1）如果是重量级锁的释放，monitor中的_owner指向当前线程，即THREAD == _owner；</p>
+<p>（2）根据不同的策略（由QMode指定），从cxq或EntryList中获取头节点，通过<code>ObjectMonitor::ExitEpilog</code>方法唤醒该节点封装的线程，唤醒操作最终由unpark完成；</p>
+<p>（3）被唤醒的线程，继续执行monitor的竞争；</p>
+</li>
+</ul>
+<p>为了减少重量级锁的操作，引进了偏向锁和轻量级锁。在某些场景下还可以对获取锁的过程做进一步优化，如下：</p>
+<ul>
+<li><p>适应性自旋</p>
+<p>当线程在获取轻量级锁的过程中执行CAS操作失败时，是要通过自旋来获取重量级锁的。自旋的意思循环检查是否可以获取重量级做。JVM内部根据运行时信息决定自旋的次数，即循环次数。适应性自旋，简单来说就是线程如果自旋成功了，则下次自旋的次数会更多，如果自旋失败了，则自旋的次数就会减少。</p>
+</li>
+<li><p>锁粗化</p>
+<p>锁粗化的就是将多次连接在一起的加锁、解锁操作合并为一次，将多个连续的锁扩展成一个范围更大的锁。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StringBufferTest</span> </span>&#123;</span><br><span class="line">    StringBuffer stringBuffer = <span class="keyword">new</span> StringBuffer();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">append</span><span class="params">()</span></span>&#123;</span><br><span class="line">        stringBuffer.append(<span class="string">"a"</span>);</span><br><span class="line">        stringBuffer.append(<span class="string">"b"</span>);</span><br><span class="line">        stringBuffer.append(<span class="string">"c"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里每次调用stringBuffer.append方法都需要加锁和解锁，如果虚拟机检测到有一系列连串的对同一个对象加锁和解锁操作，就会将其合并成一次范围更大的加锁和解锁操作，即在第一次append方法时进行加锁，最后一次append方法结束后进行解锁。</p>
+</li>
+<li><p>锁消除</p>
+<p>锁消除即删除不必要的加锁操作。根据代码逃逸技术，如果判断到一段代码中，堆上的数据不会逃逸出当前线程，那么可以认为这段代码是线程安全的，不必要加锁。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SynchronizedTest02</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SynchronizedTest02 test02 = <span class="keyword">new</span> SynchronizedTest02();</span><br><span class="line">        <span class="comment">//启动预热</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100000000</span>; i++) &#123;</span><br><span class="line">            test02.append(<span class="string">"abc"</span>, <span class="string">"def"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"Time="</span> + (System.currentTimeMillis() - start));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">append</span><span class="params">(String str1, String str2)</span> </span>&#123;</span><br><span class="line">        StringBuffer sb = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">        sb.append(str1).append(str2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>虽然StringBuffer的append是一个同步方法，但是这段程序中的StringBuffer属于一个局部变量，并且不会从该方法中逃逸出去，所以其实这过程是线程安全的，可以将锁消除。</p>
+</li>
+</ul>
+<p>除了上面JVM对锁的优化，在程序端还可以使用锁分段（如ConcurrentHashMap实现）和锁分离（ReadWriteLock实现）的技术提高并发。</p>
+<h1 id="锁的升级和降级"><a href="#锁的升级和降级" class="headerlink" title="锁的升级和降级"></a>锁的升级和降级</h1><p>锁降级在<code>ReentrantReadWriteLock</code>中的意思是从写锁降级为读锁，但是<code>ReentrantReadWriteLock</code>不能从读锁升级为写锁。</p>
+<p>锁降级在JVM中是指重量级锁降级为轻量级锁或者偏向锁。</p>
+<p>锁升级在JVM中是指偏向锁升级为轻量级锁，轻量级锁升级为重量级锁。</p>
+<h1 id="多种方式实现生产者和消费者模式"><a href="#多种方式实现生产者和消费者模式" class="headerlink" title="多种方式实现生产者和消费者模式"></a>多种方式实现生产者和消费者模式</h1><ul>
+<li><p>wait/notify</p>
+</li>
+<li><p>ReentrantLock/Condition</p>
+</li>
+<li><p>BlockingQueue</p>
+</li>
+<li><p>Semaphore</p>
+</li>
+<li><p>PipedInputStream/PipedOutputStream</p>
+<p>该方法不是基于线程同步完成，因此只能满足于一个生产者和一个消费者。原理是先创建一个管道输入流和管道输出流，然后将输入流和输出流进行连接，用生产者线程往管道输出流中写入数据，消费者在管道输入流中读取数据，这样就可以实现了不同线程间的相互通讯，但是这种方式在生产者和生产者、消费者和消费者之间不能保证同步，也就是说在一个生产者和一个消费者的情况下是可以生产者和消费者之间交替运行的，多个生成者和多个消费者者之间则不行</p>
+</li>
+</ul>
+<p>延伸阅读：</p>
+<ul>
+<li><a href="https://juejin.im/entry/596343686fb9a06bbd6f888c" target="_blank" rel="noopener">Java实现生产者和消费者的5种方式</a></li>
+</ul>
+<h1 id="RingBuffer"><a href="#RingBuffer" class="headerlink" title="RingBuffer"></a>RingBuffer</h1><p>RingBuffer是一种更高效的数据并发访问的保护机制，它不使用CAS实现锁机制，而是使用CPU缓存一致性来实现高效的一个线程读一个线程写的并发操作。CAS低效的原因是除了存在CPU缓存失效还有一个活锁的问题，即当CAS会放在一个循环内，重试去设置期望的值。</p>
+<p>高性能消息框架<a href="https://github.com/LMAX-Exchange/disruptor" target="_blank" rel="noopener">Disruptor</a>使用的就是RingBuffer<a href="https://www.jianshu.com/p/3da1bd3b29cd" target="_blank" rel="noopener"> [2] </a>。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-concurrent/" title="Java后端开发 - 并发" target="_blank" rel="external">https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-concurrent/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2018/10/13/java-programmer-knowledge-servlet/" title="Java后端开发 - Servlet"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2018/10/13/java-programmer-knowledge-thread/" title="Java后端开发 - 线程"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Java后端开发 - Servlet | 海东青</title>
+  <meta name="description" content="Servlet生命周期与过滤器Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：  Servlet 通过调用 init () 方法进行初始化； init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。因此，它是用于一次性初始化。  Servlet 调用 service() 方法来处理客户端的请求； se">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java后端开发 - Servlet">
+<meta property="og:url" content="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-servlet/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="Servlet生命周期与过滤器Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：  Servlet 通过调用 init () 方法进行初始化； init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。因此，它是用于一次性初始化。  Servlet 调用 service() 方法来处理客户端的请求； se">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/image001.gif">
+<meta property="og:updated_time" content="2023-09-04T00:20:24.364Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java后端开发 - Servlet">
+<meta name="twitter:description" content="Servlet生命周期与过滤器Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：  Servlet 通过调用 init () 方法进行初始化； init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。因此，它是用于一次性初始化。  Servlet 调用 service() 方法来处理客户端的请求； se">
+<meta name="twitter:image" content="https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/image001.gif">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-servlet/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/distributed-dynamo/" class="title">分布式系列——Dynamo</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:19:49.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Servlet生命周期与过滤器"><span class="toc-number">1.</span> <span class="toc-text">Servlet生命周期与过滤器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Session和Cookie的区别"><span class="toc-number">2.</span> <span class="toc-text">Session和Cookie的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Servlet的异步请求"><span class="toc-number">3.</span> <span class="toc-text">Servlet的异步请求</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Tomcat架构"><span class="toc-number">4.</span> <span class="toc-text">Tomcat架构</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-java-programmer-knowledge-servlet" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java后端开发 - Servlet
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2018/10/13/java-programmer-knowledge-servlet/" class="article-date">
+	  <time datetime="2018-10-13T00:15:09.000Z" itemprop="datePublished">2018-10-13</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/java/">java</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/10/13/java-programmer-knowledge-servlet/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Servlet生命周期与过滤器"><a href="#Servlet生命周期与过滤器" class="headerlink" title="Servlet生命周期与过滤器"></a>Servlet生命周期与过滤器</h1><p>Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：</p>
+<ul>
+<li><p>Servlet 通过调用 <strong>init ()</strong> 方法进行初始化；</p>
+<p>init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。因此，它是用于一次性初始化。</p>
+</li>
+<li><p>Servlet 调用 <strong>service()</strong> 方法来处理客户端的请求；</p>
+<p>service() 方法是执行实际任务的主要方法。Servlet 容器（即 Web 服务器）调用 service() 方法来处理来自客户端（浏览器）的请求，并把格式化的响应写回给客户端。</p>
+<p>每次服务器接收到一个 Servlet 请求时，服务器会产生一个新的线程并调用服务。service() 方法检查 HTTP 请求类型（GET、POST、PUT、DELETE 等），并在适当的时候调用 doGet、doPost、doPut，doDelete 等方法。</p>
+</li>
+<li><p>Servlet 通过调用 <strong>destroy()</strong> 方法终止（结束）；</p>
+</li>
+<li><p>最后，Servlet 是由 JVM 的垃圾回收器进行垃圾回收的。</p>
+</li>
+</ul>
+<p>Servlet中的过滤器Filter是实现了javax.servlet.Filter接口的服务器端程序，只要你在web.xml 文件配置好要拦截的客户端请求，它都会帮你拦截到请求。Filter可认为是Servlet的一种“变种”，它主要用于对用户请求进行预处理，也可以对HttpServletResponse进行后处理，是个典型的处理链。它与Servlet的区别在于：它不能直接向用户生成响应。完整的流程是：Filter对用户请求进行预处理，接着将请求交给Servlet进行处理并生成响应，最后Filter再对服务器响应进行后处理。</p>
+<h1 id="Session和Cookie的区别"><a href="#Session和Cookie的区别" class="headerlink" title="Session和Cookie的区别"></a>Session和Cookie的区别</h1><p>Session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群、数据库、文件中；</p>
+<p>Cookie是客户端保存用户信息的一种机制，用来记录用户的一些信息，也是实现Session的一种方式。</p>
+<h1 id="Servlet的异步请求"><a href="#Servlet的异步请求" class="headerlink" title="Servlet的异步请求"></a>Servlet的异步请求</h1><ul>
+<li><p>Servlet3.0的异步请求</p>
+<p><a href="http://download.oracle.com/otn-pub/jcp/servlet-3.0-fr-oth-JSpec/servlet-3_0-final-spec.pdf?AuthParam=1535295644_2a1916a1ba6dc83fc114e98f80b21f78" target="_blank" rel="noopener">Servlet3.0规范</a>2.3.3.3节的“Asynchronous processing”讲述了异步处理，当启用异步处理时，响应数据可以由其他线程创建，而当前线程可以立即交还给Servlet容器处理其他请求。当要启用异步处理时，首先需要声明HttpServlet支持异步处理，然后才能调用<code>request.startAsync</code>方法获得<code>AsyncContext</code>，它包含<code>request</code>和<code>response</code>。调用<code>startAsync</code>方法后，程序能保证在退出<code>service</code>方法时，不会完成本次请求，即不响应任何数据给客户端。需要在之后调用<code>AsyncContext.complete</code>方法来完成本次请求，向客户端写入数据。</p>
+</li>
+<li><p>Servlet3.1的NIO</p>
+<p><a href="https://javaee.github.io/servlet-spec/downloads/servlet-3.1/Final/servlet-3_1-final.pdf" target="_blank" rel="noopener">Servlet3.1规范</a>第3.7节“Non Blocking IO”讲述了非阻塞IO。Servlet 3.0对请求的处理虽然是异步的，但是对InputStream和OutputStream的IO操作却依然是阻塞的，对于数据量大的请求体或者返回体，阻塞IO也将导致不必要的等待，因此在Servlet 3.1中引入了非阻塞IO。</p>
+</li>
+</ul>
+<h1 id="Tomcat架构"><a href="#Tomcat架构" class="headerlink" title="Tomcat架构"></a>Tomcat架构</h1><p>Tomcat的Servlet容器是用来处理请求Servlet资源，并为web客户端填充response对象的模块。在Tomcat中，共有四种类型的容器，分别是：Engine、Host、Context和Wrapper。Servlet容器是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Container.java" target="_blank" rel="noopener">org.apache.catalina.Container</a>接口的实例。Container接口及其相关类的UML类图如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">                                     +----------------+</span><br><span class="line">                                     | &lt;&lt;interface&gt;&gt;  |</span><br><span class="line">                                     |   Container    |</span><br><span class="line">                                     +----------------+</span><br><span class="line">                                             ^       ^</span><br><span class="line">                                             |       |</span><br><span class="line">                                             |       +---------------------------+</span><br><span class="line">                                             |                                   |</span><br><span class="line">       +------------------+------------------+------------------+                |</span><br><span class="line">       |                  |                  |                  |                |</span><br><span class="line">+-------------+    +-------------+    +-------------+    +-------------+   +-------------+</span><br><span class="line">|&lt;&lt;interface&gt;&gt;|    |&lt;&lt;interface&gt;&gt;|    |&lt;&lt;interface&gt;&gt;|    |&lt;&lt;interface&gt;&gt;|   |ContainerBase|</span><br><span class="line">|   Engine    |    |     Host    |    |   Context   |    |   Wrapper   |   |             |</span><br><span class="line">+-------------+    +-------------+    +-------------+    +-------------+   +-------------+</span><br><span class="line">       ^                  ^                   ^                     ^             ^</span><br><span class="line">       |                  |                   |                     |             |</span><br><span class="line">       |  +---------------^---+---------------^-----+---------------^---+---------+</span><br><span class="line">       |  |               |   |               |     |               |   |</span><br><span class="line">+--------------+ INC  +-------------+ INC  +---------------+ INC  +---------------+</span><br><span class="line">|StandardEngine| &lt;&gt;-- | StandartHost| &lt;&gt;-- |StandardContext| &lt;&gt;-- |StandardWrapper|</span><br><span class="line">+--------------+ 1  n +-------------+ 1  n +---------------+ 1  n +---------------+</span><br></pre></td></tr></table></figure>
+<p>Tomcat的<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Pipeline.java" target="_blank" rel="noopener">Pipeline</a>管道和<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Valve.java" target="_blank" rel="noopener">Valve</a>阀的工作机制类似于Servlet的过滤器，在Servlet容器的管道中，有一个基础阀，也可以添加任意数量的阀，基础阀总是最后一个执行。</p>
+<p>当Tomcat启动时，相关组件也会一起启动，Tomcat关闭时，这些组件也会随之关闭，这是通过实现<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Lifecycle.java" target="_blank" rel="noopener">Lifecycle</a>接口达到统一启动/关闭组件的效果。实现了<code>Lifecycle</code>接口的组件可以触发一个或多个事件：<code>BEFORE_START_EVENT</code>、<code>START_EVENT</code>、<code>AFTER_START_EVENT</code>、<code>BEFORE_STOP_EVENT</code>、<code>STOP_EVENT</code>、<code>AFTER_STOP_EVENT</code>，事件是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/LifecycleEvent.java" target="_blank" rel="noopener">LifecycleEvent</a>类的实例，事件监听器是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/LifecycleListener.java" target="_blank" rel="noopener">LifecycleListener</a>类的实例，<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/util/LifecycleSupport.java" target="_blank" rel="noopener">LifecycleSupport</a>提供了一种简单的方法来触发某个组件的生命周期事件，并对事件监听器进行处理。</p>
+<p>Tomcat载入器是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Loader.java" target="_blank" rel="noopener">Loader</a>接口的实例，<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/loader/WebappLoader.java" target="_blank" rel="noopener">WebappLoader</a>是负责从<code>WEB-INF/classes</code>和<code>WEB-INF/lib</code>载入Servlet所需类的载入器，它内部会使用<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/loader/WebappClassLoader.java" target="_blank" rel="noopener">WebappClassLoader</a>作为类载入器（或类加载器）。<code>Loader</code>接口使用<code>modified()</code>方法来支持类的自动重载，在载入器的具体实现中，如果仓库（<code>Loader.addRepository()</code>）中的一个或多个类被修改，那么<code>modified()</code>方法必须返回<code>true</code>，载入器内部会调用<code>Context.reload</code>完成类重新载入的过程。载入类时，<code>WebappClassLoader</code>遵循如下规则：</p>
+<ul>
+<li>因为所有已经载入的类都会缓存起来，所以载入类时要先检查本地缓存；</li>
+<li>若本地缓存中没有，则检查上一层缓存，即调用<code>java.lang.ClassLoader</code>类的<code>findLoadedClass()</code>方法；</li>
+<li>如果两个缓存中都没有，则使用系统的类载入器<code>ApplicationClassLoader</code>进行加载，防止Web应用程序中的类覆盖Java EE的类；</li>
+<li>若启用了<code>SecurityManager</code>，则检查是否运行载入该类。若该类是禁止载入的类，抛出<code>ClassNotFoundException</code>异常；</li>
+<li>若打开标志位<code>delegate</code>，或者待载入的类是属于包触发器<code>WebappClassLoader.packageTriggers</code>中的包名，则调用父类载入器来载入相关类。如果父类载入器为<code>null</code>，则使用系统的类载入器；</li>
+<li>从当前仓库中载入相关类；</li>
+<li>若当前仓库中没有需要的类，且标志位<code>delegate</code>关闭，则使用父类载入器。若父类载入器为<code>null</code>，则使用系统的类载入器进行加载；</li>
+<li>若仍未找到需要的类，则抛出<code>ClassNotFoundException</code>异常。</li>
+</ul>
+<p>Tomcat使用Session管理器的组件来管理建立的Session对象，该组件由<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Manager.java" target="_blank" rel="noopener">Manager</a>接口表示。Session管理器需要与一个<code>Context</code>容器相关联，且必须与一个<code>Context</code>容器关联。Session管理器负责创建、更新、销毁Session对象，当有请求到来时，要返回一个有效的Session对象。Servlet实例通过调用<code>javax.servlet.http.HttpServletRequest.getSession()</code>方法获取一个Session对象。在Tomcat的默认连接器中，<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/connector/Request.java" target="_blank" rel="noopener">Request</a>类实现<code>HttpServletRequest</code>接口。Session管理器会将其所管理的Session对象放在内存中，或存储在文件中，或通过JDBC写入数据库中。Session对象是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Session.java" target="_blank" rel="noopener">Session</a>接口的实例，实现类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/session/StandardSession.java" target="_blank" rel="noopener">StandardSession</a>。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/session/StandardManager.java" target="_blank" rel="noopener">StandardManager</a>是<code>Manager</code>接口的实现类，session管理器需要负责销毁已经失效的Session对象，在<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/session/ManagerBase.java" target="_blank" rel="noopener">ManagerBase</a>类的<code>backgroundProcess</code>方法负责过期Session对象的检查与销毁。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Store.java" target="_blank" rel="noopener">Store</a>接口是为Session管理器的Session对象提供持久化存储器的一个组件，<code>Store</code>接口两个重要的方法是<code>save</code>和<code>load</code>。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/session/StoreBase.java" target="_blank" rel="noopener">StoreBase</a>是一个抽象类，提供了基本功能，该类的两个子类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/session/FileStore.java" target="_blank" rel="noopener">FileStore</a>和<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/session/JDBCStore.java" target="_blank" rel="noopener">JDBCStore</a>。</p>
+<p>一般情况下一个<code>Context</code>容器包含一个或多个<code>Wrapper</code>，而一个<code>Wrapper</code>对应一个<code>HttpServlet</code>。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/StandardWrapper.java" target="_blank" rel="noopener">StandardWrapper</a>是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Wrapper.java" target="_blank" rel="noopener">Wrapper</a>接口的实现类，它的基础阀<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/StandardWrapperValve.java" target="_blank" rel="noopener">StandardWrapperValve</a>会调用Servlet的过滤器和Servlet的<code>service</code>方法。连接器接收到HTTP请求后，方法调用的协作图如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1:[new request] create() -&gt;</span><br><span class="line">2:[new response] create() -&gt;</span><br><span class="line">            +----+</span><br><span class="line">Message1 -&gt; |    | 3:invoke() -&gt;                   4:invoke() -&gt;</span><br><span class="line">         +-----------+           +-----------------+             +-----------------------+</span><br><span class="line">---------| Connector | ----------| StandardContext |-------------|StandardContextPipeline|</span><br><span class="line">         +-----------+           +-----------------+             +-----------------------+</span><br><span class="line">                                                                 5:invoke() |</span><br><span class="line">                                                                     |      |</span><br><span class="line">                           &lt;-7:invoke()              &lt;-6:invoke()    v      |</span><br><span class="line">   +----------------------+          +-----------------+         +----------------------+</span><br><span class="line">   | StandardWrapperValve |----------| StandardWrapper |---------| StandardContextValve |</span><br><span class="line">   +----------------------+          +-----------------+         +----------------------+</span><br><span class="line">              |</span><br><span class="line">8:allocate()  | 11:service()</span><br><span class="line">     |        |      |</span><br><span class="line">     v        |      v</span><br><span class="line">   +----------------------+  9:load()-&gt;</span><br><span class="line">   |       Servlet        |---------------</span><br><span class="line">   +----------------------+  10:init()-&gt;</span><br></pre></td></tr></table></figure>
+<p>协作图过程描述如下：</p>
+<ul>
+<li>1.连接器创建request和response对象；</li>
+<li>2.连接器调用<code>StandardContext</code>实例的<code>invoke()</code>方法；</li>
+<li>3.<code>StandardContext</code>实例的<code>invoke()</code>方法调用其管道对象的<code>invoke()</code>方法。<code>StandardContext</code>中管道对象的基础阀是<code>StandardContextValve</code>类的实例，因此，<code>StandardContext</code>的管道对象会调用<code>StandardContextValve</code>实例的<code>invoke()</code>方法；</li>
+<li>4.<code>StandardContextValve</code>实例的<code>invoke()</code>方法获取相应的<code>Wrapper</code>实例处理HTTP请求。调用<code>Wrapper</code>实例的<code>invoke()</code>方法；</li>
+<li>5.<code>StandardWrapper</code>类是<code>Wrapper</code>接口的标准实现，<code>StandardWrapper</code>实例的<code>invoke()</code>方法会表用其管道对象的<code>invoke</code>方法；</li>
+<li>6.<code>StandardWrapper</code>的管道对象中的基础阀是<code>StandardWrapperValve</code>类的实例，因此，会调用<code>StandardWrapperValve</code>的<code>invoke()</code>方法，<code>StandardWrapperValve</code>的<code>invoke()</code>方法调用<code>Wrapper</code>实例的<code>allocate()</code>方法获取Servlet实例；</li>
+<li>7.<code>allocate()</code>方法调用<code>load()</code>方法载入相应的Servlet类，若已经载入，则无需重复载入；</li>
+<li>8.<code>load()</code>方法调用Servlet实例的<code>init()</code>方法；</li>
+<li>9.<code>StandardWrapperValve</code>调用Servlet实例的<code>service()</code>方法。</li>
+</ul>
+<p><a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/tomcat/util/descriptor/web/FilterDef.java" target="_blank" rel="noopener">FilterDef</a>表示一个过滤器的定义，用来说明<code>web.xml</code>部署描述符文件中定义的过滤器。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/ApplicationFilterConfig.java" target="_blank" rel="noopener">ApplicationFilterConfig</a>类实现<code>javax.servlet.FilterConfig</code>接口，用于管理Web应用程序第一次启动时创建的所有的过滤器实例，其<code>getFilter()</code>方法会返回一个<code>javax.servlet.Filter</code>对象。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/ApplicationFilterChain.java" target="_blank" rel="noopener">ApplicationFilterChain</a>类实现<code>javax.servlet.FilterChain</code>接口，<code>StandardWrapperValve</code>类的<code>invoke()</code>方法会创建<code>ApplicationFilterChain</code>类的一个实例，并调用其<code>doFilter()</code>方法。<code>ApplicationFilterChain</code>类的<code>doFilter()</code>方法会调用过滤器链中第一个过滤器的<code>doFilter</code>方法。如果某个过滤器时过滤器链中的最后一个过滤器，则会调用被请求的Servlet类的<code>service()</code>方法。</p>
+<p><a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Host.java" target="_blank" rel="noopener">Host</a>接口表示一个虚拟主机，其实现类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/StandardHost.java" target="_blank" rel="noopener">StandardHost</a>。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Engine.java" target="_blank" rel="noopener">Engine</a>表示Servlet引擎，其实现类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/StandardEngine.java" target="_blank" rel="noopener">StandardEngine</a>。<code>Host</code>的父容器只能是<code>Engine</code>，而<code>Engine</code>是顶级容器，不再有父容器，且子容器只能是<code>Host</code>。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Server.java" target="_blank" rel="noopener">Server</a>表示整个Servlet引擎，其实现类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/StandardServer.java" target="_blank" rel="noopener">StandardServer</a>。<code>Server</code>几个重要方法是<code>initialize()</code>、<code>start()</code>、<code>stop()</code>、<code>await()</code>、<code>addService()</code>。<code>initialize()</code>方法用来初始化通过<code>addService()</code>方法添加到<code>Server</code>中的服务组件。<code>await()</code>方法则是创建一个<code>ServerSocket</code>，等待客户端连接并发送关闭指令，如果收到关闭指令，则调用<code>stop()</code>方法关闭<code>Server</code>，即整个Servlet引擎。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/Service.java" target="_blank" rel="noopener">Service</a>接口表示一个服务，其实现类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/core/StandardService.java" target="_blank" rel="noopener">StandardService</a>类。<code>Service</code>通过<code>setContainer()</code>方法关联一个容器，通过<code>addConnector()</code>方法，关联多个连接器。<code>StandardService</code>内部会将其容器通过<code>Connector.setContainer</code>方法设置<code>Service</code>的容器给<code>Connector</code>。</p>
+<p>Tomcat的总体架构图如下：</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/image001.gif" alt="Tomcat架构" title="Tomcat架构"></p>
+<p>当一个处理请求时，连接器<code>Connector</code>创建<code>Request</code>和<code>Response</code>对象，通过<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/mapper/Mapper.java" target="_blank" rel="noopener">Mapper</a>类来选择相应的<code>Context</code>和<code>Wrapper</code>来处理请求。</p>
+<p>Tomcat使用<a href="https://commons.apache.org/proper/commons-digester/" target="_blank" rel="noopener">Digester</a>库来解析<code>%CATALINA_HOME%/conf/server.xml</code>文件和web应用的<code>web.xml</code>文件。<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/startup/ContextConfig.java" target="_blank" rel="noopener">ContextConfig</a>类的实例负责并解析读取web应用的<code>web.xml</code>文件，为每个Servlet元素创建一个<code>StandardWrapper</code>实例。<code>ContextConfig</code>实现了<code>LifecycleListener</code>接口，被添加到<code>StandardContext</code>作为其事件监听器。每次<code>StandardContext</code>实例触发事件时，会调用<code>ContextConfig</code>实例的<code>lifecycleEvent()</code>方法，该方法会调用<code>ContextConfig.start()</code>方法来解析<code>web.xml</code>文件。如果文件解析成功，调用<code>Context.setConfigured(true)</code>方法，使得<code>Context</code>可以正常启动，否则启动失败。</p>
+<p>Tomcat的启动类是<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/startup/Bootstrap.java" target="_blank" rel="noopener">Bootstrap</a>，其<code>start</code>方法首先判断是否存在<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/startup/Catalina.java" target="_blank" rel="noopener">Catalina</a>实例，如果存在则初始化一个<code>Catalina</code>实例，然后调用<code>Catalina.start()</code>解析<code>%CATALINA_HOME%/conf/server.xml</code>文件和初始化<code>Server</code>。<code>Catalina</code>会调用<code>Runtine.addShutdownHook()</code>方法来注册一个<code>CatalinaShutdownHook</code>类型的关闭钩子，用于安全的释放资源。</p>
+<p><code>StandardHost</code>实例使用<code>HostConfig</code>对象作为一个生命周期监听器，当<code>StandardHost</code>对象启动时，它的<code>start()</code>方法会触发一个<code>START</code>事件。为了响应<code>START</code>事件，<a href="https://github.com/apache/tomcat/blob/TOMCAT_8_0_0/java/org/apache/catalina/startup/HostConfig.java" target="_blank" rel="noopener">HostConfig</a>中的lifecycleEvent方法和<code>HostConfig</code>中的事件处理程序调用<code>start()</code>方法。<code>HostConfig</code>类的<code>deployApps()</code>会完成<code>Host</code>下各个<code>Context</code>的部署工作。</p>
+<p>延伸阅读</p>
+<ul>
+<li><a href="https://www.ibm.com/developerworks/cn/java/j-lo-tomcat1/index.html" target="_blank" rel="noopener">Tomcat 系统架构与设计模式，第 1 部分 工作原理</a>，</li>
+<li><a href="https://www.ibm.com/developerworks/cn/java/j-lo-tomcat2/" target="_blank" rel="noopener">Tomcat 系统架构与设计模式，第 2 部分 设计模式分析</a></li>
+<li><a href="https://book.douban.com/subject/10426640/" target="_blank" rel="noopener">深入剖析Tomcat</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-servlet/" title="Java后端开发 - Servlet" target="_blank" rel="external">https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-servlet/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2018/10/13/java-programmer-knowledge-jvm/" title="Java后端开发 - JVM"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2018/10/13/java-programmer-knowledge-concurrent/" title="Java后端开发 - 并发"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
