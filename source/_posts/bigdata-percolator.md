@@ -1,9 +1,10 @@
 ---
 title: 大数据系列——Percolator
-date: 2020-12-21 09:22:29
 tags: 大数据
 toc: true
+date: 2020-12-21 09:22:29
 ---
+
 
 本文是笔者阅读 [《Large-scale Incremental Processing Using Distributed Transactions and Notifications》](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/36726.pdf) 论文整理而得。
 
