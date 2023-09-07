@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Borg | 海东青</title>
+  <meta name="description" content="本文是对 Large-scale cluster management at Google with Borg 的总结。 简介Google 的 Borg 系统是集群管理系统，在它上面运行着成千上万个任务，包括各种各样的应用，运行在千上万个机器上。 Borg 的功能包括：  准入/权限控制 高效的任务调度 资源管理 进程级别的性能隔离  Borg 带来 3 个收益；  隐藏资源管理和错误处理，用户可">
+<meta name="keywords" content="云原生">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Borg">
+<meta property="og:url" content="https://stltqhs.github.io/2023/09/07/Borg/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="本文是对 Large-scale cluster management at Google with Borg 的总结。 简介Google 的 Borg 系统是集群管理系统，在它上面运行着成千上万个任务，包括各种各样的应用，运行在千上万个机器上。 Borg 的功能包括：  准入/权限控制 高效的任务调度 资源管理 进程级别的性能隔离  Borg 带来 3 个收益；  隐藏资源管理和错误处理，用户可">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://stltqhs.github.io/images/borg_job_lifecycle.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/borg_arch.jpg">
+<meta property="og:updated_time" content="2023-09-07T05:13:17.312Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Borg">
+<meta name="twitter:description" content="本文是对 Large-scale cluster management at Google with Borg 的总结。 简介Google 的 Borg 系统是集群管理系统，在它上面运行着成千上万个任务，包括各种各样的应用，运行在千上万个机器上。 Borg 的功能包括：  准入/权限控制 高效的任务调度 资源管理 进程级别的性能隔离  Borg 带来 3 个收益；  隐藏资源管理和错误处理，用户可">
+<meta name="twitter:image" content="https://stltqhs.github.io/images/borg_job_lifecycle.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2023/09/07/Borg/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云原生/">云原生</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/云原生/" style="font-size: 13px;">云原生</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/07/Borg/" class="title">Borg</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-07T05:13:17.000Z" itemprop="datePublished">2023-09-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/23/kafka/" class="title">Kafka</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-23T03:06:13.000Z" itemprop="datePublished">2020-12-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/21/bigdata-percolator/" class="title">大数据系列——Percolator</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-21T01:22:29.000Z" itemprop="datePublished">2020-12-21</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#简介"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#用户视角"><span class="toc-number">2.</span> <span class="toc-text">用户视角</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#工作负载"><span class="toc-number">2.1.</span> <span class="toc-text">工作负载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#集群和-cell"><span class="toc-number">2.2.</span> <span class="toc-text">集群和 cell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#job-和-task"><span class="toc-number">2.3.</span> <span class="toc-text">job 和 task</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Alloc"><span class="toc-number">2.4.</span> <span class="toc-text">Alloc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#优先级、配额和准入控制"><span class="toc-number">2.5.</span> <span class="toc-text">优先级、配额和准入控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命名和监控"><span class="toc-number">2.6.</span> <span class="toc-text">命名和监控</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Borg-架构"><span class="toc-number">3.</span> <span class="toc-text">Borg 架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Borgmaster"><span class="toc-number">3.1.</span> <span class="toc-text">Borgmaster</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调度"><span class="toc-number">3.2.</span> <span class="toc-text">调度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Borglet"><span class="toc-number">3.3.</span> <span class="toc-text">Borglet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扩展性"><span class="toc-number">3.4.</span> <span class="toc-text">扩展性</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#可用性"><span class="toc-number">4.</span> <span class="toc-text">可用性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用率"><span class="toc-number">5.</span> <span class="toc-text">利用率</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#方法评估"><span class="toc-number">5.1.</span> <span class="toc-text">方法评估</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#共享-cell"><span class="toc-number">5.2.</span> <span class="toc-text">共享 cell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#大-cell"><span class="toc-number">5.3.</span> <span class="toc-text">大 cell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#细粒度的资源请求"><span class="toc-number">5.4.</span> <span class="toc-text">细粒度的资源请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#资源回收"><span class="toc-number">5.5.</span> <span class="toc-text">资源回收</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#隔离"><span class="toc-number">6.</span> <span class="toc-text">隔离</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安全隔离"><span class="toc-number">6.1.</span> <span class="toc-text">安全隔离</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#性能隔离"><span class="toc-number">6.2.</span> <span class="toc-text">性能隔离</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Borg" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Borg
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/09/07/Borg/" class="article-date">
+	  <time datetime="2023-09-07T05:13:17.000Z" itemprop="datePublished">2023-09-07</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/云原生/">云原生</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/09/07/Borg/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>本文是对 <a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/43438.pdf" target="_blank" rel="noopener">Large-scale cluster management at Google with Borg</a> 的总结。</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>Google 的 Borg 系统是集群管理系统，在它上面运行着成千上万个任务，包括各种各样的应用，运行在千上万个机器上。</p>
+<p>Borg 的功能包括：</p>
+<ul>
+<li>准入/权限控制</li>
+<li>高效的任务调度</li>
+<li>资源管理</li>
+<li>进程级别的性能隔离</li>
+</ul>
+<p>Borg 带来 3 个收益；</p>
+<ul>
+<li>隐藏资源管理和错误处理，用户可以专注应用程序的开发；</li>
+<li>高可靠和高可用；</li>
+<li>高效的在成千上万个机器上运行工作负载。</li>
+</ul>
+<p>当前云原生大红大紫的 Kubernates 的思想就来自于 Borg。</p>
+<h1 id="用户视角"><a href="#用户视角" class="headerlink" title="用户视角"></a>用户视角</h1><p>Borg 运行 Google 的应用和服务，用户将他们的工作（服务或者应用）以 job 的形式提交，job 由多个 task 组成，每个 task 都是由同一个二进制程序运行。每个 job 运行在一个 Borg 的 cell 里，多个机器作为一个单元来管理。</p>
+<h2 id="工作负载"><a href="#工作负载" class="headerlink" title="工作负载"></a>工作负载</h2><p>工作负载分为两类：</p>
+<ul>
+<li>长时间运行的服务，它们不会停下来，比如 web 服务，Gmail 等</li>
+<li>批处理任务，任务执行结束后就会停止，比如 MapReduce，管理这类任务还有 YARN。</li>
+</ul>
+<h2 id="集群和-cell"><a href="#集群和-cell" class="headerlink" title="集群和 cell"></a>集群和 cell</h2><p>一个 cell 中的多个机器，它们属于一个集群，由高性能数据中心规则的网站连接起来。一个集群活在数据中心建筑里，多个建筑构造一个站点。一个集群通常包括一个大规模的 cell，可能还有小规模的测试 cell 以及其他用户的 cell。</p>
+<h2 id="job-和-task"><a href="#job-和-task" class="headerlink" title="job 和 task"></a>job 和 task</h2><p>job 的属性包括名称，所属者和它的 task。job 可用限制运行在什么样的机器上，比如 CPU 架构，操作系统等等。一个 job 只运行在一个 cell 中。</p>
+<p>每个 task 包括一个或者多个 linux 进程，它们运行在一个容器内。这与 k8s 的 pod 非常类似。Borg 没有使用虚拟机的方式来运行任务，因为虚拟机本身非常消耗资源。</p>
+<p>每个 task 都有一些属性，包括资源需求，比如 CPU、内存、磁盘IO、TCP 端口等，它们都可以更细粒度的指定。</p>
+<p>用户提交 job 时通过 RPC 向 Borg 发起通知。每个 job 都是通过特定领域的语言描述的，类似 k8s 的 yaml。</p>
+<p>用户可以修改 job 的属性，然后让 borg 以滚动更新的方式让应 job 的新配置生效。</p>
+<p>每个任务在关闭时首先会发出 SIGTERM 信号，这个时候任务自己有时间做一些清理动作，然后任务自己结束。超过一定时间任务还未结束会发出 SIGKILL 让操作系统强制杀死。</p>
+<p><img src="/images/borg_job_lifecycle.jpg" alt="图-1 job 和 task 的状态"><br><em>图-1 job 和 task 的状态</em></p>
+<h2 id="Alloc"><a href="#Alloc" class="headerlink" title="Alloc"></a>Alloc</h2><p>Alloc 是一个机器上预留的一组资源（资源管理器），在这些资源中可以运行一个或多个任务（也就是为任务分配资源，Alloc 就是 Allocate 的简称，意思是分配）。</p>
+<p>Alloc 的资源类似机器的资源，跑在里面的多个任务共享它们的资源。（比如在 k8s 中，给一个 pod 设置为 2G 内存，多个进程共享这 2G 内存）。</p>
+<p>Alloc set 就像是一个 job 一样，在多个机器上预留的一组资源。如果一个 alloc set 创建后，多个任务可以运行在这组资源下。</p>
+<h2 id="优先级、配额和准入控制"><a href="#优先级、配额和准入控制" class="headerlink" title="优先级、配额和准入控制"></a>优先级、配额和准入控制</h2><p>使用优先级和配额来评估  Borg 是否可以承担得起任务运行所需的资源。</p>
+<p>高优先级的任务可以获得的配额比低优先级的高，而且还会通过抢占低优先级任务配额的方式来满足高优先级的任务。Borg 定义了优先级带宽：monitoring, production, batch, 和 best effort 这四种。生产级别的 job 属于 monitoring 和 production 。</p>
+<p>配额用来决定哪个任务允许调度，配额使用 CPU、RAM 资源矩阵表示，可以定义每个优先级的配额，也可以定义一个周期时间内所需要的配额。配额检查是准入控制的一部分，不属于调度。如果任务的配额不足时会立即拒绝接入。</p>
+<p>高优先级配额要比低优先级配额消耗的多，生产级别的配额受到一个 cell 实际可用资源的限制。当用户提交了生产级别的任务时，只有满足任务所需的配额时才可能期望任务能够运行。</p>
+<h2 id="命名和监控"><a href="#命名和监控" class="headerlink" title="命名和监控"></a>命名和监控</h2><p>客户端如何找到 job 的那个任务来提供服务呢，是 BNS（全称是 Borg name service)，类似 DNS。BNS 包括 cell 的名字、job 的名字以及 task 的数量。Borg 将一个 task 的主机名和端口写入 Chubby 服务中（可以将 Chubby 看做是 Zookeeper），这样才能让 RPC 系统找到 task 端点（endpoint）。此外 Borg 会将 job 的大小和任务健康状态信息写入 Chubby 以便 RPC 系统可以路由到健康服务中。</p>
+<p>Borg 通过检测每个 task 暴露的健康 HTTP 接口来判断系统是否正常工作，如果接口返回了错误或者响应不正常，则可以任务服务工作不正常了，RPC 系统就不会路由到故障节点上。</p>
+<p>Borg 提供了日志数据卷用来存储日志，如果任务停止时，日志还会保留一段时间，方便用户排查问题。Borg 为每个 task 都详细的记录了资源使用情况、详细日志、执行历史记录和最终命运。</p>
+<h1 id="Borg-架构"><a href="#Borg-架构" class="headerlink" title="Borg 架构"></a>Borg 架构</h1><p><img src="/images/borg_arch.jpg" alt="Borg 架构"><br><em>图-2 Borg 架构</em></p>
+<p>如图-2所示，Borg 的成分包括：</p>
+<ul>
+<li>由多个机器组成的一个 cell；</li>
+<li>一个逻辑上的中心化控制节点 Borgmaster；</li>
+<li>运行在每个机器上的 Borglet；</li>
+</ul>
+<h2 id="Borgmaster"><a href="#Borgmaster" class="headerlink" title="Borgmaster"></a>Borgmaster</h2><p>每个 cell 的 Borgmaster 都由两个进程组成：Borgmaster 的主进程和一个分离的调度器。Borgmaster 负责接受 RPC 请求来完成对集群状态的修改或者是读取数据。</p>
+<p>中心化的 Borgmaster 也是多副本的，每个副本都在内存中维持一份 cell 最新的状态数据，这些数据当然也会维护在 Chubby 中（还包括它的副本和磁盘）。每个 cell 选举的单节点 master 由两个作用：作为 Paxos 的 leader 和状态修改。当 master 出现错误需要选举时可能会执行 10 秒钟，如果 cell 集群更大，则需要消耗更多的时间，因为需要在新 master 内存中重建集群状态。当一个副本从中断中恢复时，它会动态的从其他副本中再次同步状态数据。</p>
+<p>Borg 在时间上的某个点的状态被称为检查点（checkpoint），由存储在 Chubby 上的周期性快照和更新日志组成。检查点有很多用途，包括恢复到任意时间点的状态。</p>
+<p>Borgmaster 还有一个高保真的模拟器，称为 Fauxmaster，它可以用来读取检查点文件，并且包括与线上 Borgmaster 一样的代码逻辑和与 Borglet 交互的代码逻辑。它可以接收 RPC 请求执行操作，用来调试错误信息，就好像是跟 Borgmaster 交互一样，与模拟的 Borglet 从 checkpoint 文件中重放交互流程。</p>
+<h2 id="调度"><a href="#调度" class="headerlink" title="调度"></a>调度</h2><p>当一个任务提交时，Borg 将它的状态存储在 Chubby 中，然后将 job 添加到 pending 队列中。调度器异步扫描 pending 队列作业(job)，将其任务分配在一个满足资源限制条件的机器上运行。分配算法包括两部分：可行性检查和打分。可行性分析就是找到可以运行该任务的机器，而打分就是从可行性分析得到的机器列表中再选择最合适的机器来运行任务。</p>
+<p>打分有两种策略：worse fit 和 best fit，使用 worse fit 意味着为负载分摊到所有机器中，而 best fit 则使用紧凑的方式、尽量耗尽机器的资源。每种方法都有优缺点，Borg 使用中庸的方法，也就是给机器留下一定的资源来应对突发流量。</p>
+<p>如果无法从打分阶段获取合适的机器来运行任务，Borg 会从优先级低到高来抢占一些任务的资源。被抢占的任务会停止运行，然后重新进入调度阶段，也就是放入 pending 队列。</p>
+<p>为了加快任务启动的时间，Borg 会有限选择已经有该任务的二进制程序的集群，避免下载文件而耗费大量的时间。</p>
+<h2 id="Borglet"><a href="#Borglet" class="headerlink" title="Borglet"></a>Borglet</h2><p>每台机器上都会跑一个 Borg agent，称为 Borglet。它的功能包括：</p>
+<ul>
+<li>启动和停止任务（task）；</li>
+<li>任务失败时重启任务；</li>
+<li>操作 OS 内核来管理本地机器的资源；</li>
+<li>滚动 debug 日志；</li>
+<li>将机器状态报告给 Borgmaster；</li>
+<li>上报监控数据。</li>
+</ul>
+<p>Borgmaster 按照一定的速率与 Borglet 通信（获取 Borglet 机器的状态），减少网络流量，避免出现恢复风暴。为了提高性能，Borgmaster 的每个副本都以无状态分片的模式与 Borglet 通信，Borgmaster 每次选举都会重新计算分片，决定哪些副本管理哪些 Borglet。基于弹性的考虑，Borgmaster 副本收到 Borglet 完整的状态信息后，会聚合、压缩消息，并将差异信息上报给 Borgmaster。</p>
+<p>如果 Borgmaster 没有收到 Borglet 的心跳信息（也就是未回复 poll 消息），则将这台机器标记为故障，跑在这台集群上的任务会重新调度。如果机器恢复，新调度的任务就需要停止运行。</p>
+<h2 id="扩展性"><a href="#扩展性" class="headerlink" title="扩展性"></a>扩展性</h2><p>一个 Borgmaster 可以管理一个上千台机器的 cell，多个 cell 时每分钟可以达到 10000 个任务。Borgmaster 采用多种方法来增加性能。</p>
+<p>为了处理更大规模的 cell，Borgmaster 将调度器独立为一个进程，它可以与其他 Borgmaster 副本功能并行的处理。一个调度器副本操作在它本地内存状态下，重复的执行：1）从选举的 master 中接收变更的状态数据，包括分配数据和 pending 队列的数据；2）更细本地内存副本信息；3）调度任务；4）通知选举的 master 关于任务分配的信息。</p>
+<p>其他几个提高 Borg 扩展性的方法如下。</p>
+<p><strong>缓存打分</strong>：评估可用的机器和打分是非常昂贵的，通过缓存打分可以加快速度。</p>
+<p><strong>同等类别</strong>：评估可用的机器和打分应用在一批相同需求场景下，减少重复计算。</p>
+<p><strong>随机化</strong>：给所有机器计算可行性和打分太慢，可以随机选择一批可行的机器然后打分。</p>
+<h1 id="可用性"><a href="#可用性" class="headerlink" title="可用性"></a>可用性</h1><p>Borg 为提高可用性使用了多副本机制，虽然使用了中心化的模式，但是 master 节点通过将状态日志同步到多副本中来保证服务不中断。假如 master 挂了，其他副本会选择一个新的 master。</p>
+<p>Borg 还使用如下技术提高可用性。</p>
+<ul>
+<li>自动重新调度失败的任务</li>
+<li>减少关联错误，将一个 job 的多个任务分发到不同错误域下，比如不同机器、不同机甲、不同电源。</li>
+<li>杜绝因机器维护时让一个 job 的任务同时关闭的情况；减少任务崩溃的频率；</li>
+<li>使用声明式期望状态表示法和幂等性，让失败的服务可以重新提交而不会有任何影响；</li>
+<li>由于在一个大规模的 cell 中比较难以分辨机器不可达是因为网络问题还是机器故障，所以需要控制任务因为机器不可达而“挪地”的操作速率；</li>
+<li>避免重复修复机器带来的任务崩溃的情况；</li>
+<li>重复跑 logsaver 任务，使其可以从中间状态中恢复。</li>
+</ul>
+<p>Borg 有一个关键设计就是如果 master 或者 borglet 挂了之后，正在运行的任务可以让他们继续运行。</p>
+<p>通过这些优化，Borg 可以达到 99.99% 的可用性：因为机器故障而使用副本机制；准入控制避免超负载；使用简单的方法部署实例；使用底层工具最小化外部依赖。</p>
+<h1 id="利用率"><a href="#利用率" class="headerlink" title="利用率"></a>利用率</h1><h2 id="方法评估"><a href="#方法评估" class="headerlink" title="方法评估"></a>方法评估</h2><p>Borg 使用 cell 压缩的方式来评估调度策略的利用率，也就是通过 Fauxmaster 读取生产的日志文件来模拟线上流程，并且通过减少机器数量来记录使用率，直到刚好能满足需求。通过 cell 压缩来评估调度策略是一个比较公平和一致的方法，因为它直接反映了投入和产出。更好的策略可以使用更少的集群来满足同样的工作负载。</p>
+<p>一般线上环境会预留一部分空间来应对突发事件、黑天鹅事件。</p>
+<h2 id="共享-cell"><a href="#共享-cell" class="headerlink" title="共享 cell"></a>共享 cell</h2><p>共享 cell 可以提高机器利用率，从而节省成本或开支。</p>
+<p>比如 prod 和 non-prod 两种 cell 的共享模式。由于部署 prod 上的 task 是处理生产环境流量的，为了应对流量尖峰或者突发事件，会预留一些资源。这些资源大部分时间都不会用到。为了提高资源利用率，Borg 会回收一部分资源用来跑 non-prod 的任务。前面已经说到优先级的概念，也就是当生产环境需要更多资源时，会从低优先级（non-prod 的优先级就比 prod 的优先级低）获取，将低优先级的任务结束，释放资源。</p>
+<p>资源池化也能有效的降低开销，比如很多 cell 都会被上千个用户共享。</p>
+<p>Google 内部对一台机器跑着不同用户且不同类型的任务的性能影响做了研究，发现确实会受到任务类型的影响，但是影响是非常小的。相反，共享除了 CPU 外，还有磁盘、内存等资源，带来的收益更大。</p>
+<h2 id="大-cell"><a href="#大-cell" class="headerlink" title="大 cell"></a>大 cell</h2><p>Google 创建更大的 cell，不仅可以运行大规模计算，而且还可以减少资源碎片。Google 内部通过对资源分桶和不分桶实验证明，资源分桶时需要更多的机器，而不分桶则能更好的容纳任务。</p>
+<h2 id="细粒度的资源请求"><a href="#细粒度的资源请求" class="headerlink" title="细粒度的资源请求"></a>细粒度的资源请求</h2><p>Borg 使用细粒度的资源管理，用户可以指定任务需要的资源，包括 CPU 核数和以字节表示内存及磁盘资源。Google 内部通过实验证明，像云厂商那种提供固定资源的场景是不适合 Google 内部的，当资源大小固定时，会使用更多的机器来满足同等规模的工作负载。</p>
+<h2 id="资源回收"><a href="#资源回收" class="headerlink" title="资源回收"></a>资源回收</h2><p>一个作业可以指定一个资源限制：每个任务应该被授予的资源上限。这个限制被 Borg 用来决定用户配额是否足以提交任务，并且决定一台机器是否有足够的剩余资源调度任务。通常用户会申请更多资源配额，也意味着用户会为 task 设置的资源会超过 task 本身真正所需的资源大小。如果一个 task 尝试获取比请求更多的资源时，Borg 会将任务杀死。</p>
+<p>如果当前的资源没有被真正使用，不应该浪费他们，而是将他们用于运行低优先级的任务，比如批处理任务。Borg 会估算任务会使用的资源，然后将多余的内存回收作它用，这个过程称为资源回收。</p>
+<p>高优先级的任务只有在使用的资源超过自己指定的请求限制时才会被杀，如果高优先级任务需要更多资源时，但是当前资源无法分配时，Borg 会将低优先级任务杀死，让其释放资源给高优先级的任务使用。</p>
+<h1 id="隔离"><a href="#隔离" class="headerlink" title="隔离"></a>隔离</h1><p>前文说到机器资源共享，一台机器会运行不同用户提交的不同内容。需要一些机制阻止一个任务影响到另一个任务。</p>
+<h2 id="安全隔离"><a href="#安全隔离" class="headerlink" title="安全隔离"></a>安全隔离</h2><p>Borg 使用 <code>chroot</code> 和 <code>cgroup</code> 机制实现安全级别的隔离，borgssh 连接而创建的 shell 的任务会限制在一个 chroot 和 cgroup 下。</p>
+<p>对于外部系统会使用 KVM 这种安全沙箱技术来提供更强的隔离性，KVM 是一个运行在 Borg 上的进程。</p>
+<h2 id="性能隔离"><a href="#性能隔离" class="headerlink" title="性能隔离"></a>性能隔离</h2><p>早起 Borglet 使用相对原始的资源隔离方式，进程出现一些任务占用或者吃掉其他任务所需要的资源，造成一些用户像把自己的任务放在一个特定的机器或者 cell 中来避免其他任务的干扰。现在 Borglet 使用 cgroup 技术可以有效控制资源隔离。</p>
+<p>为了应对过量投入和超负荷，Borg 还使用了如下方法：</p>
+<ul>
+<li>将任务划分为 latency-sensitive （缩写为 LS，意思是低延迟的线上用户服务）和 batch （批处理）任务，高优先级的 LS 任务会被更好的对待，而且还会从 batch 任务抢一些资源，使得 batch 任务处于饥饿状态；</li>
+<li>将资源划分为可压缩（比如 CPU，磁盘 IO 带宽）和不可压缩（比如内存和磁盘空间）。可压缩的资源是基于速率的，而且可以在用杀死任务的情况下从任务中回收一些资源，这会降低任务服务的质量。而不可压缩的资源则无法在不杀任务的情况下就能回收资源的。</li>
+<li>用户空间的控制，比如1）基于内存使用情况的预测来分配内存；2）在操作系统内核层面处理 OOM 事件；3）当任务使用过量资源时或者机器资源快耗尽时就将其杀死。</li>
+<li>使用基于 cgroup 的调度策略，降低调度延迟。</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2023/09/07/Borg/" title="Borg" target="_blank" rel="external">https://stltqhs.github.io/2023/09/07/Borg/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2023/09/03/Milvus/" title="Milvus"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
