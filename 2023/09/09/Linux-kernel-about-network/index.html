@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Linux 网络简说（上） | 海东青</title>
+  <meta name="description" content="Linux 网络的知识点是非常多的，不可能一篇文章就可能讲清楚。本文参考了 开发内功修炼 的文章，做了简单叙述，算是一个笔记。 网络分层图-1 网络分层 在 Linux 内核实现中，链路层协议靠网卡驱动来实现，内核协议栈来实现网络层和传输层。内核对更上层的应用层提供 socket 接口来供用户进程访问。我们用 Linux 的视⻆来看到的 TCP/IP 网络分层模型应该是图-1的样子。 内核和网络设">
+<meta name="keywords" content="网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 网络简说（上）">
+<meta property="og:url" content="https://stltqhs.github.io/2023/09/09/Linux-kernel-about-network/index.html">
+<meta property="og:site_name" content="海东青">
+<meta property="og:description" content="Linux 网络的知识点是非常多的，不可能一篇文章就可能讲清楚。本文参考了 开发内功修炼 的文章，做了简单叙述，算是一个笔记。 网络分层图-1 网络分层 在 Linux 内核实现中，链路层协议靠网卡驱动来实现，内核协议栈来实现网络层和传输层。内核对更上层的应用层提供 socket 接口来供用户进程访问。我们用 Linux 的视⻆来看到的 TCP/IP 网络分层模型应该是图-1的样子。 内核和网络设">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_layer.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_receive_with_hardware.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_ksoftirqd.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_subnetwork.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_stack_register.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_netinterface_init.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernal_start_netinterface.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernal_hardware_interrupt.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_ksoftirqd_process.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_stack_process.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_recvfrom_udp.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_receive_wait.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_socket_struct.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_receive_process.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_tcp_recv.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_task_files.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_task_one_file.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_init_socket.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_socket_file.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_eventpoll_file.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_eventpoll_file_desc.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_epctl.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_epoll_wait.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_epoll_wakeup.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_send_overview.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_ring_buffer.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_send.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_tcp_send.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_skb.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_xmit.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_ip_out.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_neighbor.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_netdev.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_soft_tx.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_igb.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_dev_send_complete.jpg">
+<meta property="og:image" content="https://stltqhs.github.io/images/network_kernel_send_desc.jpg">
+<meta property="og:updated_time" content="2023-09-09T08:20:24.443Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux 网络简说（上）">
+<meta name="twitter:description" content="Linux 网络的知识点是非常多的，不可能一篇文章就可能讲清楚。本文参考了 开发内功修炼 的文章，做了简单叙述，算是一个笔记。 网络分层图-1 网络分层 在 Linux 内核实现中，链路层协议靠网卡驱动来实现，内核协议栈来实现网络层和传输层。内核对更上层的应用层提供 socket 接口来供用户进程访问。我们用 Linux 的视⻆来看到的 TCP/IP 网络分层模型应该是图-1的样子。 内核和网络设">
+<meta name="twitter:image" content="https://stltqhs.github.io/images/network_kernel_layer.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://stltqhs.github.io/2023/09/09/Linux-kernel-about-network/index.html">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/stltqhs" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海东青</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java 技术专家</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Guangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/">NoSQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mq/">mq</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云原生/">云原生</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人工智能/">人工智能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/大数据/">大数据</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/网络/">网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机体系结构/">计算机体系结构</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/NoSQL/" style="font-size: 13.33px;">NoSQL</a> <a href="/tags/java/" style="font-size: 14px;">java</a> <a href="/tags/mq/" style="font-size: 13px;">mq</a> <a href="/tags/云原生/" style="font-size: 13.33px;">云原生</a> <a href="/tags/人工智能/" style="font-size: 13px;">人工智能</a> <a href="/tags/大数据/" style="font-size: 13.67px;">大数据</a> <a href="/tags/算法/" style="font-size: 13px;">算法</a> <a href="/tags/网络/" style="font-size: 13px;">网络</a> <a href="/tags/计算机体系结构/" style="font-size: 13.33px;">计算机体系结构</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/09/Linux-kernel-about-network/" class="title">Linux 网络简说（上）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-09T08:20:24.000Z" itemprop="datePublished">2023-09-09</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/08/Borg-Omega-and-Kubernates/" class="title">Borg, Omega, and Kubernates</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-08T06:40:38.000Z" itemprop="datePublished">2023-09-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/07/Borg/" class="title">Borg</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-07T05:13:17.000Z" itemprop="datePublished">2023-09-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/09/03/Milvus/" class="title">Milvus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-09-03T09:18:33.000Z" itemprop="datePublished">2023-09-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/10/redis/" class="title">Redis</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-10T12:49:08.000Z" itemprop="datePublished">2021-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#网络分层"><span class="toc-number">1.</span> <span class="toc-text">网络分层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-收包流程"><span class="toc-number">2.</span> <span class="toc-text">Linux 收包流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#启动和初始化"><span class="toc-number">2.1.</span> <span class="toc-text">启动和初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ksoftirqd-进程初始化"><span class="toc-number">2.1.1.</span> <span class="toc-text">ksoftirqd 进程初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#网络子系统初始化"><span class="toc-number">2.1.2.</span> <span class="toc-text">网络子系统初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#协议栈注册"><span class="toc-number">2.1.3.</span> <span class="toc-text">协议栈注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#网卡初始化"><span class="toc-number">2.1.4.</span> <span class="toc-text">网卡初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动网卡"><span class="toc-number">2.1.5.</span> <span class="toc-text">启动网卡</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#接收数据"><span class="toc-number">2.2.</span> <span class="toc-text">接收数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#硬中断处理"><span class="toc-number">2.2.1.</span> <span class="toc-text">硬中断处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ksoftirqd-软中断处理"><span class="toc-number">2.2.2.</span> <span class="toc-text">ksoftirqd 软中断处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#网络协议栈处理"><span class="toc-number">2.2.3.</span> <span class="toc-text">网络协议栈处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IP-协议层处理"><span class="toc-number">2.2.4.</span> <span class="toc-text">IP 协议层处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#协议处理"><span class="toc-number">2.3.</span> <span class="toc-text">协议处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#UDP"><span class="toc-number">2.3.1.</span> <span class="toc-text">UDP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP"><span class="toc-number">2.3.2.</span> <span class="toc-text">TCP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读阻塞原理"><span class="toc-number">2.3.3.</span> <span class="toc-text">读阻塞原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进程唤醒原理"><span class="toc-number">2.3.4.</span> <span class="toc-text">进程唤醒原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO-多路复用-epoll-原理"><span class="toc-number">2.4.</span> <span class="toc-text">IO 多路复用 epoll 原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#accept-创建新-socket"><span class="toc-number">2.4.1.</span> <span class="toc-text">accept 创建新 socket</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#初始化-struct-socket-对象"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">初始化 struct socket 对象</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#为新-socket-对象申请-file"><span class="toc-number">2.4.1.2.</span> <span class="toc-text">为新 socket 对象申请 file</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#接收连接"><span class="toc-number">2.4.1.3.</span> <span class="toc-text">接收连接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#添加新文件到当前进程的打开文件列表"><span class="toc-number">2.4.1.4.</span> <span class="toc-text">添加新文件到当前进程的打开文件列表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll-create-实现"><span class="toc-number">2.4.2.</span> <span class="toc-text">epoll_create 实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll-ctl-添加-socket"><span class="toc-number">2.4.3.</span> <span class="toc-text">epoll_ctl 添加 socket</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll-wait-等待接收"><span class="toc-number">2.4.4.</span> <span class="toc-text">epoll_wait 等待接收</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据来啦"><span class="toc-number">2.4.5.</span> <span class="toc-text">数据来啦</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网络包处理之-CPU-开销汇总"><span class="toc-number">2.5.</span> <span class="toc-text">网络包处理之 CPU 开销汇总</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-发包流程"><span class="toc-number">3.</span> <span class="toc-text">Linux 发包流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#LINUX-网络发送过程总览"><span class="toc-number">3.1.</span> <span class="toc-text">LINUX 网络发送过程总览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网卡启动"><span class="toc-number">3.2.</span> <span class="toc-text">网卡启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#发送数据"><span class="toc-number">3.3.</span> <span class="toc-text">发送数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#send-系统调用实现"><span class="toc-number">3.3.1.</span> <span class="toc-text">send 系统调用实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#传输层处理"><span class="toc-number">3.3.2.</span> <span class="toc-text">传输层处理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#传输层拷⻉"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">传输层拷⻉</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#传输层发送"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">传输层发送</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#网络层发送处理"><span class="toc-number">3.3.2.3.</span> <span class="toc-text">网络层发送处理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#邻居子系统"><span class="toc-number">3.3.2.4.</span> <span class="toc-text">邻居子系统</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#网络设备子系统"><span class="toc-number">3.3.2.5.</span> <span class="toc-text">网络设备子系统</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#软中断调度"><span class="toc-number">3.3.2.6.</span> <span class="toc-text">软中断调度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#igb-网卡驱动发送"><span class="toc-number">3.3.2.7.</span> <span class="toc-text">igb 网卡驱动发送</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#发送完成硬中断"><span class="toc-number">3.3.2.8.</span> <span class="toc-text">发送完成硬中断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#总结"><span class="toc-number">3.3.2.9.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Linux-kernel-about-network" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux 网络简说（上）
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/09/09/Linux-kernel-about-network/" class="article-date">
+	  <time datetime="2023-09-09T08:20:24.000Z" itemprop="datePublished">2023-09-09</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/网络/">网络</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/09/09/Linux-kernel-about-network/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p><em>Linux 网络的知识点是非常多的，不可能一篇文章就可能讲清楚。本文参考了 <a href="https://github.com/yanfeizhang/coder-kung-fu" target="_blank" rel="noopener">开发内功修炼</a> 的文章，做了简单叙述，算是一个笔记。</em></p>
+<h1 id="网络分层"><a href="#网络分层" class="headerlink" title="网络分层"></a>网络分层</h1><p><img src="/images/network_kernel_layer.jpg" alt="网络分层"><br><em>图-1 网络分层</em></p>
+<p>在 Linux 内核实现中，链路层协议靠网卡驱动来实现，内核协议栈来实现网络层和传输层。内核对更上层的应用层提供 socket 接口来供用户进程访问。我们用 Linux 的视⻆来看到的 TCP/IP 网络分层模型应该是图-1的样子。</p>
+<p>内核和网络设备驱动是通过中断的方式来处理的。当设备上有数据到达的时候，会给 CPU 的相关引脚上触发一个电压变化，以通知 CPU 来处理数据。</p>
+<p>Linux 中断处理函数是分上半部和下半部的。上半部是只进行最简单的工作，快速处理然后释放 CPU ，接着 CPU 就可以允许其它中断进来。剩下将绝大部分的工作都放到下半部中，可以慢慢从容处理。2.4 以后的内核版本采用的下半部实现方式是软中断，由 ksoftirqd 内核线程全权处理。</p>
+<h1 id="Linux-收包流程"><a href="#Linux-收包流程" class="headerlink" title="Linux 收包流程"></a>Linux 收包流程</h1><p><img src="/images/network_kernel_receive_with_hardware.jpg" alt="Linux 收包流程"><br><em>图-2 Linux 收包流程</em></p>
+<h2 id="启动和初始化"><a href="#启动和初始化" class="headerlink" title="启动和初始化"></a>启动和初始化</h2><h3 id="ksoftirqd-进程初始化"><a href="#ksoftirqd-进程初始化" class="headerlink" title="ksoftirqd 进程初始化"></a>ksoftirqd 进程初始化</h3><p>Linux 的软中断都是在专⻔的内核线程(ksoftirqd)中进行的，该进程数量不是 1 个,而是 N 个,其中 N 等于你的机器的核数。系统初始化的时候在 kernel/smpboot.c 中调用了 <code>smpboot_register_percpu_thread</code>， 该函数进一步会执行到 <code>spawn_ksoftirqd</code>（位于 kernel/softirq.c）来创建出 softirqd 进程。当 ksoftirqd 被创建出来以后,它就会进入自己的线程循环函数 <code>ksoftirqd_should_run</code> 和 <code>run_ksoftirqd</code> 了。不停地判断有没有软中断需要被处理。</p>
+<p><img src="/images/network_kernel_ksoftirqd.jpg" alt="ksoftirqd 创建流程"><br><em>图-3 ksoftirqd 创建流程</em></p>
+<h3 id="网络子系统初始化"><a href="#网络子系统初始化" class="headerlink" title="网络子系统初始化"></a>网络子系统初始化</h3><p><img src="/images/network_kernel_subnetwork.jpg" alt="网络子系统初始化"><br><em>图-4 网络子系统初始化</em></p>
+<p>linux 内核通过调用 <code>subsys_initcall</code>  来初始化各个子系统，在这个函数里，会为每个 CPU 都申请一个 softnet_data  数据结构，在这个数据结构里的 poll_list  是等待驱动程序将其 poll 函数注册进来。另外 <code>open_softirq</code> 注册了每一种软中断都注册一个处理函数。 <code>NET_TX_SOFTIRQ</code> 的处理函数为 <code>net_tx_action</code>，<code>NET_RX_SOFTIRQ</code> 的为 <code>net_rx_action</code>。</p>
+<h3 id="协议栈注册"><a href="#协议栈注册" class="headerlink" title="协议栈注册"></a>协议栈注册</h3><p><img src="/images/network_kernel_stack_register.jpg" alt="协议栈注册"><br><em>图-5 协议栈注册</em></p>
+<p>内核实现了网络层的 ip 协议，也实现了传输层的 tcp 协议和 udp 协议。 这些协议对应的实现函数分别是 <code>ip_rcv()</code>, <code>tcp_v4_rcv()</code>和 <code>udp_rcv()</code>。通过 <code>inet_init</code> ,将这些函数注册到了 <code>inet_protos</code> 和 <code>ptype_base</code> 数据结构中了。<code>inet_protos</code> 记录着 udp 和 tcp 的处理函数地址，<code>ptype_base</code> 存储着 <code>ip_rcv()</code> 函数的处理地址。</p>
+<p>如果看一下 <code>ip_rcv</code> 和 <code>udp_rcv</code> 等函数的代码能看到很多协议的处理过程。例如 <code>ip_rcv</code> 中会处理 netfilter 和 iptable 过滤，如果你有很多或者很复杂的 netfilter 或 iptables 规则，这些规则都是在软中断的上下文中执行的，会加大网络延迟。再例如 <code>udp_rcv</code> 中会判断 socket 接收队列是否满了。对应的相关内核参数是 <code>net.core.rmem_max</code> 和 <code>net.core.rmem_default</code>。</p>
+<h3 id="网卡初始化"><a href="#网卡初始化" class="headerlink" title="网卡初始化"></a>网卡初始化</h3><p><img src="/images/network_kernel_netinterface_init.jpg" alt="网卡初始化"><br><em>图-6 网卡初始化</em></p>
+<h3 id="启动网卡"><a href="#启动网卡" class="headerlink" title="启动网卡"></a>启动网卡</h3><p><img src="/images/network_kernal_start_netinterface.jpg" alt="启动网卡"><br><em>图-6 启动网卡</em></p>
+<h2 id="接收数据"><a href="#接收数据" class="headerlink" title="接收数据"></a>接收数据</h2><h3 id="硬中断处理"><a href="#硬中断处理" class="headerlink" title="硬中断处理"></a>硬中断处理</h3><p><img src="/images/network_kernal_hardware_interrupt.jpg" alt="硬中断处理"><br><em>图-7 硬中断处理</em></p>
+<p>首先当数据帧从网线到达网卡上的时候,第一站是网卡的接收队列。网卡在分配给自己的 RingBuffer 中寻找可用的内存位置,找到后 DMA 引擎会把数据 DMA 到网卡之前关联的内存里,这个时候 CPU 都是无感的。当 DMA 操作完成以后,网卡会向 CPU 发起一个硬中断,通知 CPU 有数据到达。</p>
+<p><em>注意:当RingBuffer满的时候,新来的数据包将给丢弃。ifconfig查看网卡的时候,可以里面有个overruns,表示因为环形队列满被丢弃的包。如果发现有丢包,可能需要通过ethtool命令来加大环形队列的⻓度。</em></p>
+<h3 id="ksoftirqd-软中断处理"><a href="#ksoftirqd-软中断处理" class="headerlink" title="ksoftirqd 软中断处理"></a>ksoftirqd 软中断处理</h3><p><img src="/images/network_kernel_ksoftirqd_process.jpg" alt="ksoftirqd 软中断处理"><br><em>图-8 ksoftirqd 软中断处理</em></p>
+<p>硬中断中设置软中断标记,和 ksoftirq 的判断是否有软中断到达,都是基于 <code>smp_processor_id()</code> 的。这意味着只要硬中断在哪个 CPU 上被响应,那么软中断也是在这个 CPU 上处理的。所以说,如果你发现你的 Linux 软中断 CPU 消耗都集中在一个核上的话,做法是要把调整硬中断的 CPU 亲和性,来将硬中断打散到不同的 CPU 核上去。</p>
+<p>使用的 <code>time_limit</code> 和 <code>budget</code> 来控制 <code>net_rx_action</code> 函数主动退出，目的是保证网络包的接收不霸占 CPU 不放。</p>
+<p><code>net_rx_action</code> 这个函数中剩下的核心逻辑是获取到当前 CPU 变量 <code>softnet_data</code>，对其 <code>poll_list</code> 进行遍历, 然后执行到网卡驱动注册到的 <code>poll</code> 函数。</p>
+<h3 id="网络协议栈处理"><a href="#网络协议栈处理" class="headerlink" title="网络协议栈处理"></a>网络协议栈处理</h3><p><img src="/images/network_kernel_stack_process.jpg" alt="网络协议栈处理"><br><em>图-9 网络协议栈处理</em></p>
+<p>在 <code>__netif_receive_skb_core</code>  中，包含原来经常使用的 tcpdump 的抓包。接着 <code>__netif_receive_skb_core</code>  取出 protocol,它会从数据包中取出协议信息,然后遍历注册在这个协议上的回调函数列表。 <code>ptype_base</code>  是一个 hash table,在协议注册小节我们提到过。<code>ip_rcv</code> 函数地址就是存在这个 hash table 中的。</p>
+<h3 id="IP-协议层处理"><a href="#IP-协议层处理" class="headerlink" title="IP 协议层处理"></a>IP 协议层处理</h3><p><code>ip_recv</code> -&gt; <code>ip_rcv_finish</code> -&gt; <code>ip_route_input_noref</code> -&gt; <code>ip_route_input_mc</code> -&gt; <code>ip_local_deliver</code>。</p>
+<p><code>ip_local_deliver</code> 是路由子系统</p>
+<h2 id="协议处理"><a href="#协议处理" class="headerlink" title="协议处理"></a>协议处理</h2><h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><p><img src="/images/network_kernel_recvfrom_udp.jpg" alt="UDP 收包流程"><br><em>图-10 UDP 收包流程</em></p>
+<p>所谓的读取过程,就是访问 <code>sk&gt;sk_receive_queue</code> 。如果没有数据,且用户也允许等待,则将调用 <code>wait_for_more_packets()</code>执行等待操作,它加入会让用户进程进入睡眠状态。相关代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: net/core/datagram.c:EXPORT_SYMBOL(__skb_recv_datagram); </span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sk_buff</span> *__<span class="title">skb_recv_datagram</span>(<span class="title">struct</span> <span class="title">sock</span> *<span class="title">sk</span>, <span class="title">unsigned</span> <span class="title">int</span> <span class="title">flags</span>, <span class="title">int</span> *<span class="title">peeked</span>, <span class="title">int</span> *<span class="title">off</span>, <span class="title">int</span> *<span class="title">err</span>) &#123;</span></span><br><span class="line">	<span class="comment">// ......</span></span><br><span class="line">	<span class="keyword">do</span> &#123;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">sk_buff_head</span> *<span class="title">queue</span> = &amp;<span class="title">sk</span>-&gt;<span class="title">sk_receive_queue</span>;</span></span><br><span class="line">		skb_queue_walk(<span class="built_in">queue</span>, skb) &#123;</span><br><span class="line">			<span class="comment">// ......</span></span><br><span class="line">	    &#125;</span><br><span class="line">	    <span class="comment">/* User doesn't want to wait */</span></span><br><span class="line">	    error = -EAGAIN;</span><br><span class="line">	    <span class="keyword">if</span> (!timeo) <span class="keyword">goto</span> no_packet;</span><br><span class="line">	&#125; <span class="keyword">while</span> (!wait_for_more_packets(sk, err, &amp;timeo, last));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h3><p><img src="/images/network_kernel_receive_wait.jpg" alt="进程收包流程"><br><em>图-11 进程收包流程</em></p>
+<p><img src="/images/network_kernel_socket_struct.jpg" alt="socket 结构"><br><em>图-12 socket 结构</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: net/core/sock.c </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sock_init_data</span><span class="params">(struct socket *sock, struct sock *sk)</span> </span>&#123;</span><br><span class="line">	sk-&gt;sk_data_ready   =   sock_def_readable;</span><br><span class="line">	sk-&gt;sk_write_space  =   sock_def_write_space;</span><br><span class="line">	sk-&gt;sk_error_report =   sock_def_error_report;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当调用 <code>sock_create</code> 时会创建一些列的 socket 相关对象，在 <code>sock_init_data</code> 会注册一些函数（比如上面的代码）。当软中断上收到数据包时会通过调用 <code>sk_data_ready</code> 函数指针(实际被设置成了 <code>sock_def_readable()</code>) 来唤醒在 sock 上等待的进程。</p>
+<h3 id="读阻塞原理"><a href="#读阻塞原理" class="headerlink" title="读阻塞原理"></a>读阻塞原理</h3><p><img src="/images/network_kernel_receive_process.jpg" alt="进程阻塞原理"><br><em>图-13 进程阻塞原理</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: net/core/sock.c </span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sk_wait_data</span><span class="params">(struct sock *sk, <span class="keyword">long</span> *timeo)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//当前进程(current)关联到所定义的等待队列项上  </span></span><br><span class="line">	DEFINE_WAIT(wait);</span><br><span class="line">	<span class="comment">// 调用 sk_sleep 获取 sock 对象下的 wait</span></span><br><span class="line">	<span class="comment">// 并准备挂起,将进程状态设置为可打断 INTERRUPTIBLE   </span></span><br><span class="line">	prepare_to_wait(sk_sleep(sk), &amp;wait, TASK_INTERRUPTIBLE);</span><br><span class="line">	set_bit(SOCK_ASYNC_WAITDATA, &amp;sk-&gt;sk_socket-&gt;flags);</span><br><span class="line">	<span class="comment">// 通过调用schedule_timeout让出CPU,然后进行睡眠</span></span><br><span class="line">	rc = sk_wait_event(sk, timeo, !skb_queue_empty(&amp;sk&gt;sk_receive_queue));</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先在 <code>DEFINE_WAIT</code> 宏下,定义了一个等待队列项 <code>wait</code>。 在这个新的等待队列项上,注册了回调函数 <code>autoremove_wake_function</code>,并把当前进程描述符 <code>current</code> 关联到其 <code>.private</code> 成员上。</p>
+<p>紧接着在 <code>sk_wait_data</code> 中 调用 <code>sk_sleep</code> 获取 sock 对象下的等待队列列表头 <code>wait_queue_head_t</code>。</p>
+<p>接着调用 <code>prepare_to_wait</code> 来把新定义的等待队列项 <code>wait</code> 插入到 <code>sock</code> 对象的等待队列下。</p>
+<p>这样后面当内核收完数据产生就绪时间的时候,就可以查找 socket 等待队列上的等待项,进而就可以找到回调函数和在等待该 socket 就绪事件的进程了。<br>最后再调用 <code>sk_wait_event</code> 让出 CPU,进程将进入睡眠状态,这会导致一次进程上下文的开销。</p>
+<h3 id="进程唤醒原理"><a href="#进程唤醒原理" class="headerlink" title="进程唤醒原理"></a>进程唤醒原理</h3><p><img src="/images/network_kernel_tcp_recv.jpg" alt="TCP 收包流程"><br><em>图-14 TCP 收包流程</em></p>
+<p>软中断(也就是 Linux 里的 ksoftirqd 进程)里收到数据包以后,发现是 tcp 的包的话就会执行到 <code>tcp_v4_rcv</code> 函数。接着走,如果是 ESTABLISH 状态下的数据包,则最终会把数据拆出来放到对应 socket 的接收队列中。然后调用 sk_data_ready 来唤醒用户进程。</p>
+<p>在 <code>tcp_v4_rcv</code> 中首先根据收到的网络包的 header 里的 source 和 dest 信息来在本机上查询对应的 socket。找到以后,我们直接进入接收的主体函数 <code>tcp_v4_do_rcv</code> 来看。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: net/ipv4/tcp_input.c </span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">tcp_rcv_established</span><span class="params">(struct sock *sk, struct sk_buff *skb, <span class="keyword">const</span> struct tcphdr *th, <span class="keyword">unsigned</span> <span class="keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">   ......</span><br><span class="line">  <span class="comment">// 接收数据到队列中  </span></span><br><span class="line">  eaten = tcp_queue_rcv(sk, skb, tcp_header_len, &amp;fragstolen);   </span><br><span class="line">  <span class="comment">// 数据 ready,唤醒 socket 上阻塞掉的进程  </span></span><br><span class="line">  sk-&gt;sk_data_ready(sk, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>在 <code>tcp_rcv_established</code> 中通过调用  tcp_queue_rcv 函数中完成了将接收数据放到 socket 的接收队列上。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: net/ipv4/tcp_input.c </span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">must_check <span class="title">tcp_queue_rcv</span><span class="params">(struct sock *sk, struct sk_buff *skb, <span class="keyword">int</span> hdrlen, <span class="keyword">bool</span> *fragstolen)</span> </span>&#123;   </span><br><span class="line">	<span class="comment">// 把接收到的数据放到 socket 的接收队列的尾部</span></span><br><span class="line">	<span class="keyword">if</span> (!eaten) &#123;</span><br><span class="line">		__skb_queue_tail(&amp;sk-&gt;sk_receive_queue, skb);</span><br><span class="line">		skb_set_owner_r(skb, sk);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> eaten;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用 <code>tcp_queue_rcv</code> 接收完成之后,接着再调用 <code>sk_data_ready</code> 来唤醒在socket上等待的用户进程。</p>
+<p>回想上面我们在 创建 socket 流程里执行到的 <code>sock_init_data</code> 函数,在这个函数里已经把 <code>sk_data_ready</code> 设置成 <code>sock_def_readable</code> 函数了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: net/core/sock.c static </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sock_def_readable</span><span class="params">(struct sock *sk, <span class="keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">socket_wq</span> *<span class="title">wq</span>;</span></span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	wq = rcu_dereference(sk-&gt;sk_wq);</span><br><span class="line">	<span class="comment">// 有进程在此 socket 的等待队列</span></span><br><span class="line">	<span class="keyword">if</span> (wq_has_sleeper(wq))     <span class="comment">//唤醒等待队列上的进程</span></span><br><span class="line">		wake_up_interruptible_sync_poll(&amp;wq-&gt;wait, POLLIN | POLLPRI | POLLRDNORM | POLLRDBAND);</span><br><span class="line"></span><br><span class="line">	sk_wake_async(sk, SOCK_WAKE_WAITD, POLL_IN);</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>wake_up_interruptible_sync_poll</code> 会调用 <code>__wake_up_sync_key</code> 方法，在此继续调用 <code>__wake_up_common</code> 方法。<code>__wake_up_common</code> 实现唤醒。这里注意下, 该函数调用是参数 <code>nr_exclusive</code> 传入的是 1,这里指的是即使是有多个进程都阻塞在同一个 socket 上,也只唤醒 1 个进程。其作用是为了避免惊群。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: kernel/sched/core.c </span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __wake_up_common(<span class="keyword">wait_queue_head_t</span> *q, <span class="keyword">unsigned</span> <span class="keyword">int</span> mode, <span class="keyword">int</span> nr_exclusive, <span class="keyword">int</span> wake_flags, <span class="keyword">void</span> *key) &#123;</span><br><span class="line">	<span class="keyword">wait_queue_t</span> *curr, *next;</span><br><span class="line">	list_for_each_entry_safe(curr, next, &amp;q-&gt;task_list, task_list) &#123;</span><br><span class="line">		<span class="keyword">unsigned</span> flags = curr-&gt;flags;</span><br><span class="line">		<span class="keyword">if</span> (curr-&gt;func(curr, mode, wake_flags, key) &amp;&amp; (flags &amp; WQ_FLAG_EXCLUSIVE) &amp;&amp; !--nr_exclusive) <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 <code>__wake_up_common</code> 中找出一个等待队列项 <code>curr</code>,然后调用其 <code>curr-&gt;func</code>。回忆我们前面在 <code>recv</code> 函数执行的时候,使用 <code>DEFINE_WAIT()</code> 定义等待队列项的细节,内核把 <code>curr&gt;func</code> 设置成了 <code>autoremove_wake_function</code>。</p>
+<p>在 <code>autoremove_wake_function</code> 中,调用了 <code>default_wake_function</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: kernel/sched/core.c</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">default_wake_function</span><span class="params">(<span class="keyword">wait_queue_t</span> *curr, <span class="keyword">unsigned</span> mode, <span class="keyword">int</span> wake_flags, <span class="keyword">void</span> *key)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> try_to_wake_up(curr-&gt;<span class="keyword">private</span>, mode, wake_flags);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用 <code>try_to_wake_up</code> 时传入的 <code>task_struct</code> 是 <code>curr-&gt;private</code>。这个就是当时因为等待而被阻塞的进程项。 当这个函数执行完的时候,在 socket 上等待而被阻塞的进程就被推入到可运行队列里了,这又将是一次进程上下文切换的开销。</p>
+<h2 id="IO-多路复用-epoll-原理"><a href="#IO-多路复用-epoll-原理" class="headerlink" title="IO 多路复用 epoll 原理"></a>IO 多路复用 epoll 原理</h2><p>在 Linux 上多路复用方案有 select、poll、epoll。 它们三个中 epoll 的性能表现是最优秀的,能支持的并发量也最大。</p>
+<p>epoll 相关的函数是如下三个:</p>
+<ul>
+<li><code>epoll_create</code>:创建一个 epoll 对象</li>
+<li><code>epoll_ctl</code>:向 epoll 对象中添加要管理的连接</li>
+<li><code>epoll_wait</code>:等待其管理的连接上的 IO 事件</li>
+</ul>
+<p>简单示例代码如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	listen(lfd, ...);</span><br><span class="line">	cfd1 = accept(...);</span><br><span class="line">	cfd2 = accept(...);</span><br><span class="line">	efd = epoll_create(...);</span><br><span class="line">	epoll_ctl(efd, EPOLL_CTL_ADD, cfd1, ...);</span><br><span class="line">	epoll_ctl(efd, EPOLL_CTL_ADD, cfd2, ...);</span><br><span class="line">	epoll_wait(efd, ...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="accept-创建新-socket"><a href="#accept-创建新-socket" class="headerlink" title="accept 创建新 socket"></a>accept 创建新 socket</h3><p>当 accept 之后,进程会创建一个新的 socket 出来,专⻔用于和对应的客户端通信,然后把它放到当前进程的打开文件列表中。</p>
+<p><img src="/images/network_kernel_task_files.jpg" alt="进程文件列表"><br><em>图-15 进程文件列表</em></p>
+<p>其中一条连接的 socket 内核对象更为具体一点的结构图如下。</p>
+<p><img src="/images/network_kernel_task_one_file.jpg" alt="socket 文件"><br><em>图-16 socket 文件</em></p>
+<h4 id="初始化-struct-socket-对象"><a href="#初始化-struct-socket-对象" class="headerlink" title="初始化 struct socket 对象"></a>初始化 struct socket 对象</h4><p>首先是调用 <code>sock_alloc</code> 申请一个 struct socket 对象出来。然后接着把 <code>listen</code> 状态的 socket 对象上的协议操作函数集合 ops 赋值给新的 socket。</p>
+<p><img src="/images/network_kernel_init_socket.jpg" alt="socket 操作函数赋值"><br><em>图-17 socket 操作函数赋值</em></p>
+<p>其中 inet_stream_ops 的定义如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: net/ipv4/af_inet.c</span></span><br><span class="line"><span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">proto_ops</span> <span class="title">inet_stream_ops</span> = &#123;</span></span><br><span class="line">	...</span><br><span class="line">    .accept        = inet_accept,</span><br><span class="line">    .listen        = inet_listen,</span><br><span class="line">    .sendmsg       = inet_sendmsg,</span><br><span class="line">    .recvmsg       = inet_recvmsg,</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="为新-socket-对象申请-file"><a href="#为新-socket-对象申请-file" class="headerlink" title="为新 socket 对象申请 file"></a>为新 socket 对象申请 file</h4><p>struct socket 对象中有一个重要的成员 – file 内核对象指针。这个指针初始化的时候是空的。 在 accept 方法里会调用 <code>sock_alloc_file</code> 来申请内存并初始化。 然后将新 file 对象设置到 <code>sock-&gt;file</code> 上。<code>sock_alloc_file</code> 又会接着调用到 <code>alloc_file</code>。注意在 <code>alloc_file</code> 方法中,把 <code>socket_file_ops</code> 函数集合一并赋到了新 <code>file-&gt;f_op</code> 里了。在 <code>accept</code> 里创建的新 socket 里的 <code>file-&gt;f_op-&gt;poll</code> 函数指向的是 <code>sock_poll</code>。</p>
+<p><img src="/images/network_kernel_socket_file.jpg" alt="socket 文件"><br><em>图-18 socket 文件</em></p>
+<h4 id="接收连接"><a href="#接收连接" class="headerlink" title="接收连接"></a>接收连接</h4><p>在 socket 内核对象中除了 file 对象指针以外,有一个核心成员 sock。这个 struct sock 数据结构非常大,是 socket 的核心内核对象。发送队列、接收队列、等待队列等核心数据结构都位于此。在 <code>accept</code> 的源码中会调用 <code>sock-&gt;ops-&gt;accept</code> 方法，它对应的方法是 <code>inet_accept</code>。它执行的时候会从握手队列里直接获取创建好的 sock。</p>
+<h4 id="添加新文件到当前进程的打开文件列表"><a href="#添加新文件到当前进程的打开文件列表" class="headerlink" title="添加新文件到当前进程的打开文件列表"></a>添加新文件到当前进程的打开文件列表</h4><p>当 file、socket、sock 等关键内核对象创建完毕以后,剩下要做的一件事情就是把它挂到当前进程的打开文件列表中就行了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: fs/file.c </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fd_install</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> fd, struct file *file)</span> </span>&#123;</span><br><span class="line">	__fd_install(current-&gt;files, fd, file);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> __fd_install(struct files_struct *files, <span class="keyword">unsigned</span> <span class="keyword">int</span> fd, struct file *file) &#123;</span><br><span class="line">	...</span><br><span class="line">    fdt = files_fdtable(files);</span><br><span class="line">    BUG_ON(fdt-&gt;fd[fd] != <span class="literal">NULL</span>);</span><br><span class="line">    rcu_assign_pointer(fdt-&gt;fd[fd], file);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="epoll-create-实现"><a href="#epoll-create-实现" class="headerlink" title="epoll_create 实现"></a>epoll_create 实现</h3><p>在用户进程调用 <code>epoll_create</code> 时,内核会创建一个 struct eventpoll 的内核对象。并同样把它关联到当前进程的已打开文件列表中。</p>
+<p><img src="/images/network_kernel_eventpoll_file.jpg" alt="进程中的 eventpoll 文件"><br><em>图-19 进程中的 eventpoll 文件</em></p>
+<p>对于 struct eventpoll 对象,更详细的结构如下(同样只列出和主题相关的成员)。</p>
+<p><img src="/images/network_kernel_eventpoll_file_desc.jpg" alt="eventpoll 文件说明"><br><em>图-20 eventpoll 文件说明</em></p>
+<p>eventpoll 这个结构体中的几个成员的含义如下: </p>
+<ul>
+<li>wq: 等待队列链表。软中断数据就绪的时候会通过 wq 来找到阻塞在 epoll 对象上的用户进程。</li>
+<li>rbr: 一棵红黑树。为了支持对海量连接的高效查找、插入和删除,eventpoll 内部使用了一棵红黑树。通过这棵树来管理用户进程下添加进来的所有 socket 连接。  </li>
+<li>rdllist: 就绪的描述符的链表。当有的连接就绪的时候,内核会把就绪的连接放到 rdllist 链表里。这样应用进程只需要判断链表就能找出就绪进程,而不用去遍历整棵树。</li>
+</ul>
+<h3 id="epoll-ctl-添加-socket"><a href="#epoll-ctl-添加-socket" class="headerlink" title="epoll_ctl 添加 socket"></a>epoll_ctl 添加 socket</h3><p>在使用 <code>epoll_ctl</code> 注册每一个 socket 的时候,内核会做如下三件事情</p>
+<ul>
+<li>分配一个红黑树节点对象 epitem, </li>
+<li>添加等待事件到 socket 的等待队列中,其回调函数是 <code>ep_poll_callback</code></li>
+<li>将 epitem 插入到 epoll 对象的红黑树里</li>
+</ul>
+<p>通过 epoll_ctl 添加两个 socket 以后,这些内核数据结构最终在进程中的关系图大致如下。</p>
+<p><img src="/images/network_kernel_epctl.jpg" alt="注册两个 socket 的文件列表"><br><em>图-21 注册两个 socket 的文件列表</em></p>
+<h3 id="epoll-wait-等待接收"><a href="#epoll-wait-等待接收" class="headerlink" title="epoll_wait 等待接收"></a>epoll_wait 等待接收</h3><p><code>epoll_wait</code> 做的事情不复杂,当它被调用时它观察 <code>eventpoll-&gt;rdllist</code> 链表里有没有数据即可。有数据就返回,没有数据就创建一个等待队列项,将其添加到 eventpoll 的等待队列上,然后把自己阻塞掉就完事。</p>
+<p><img src="/images/network_kernel_epoll_wait.jpg" alt="epoll_wait 流程"><br><em>图-22 epoll_wait 流程</em></p>
+<h3 id="数据来啦"><a href="#数据来啦" class="headerlink" title="数据来啦"></a>数据来啦</h3><p>当 socket 上数据就绪时候,内核将以 <code>sock_def_readable</code> 这个函数为入口,找到 epoll_ctl 添加 socket 时在其上设置的回调函数 <code>ep_poll_callback</code>。</p>
+<p><code>ep_poll_callback</code> 函数的逻辑如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: fs/eventpoll.c </span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">ep_poll_callback</span><span class="params">(<span class="keyword">wait_queue_t</span> *wait, <span class="keyword">unsigned</span> mode, <span class="keyword">int</span> sync, <span class="keyword">void</span> *key)</span></span></span><br><span class="line"><span class="function"></span>&#123;     </span><br><span class="line">	<span class="comment">// 获取 wait 对应的 epitem     </span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">epitem</span> *<span class="title">epi</span> = <span class="title">ep_item_from_wait</span>(<span class="title">wait</span>);</span>     </span><br><span class="line">	<span class="comment">// 获取 epitem 对应的 eventpoll 结构体    </span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">eventpoll</span> *<span class="title">ep</span> = <span class="title">epi</span>-&gt;<span class="title">ep</span>;</span>     </span><br><span class="line">	<span class="comment">// 1. 将当前epitem 添加到 eventpoll 的就绪队列中</span></span><br><span class="line">	list_add_tail(&amp;epi-&gt;rdllink, &amp;ep-&gt;rdllist);</span><br><span class="line">	<span class="comment">// 2. 查看 eventpoll 的等待队列上是否有在等待</span></span><br><span class="line">	<span class="keyword">if</span> (waitqueue_active(&amp;ep-&gt;wq))</span><br><span class="line">		wake_up_locked(&amp;ep-&gt;wq);</span><br></pre></td></tr></table></figure></p>
+<p>在 <code>ep_poll_callback</code> 根据等待任务队列项上的额外的 base 指针可以找到 epitem, 进而也可以找到 eventpoll对象。</p>
+<p>首先它做的第一件事就是把自己的 epitem 添加到 epoll 的就绪队列中。</p>
+<p>接着它又会查看 eventpoll 对象上的等待队列里是否有等待项(epoll_wait 执行的时候会设置)。</p>
+<p>如果没执行软中断的事情就做完了。如果有等待项,那就查找到等待项里设置的回调函数。</p>
+<p><img src="/images/network_kernel_epoll_wakeup.jpg" alt="eventpoll 等待队列"><br><em>图-23 eventpoll 等待队列</em></p>
+<p>在 <code>default_wake_function</code> 中找到等待队列项里的进程描述符,然后唤醒之。</p>
+<p>等待队列项 <code>curr-&gt;private</code> 指针是在 epoll 对象上等待而被阻塞掉的进程。</p>
+<p>将 <code>epoll_wait</code> 进程推入可运行队列,等待内核重新调度进程。然后 <code>epoll_wait</code> 对应的这个进程重新运行后,就从 schedule 恢复当进程醒来后,继续从 <code>epoll_wait</code> 时暂停的代码继续执行。把 <code>rdlist</code> 中就绪的事件返回给用户进程。</p>
+<h2 id="网络包处理之-CPU-开销汇总"><a href="#网络包处理之-CPU-开销汇总" class="headerlink" title="网络包处理之 CPU 开销汇总"></a>网络包处理之 CPU 开销汇总</h2><ul>
+<li>系统态 CPU 开销</li>
+<li>硬中断、软中断开销</li>
+<li>进程上下文切换</li>
+</ul>
+<h1 id="Linux-发包流程"><a href="#Linux-发包流程" class="headerlink" title="Linux 发包流程"></a>Linux 发包流程</h1><h2 id="LINUX-网络发送过程总览"><a href="#LINUX-网络发送过程总览" class="headerlink" title="LINUX 网络发送过程总览"></a>LINUX 网络发送过程总览</h2><p><img src="/images/network_kernel_send_overview.jpg" alt="发包总览"><br><em>图-24 发包总览</em></p>
+<p>注意，我们今天的主题虽然是发送数据,但是硬中断最终触发的软中断却是 <code>NET_RX_SOFTIRQ</code>,而并不是 <code>NET_TX_SOFTIRQ</code> !!!(T 是 transmit 的缩写,R 表示 receive)</p>
+<h2 id="网卡启动"><a href="#网卡启动" class="headerlink" title="网卡启动"></a>网卡启动</h2><p>现在的服务器上的网卡一般都是支持多队列的。每一个队列上都是由一个 RingBuffer 表示的,开启了多队列以后的的网卡就会对应有多个 RingBuffer。</p>
+<p>网卡在启动时最重要的任务之一就是分配和初始化 RingBuffer。</p>
+<p><img src="/images/network_kernel_ring_buffer.jpg" alt="发送环形队列"><br><em>图-25 发送环形队列</em></p>
+<p>有两个 RingBuffer，分别是:</p>
+<ul>
+<li>igb_tx_buffer 数组:这个数组是内核使用的,通过 vzalloc 申请的；</li>
+<li>e1000_adv_tx_desc 数组:这个数组是网卡硬件使用的,硬件是可以通过 DMA 直接访问这块内存,通过 <code>dma_alloc_coherent</code> 分配。</li>
+</ul>
+<h2 id="发送数据"><a href="#发送数据" class="headerlink" title="发送数据"></a>发送数据</h2><h3 id="send-系统调用实现"><a href="#send-系统调用实现" class="headerlink" title="send 系统调用实现"></a>send 系统调用实现</h3><p><img src="/images/network_kernel_send.jpg" alt="消息发送"><br><em>图-26 消息发送</em></p>
+<h3 id="传输层处理"><a href="#传输层处理" class="headerlink" title="传输层处理"></a>传输层处理</h3><h4 id="传输层拷⻉"><a href="#传输层拷⻉" class="headerlink" title="传输层拷⻉"></a>传输层拷⻉</h4><p><img src="/images/network_kernel_tcp_send.jpg" alt="TCP 消息发送"><br><em>图-27 TCP 消息发送</em></p>
+<p>在 tcp_sendmsg 函数里，内核会申请一个内核态的 skb 内存,将用户待发送的数据拷⻉进去。注意这个时候不一定会真正开始发送,如果没有达到发送条件的话很可能这次调用直接就返回了。</p>
+<p><img src="/images/network_kernel_skb.jpg" alt="发送队列"><br><em>图-28 发送队列</em></p>
+<h4 id="传输层发送"><a href="#传输层发送" class="headerlink" title="传输层发送"></a>传输层发送</h4><p><img src="/images/network_kernel_xmit.jpg" alt="传输层发送"><br><em>图-29 传输层发送</em></p>
+<h4 id="网络层发送处理"><a href="#网络层发送处理" class="headerlink" title="网络层发送处理"></a>网络层发送处理</h4><p><img src="/images/network_kernel_ip_out.jpg" alt="网络层发送"><br><em>图-30 网络层发送</em></p>
+<h4 id="邻居子系统"><a href="#邻居子系统" class="headerlink" title="邻居子系统"></a>邻居子系统</h4><p><img src="/images/network_kernel_neighbor.jpg" alt="邻居子系统设置 mac 地址"><br><em>图-31 邻居子系统设置 mac 地址</em></p>
+<h4 id="网络设备子系统"><a href="#网络设备子系统" class="headerlink" title="网络设备子系统"></a>网络设备子系统</h4><p><img src="/images/network_kernel_netdev.jpg" alt="网络设备子系统"><br><em>图-32 网络设备子系统</em></p>
+<p>图-32所示，如果系统态 CPU 发送网络包不够用的时候,会调用 <code>__netif_schedule</code> 触发一个软中断。该函数会进入到 <code>__netif_reschedule</code>,由它来实际发出 <code>NET_TX_SOFTIRQ</code> 类型软中断。</p>
+<h4 id="软中断调度"><a href="#软中断调度" class="headerlink" title="软中断调度"></a>软中断调度</h4><p><img src="/images/network_kernel_soft_tx.jpg" alt="软中断发送"><br><em>图-33 软中断发送</em></p>
+<h4 id="igb-网卡驱动发送"><a href="#igb-网卡驱动发送" class="headerlink" title="igb 网卡驱动发送"></a>igb 网卡驱动发送</h4><p><img src="/images/network_kernel_igb.jpg" alt="igb 网卡驱动发送"><br><em>图-34 igb 网卡驱动发送</em></p>
+<h4 id="发送完成硬中断"><a href="#发送完成硬中断" class="headerlink" title="发送完成硬中断"></a>发送完成硬中断</h4><p><img src="/images/network_kernel_dev_send_complete.jpg" alt="发送完成后响应硬中断并进行清理"><br><em>图-35 发送完成后响应硬中断并进行清理</em></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/images/network_kernel_send_desc.jpg" alt="发送流程总结"><br><em>图-36 发送流程总结</em></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://stltqhs.github.io/2023/09/09/Linux-kernel-about-network/" title="Linux 网络简说（上）" target="_blank" rel="external">https://stltqhs.github.io/2023/09/09/Linux-kernel-about-network/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/stltqhs" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/stltqhs" target="_blank"><span class="text-dark">海东青</span><small class="ml-1x">Java 技术专家</small></a></h3>
+        <div>熟练 JVM、多线程、MySQL、容器化及云原生虚拟技术。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2023/09/08/Borg-Omega-and-Kubernates/" title="Borg, Omega, and Kubernates"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?be79fae6ef126e586106ff806c368fc7";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
