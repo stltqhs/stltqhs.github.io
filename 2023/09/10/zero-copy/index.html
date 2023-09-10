@@ -17,21 +17,26 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>Java后端开发 - 算法和数据结构 | 海东青</title>
-  <meta name="description" content="排序算法1.插入排序 直接插入排序 希尔排序 2.交换排序 冒泡排序 快速排序 3.选择排序 直接选择排序 树形选择排序 堆排序 4.归并排序 5.基数排序 多关键字排序 链式基数排序 算法需要多练，熟能生巧，可在Leetcode刷题。 查找算法1.哈希查找 2.静态查找 顺序查找 二分查找 分块查找 3.动态查找 二叉排序树 平衡二叉树 B_树和B+树 红黑树 数据结构1.线性表 顺序表：数组，">
-<meta name="keywords" content="算法">
+  <title>彻底搞懂零拷贝 | 海东青</title>
+  <meta name="description" content="本文主要参考 Zero Copy I: User-Mode Perspective，作为一个笔记。 什么是零拷贝为了更好的理解问题的解决方案，我们首先需要理解问题的本身。我们先看一段代码，它是读取一个文件，然后将文件内容通过网络的方式发送出去。 代码块-112read(file, tmp_buf, len);write(socket, tmp_buf, len); 站在我们的角度看，read 函数">
+<meta name="keywords" content="网络">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java后端开发 - 算法和数据结构">
-<meta property="og:url" content="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-algorithm/index.html">
+<meta property="og:title" content="彻底搞懂零拷贝">
+<meta property="og:url" content="https://stltqhs.github.io/2023/09/10/zero-copy/index.html">
 <meta property="og:site_name" content="海东青">
-<meta property="og:description" content="排序算法1.插入排序 直接插入排序 希尔排序 2.交换排序 冒泡排序 快速排序 3.选择排序 直接选择排序 树形选择排序 堆排序 4.归并排序 5.基数排序 多关键字排序 链式基数排序 算法需要多练，熟能生巧，可在Leetcode刷题。 查找算法1.哈希查找 2.静态查找 顺序查找 二分查找 分块查找 3.动态查找 二叉排序树 平衡二叉树 B_树和B+树 红黑树 数据结构1.线性表 顺序表：数组，">
+<meta property="og:description" content="本文主要参考 Zero Copy I: User-Mode Perspective，作为一个笔记。 什么是零拷贝为了更好的理解问题的解决方案，我们首先需要理解问题的本身。我们先看一段代码，它是读取一个文件，然后将文件内容通过网络的方式发送出去。 代码块-112read(file, tmp_buf, len);write(socket, tmp_buf, len); 站在我们的角度看，read 函数">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2023-09-04T00:20:24.357Z">
+<meta property="og:image" content="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f1.jpg">
+<meta property="og:image" content="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f2.jpg">
+<meta property="og:image" content="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f3.jpg">
+<meta property="og:image" content="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f4.jpg">
+<meta property="og:updated_time" content="2023-09-10T08:09:19.717Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Java后端开发 - 算法和数据结构">
-<meta name="twitter:description" content="排序算法1.插入排序 直接插入排序 希尔排序 2.交换排序 冒泡排序 快速排序 3.选择排序 直接选择排序 树形选择排序 堆排序 4.归并排序 5.基数排序 多关键字排序 链式基数排序 算法需要多练，熟能生巧，可在Leetcode刷题。 查找算法1.哈希查找 2.静态查找 顺序查找 二分查找 分块查找 3.动态查找 二叉排序树 平衡二叉树 B_树和B+树 红黑树 数据结构1.线性表 顺序表：数组，">
+<meta name="twitter:title" content="彻底搞懂零拷贝">
+<meta name="twitter:description" content="本文主要参考 Zero Copy I: User-Mode Perspective，作为一个笔记。 什么是零拷贝为了更好的理解问题的解决方案，我们首先需要理解问题的本身。我们先看一段代码，它是读取一个文件，然后将文件内容通过网络的方式发送出去。 代码块-112read(file, tmp_buf, len);write(socket, tmp_buf, len); 站在我们的角度看，read 函数">
+<meta name="twitter:image" content="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f1.jpg">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-algorithm/index.html">
+  <link rel="canonical" href="https://stltqhs.github.io/2023/09/10/zero-copy/index.html">
   
   
     <link rel="icon" href="/favicon.png" type="image/x-icon">
@@ -284,21 +289,21 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#排序算法"><span class="toc-number">1.</span> <span class="toc-text">排序算法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#查找算法"><span class="toc-number">2.</span> <span class="toc-text">查找算法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据结构"><span class="toc-number">3.</span> <span class="toc-text">数据结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#算法思想"><span class="toc-number">4.</span> <span class="toc-text">算法思想</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他应用算法"><span class="toc-number">5.</span> <span class="toc-text">其他应用算法</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是零拷贝"><span class="toc-number">1.</span> <span class="toc-text">什么是零拷贝</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#第一步改进：mmap"><span class="toc-number">2.</span> <span class="toc-text">第一步改进：mmap</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#再次改进：sendfile"><span class="toc-number">3.</span> <span class="toc-text">再次改进：sendfile</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#终极大招：DMA-Gather"><span class="toc-number">4.</span> <span class="toc-text">终极大招：DMA Gather</span></a></li></ol>
     </nav>
   </div>
 </aside>
 
 <main class="main" role="main">
   <div class="content">
-  <article id="post-java-programmer-knowledge-algorithm" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-zero-copy" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      Java后端开发 - 算法和数据结构
+      彻底搞懂零拷贝
     </h1>
   
 
@@ -306,105 +311,66 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2018/10/13/java-programmer-knowledge-algorithm/" class="article-date">
-	  <time datetime="2018-10-13T00:18:07.000Z" itemprop="datePublished">2018-10-13</time>
+	<a href="/2023/09/10/zero-copy/" class="article-date">
+	  <time datetime="2023-09-10T08:09:19.000Z" itemprop="datePublished">2023-09-10</time>
 	</a>
 </span>
         
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link" href="/tags/算法/">算法</a>
+	<a class="article-tag-link" href="/tags/网络/">网络</a>
   </span>
 
 
         
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/10/13/java-programmer-knowledge-algorithm/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/09/10/zero-copy/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h1 id="排序算法"><a href="#排序算法" class="headerlink" title="排序算法"></a>排序算法</h1><p>1.插入排序</p>
-<p>直接插入排序</p>
-<p>希尔排序</p>
-<p>2.交换排序</p>
-<p>冒泡排序</p>
-<p>快速排序</p>
-<p>3.选择排序</p>
-<p>直接选择排序</p>
-<p>树形选择排序</p>
-<p>堆排序</p>
-<p>4.归并排序</p>
-<p>5.基数排序</p>
-<p>多关键字排序</p>
-<p>链式基数排序</p>
-<p>算法需要多练，熟能生巧，可在<a href="https://leetcode.com/" target="_blank" rel="noopener">Leetcode</a>刷题。</p>
-<h1 id="查找算法"><a href="#查找算法" class="headerlink" title="查找算法"></a>查找算法</h1><p>1.哈希查找</p>
-<p>2.静态查找</p>
-<p>顺序查找</p>
-<p>二分查找</p>
-<p>分块查找</p>
-<p>3.动态查找</p>
-<p>二叉排序树</p>
-<p>平衡二叉树</p>
-<p>B_树和B+树</p>
-<p>红黑树</p>
-<h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><p>1.线性表</p>
-<p>顺序表：数组，如ArrayList；</p>
-<p>链表：单链表，如LinkedList；</p>
-<p>2.栈</p>
-<p>3.队列</p>
-<p>4.串</p>
-<p>Brute-Force模式匹配算法</p>
-<p>KMP模式匹配算法</p>
-<p>5.树</p>
-<p>二叉树</p>
-<p>哈夫慢编码</p>
-<p>树的遍历：先序遍历，中序遍历，后序遍历</p>
-<p>6.图</p>
-<p>邻接矩阵</p>
-<p>图的遍历：广度优先搜索和深度优先搜索</p>
-<p>最小生成树：克鲁斯卡尔算法和普里姆算法</p>
-<p>最短路径：单源最短路径算法（迪杰斯特拉）和费洛伊德算法</p>
-<p>拓扑排序</p>
-<p>关键路径算法</p>
-<p>有些数据结构难以理解是因为不够直观，可以查看<a href="https://www.cs.usfca.edu/~galles/visualization/Algorithms.html" target="_blank" rel="noopener">Data Structure Visualizations</a>和<a href="https://github.com/algorithm-visualizer/algorithm-visualizer" target="_blank" rel="noopener">Algorithm Visualizer</a>，可视化数据结构。</p>
-<h1 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h1><p>1.递归与分治策略</p>
-<p>二分搜索</p>
-<p>大整数乘法</p>
-<p>矩阵乘法</p>
-<p>棋盘覆盖</p>
-<p>合并排序</p>
-<p>快速排序</p>
-<p>线性时间选择</p>
-<p>2.动态规划</p>
-<p>矩阵连乘</p>
-<p>最长公共子序列</p>
-<p>最大字段求和</p>
-<p>0-1背包</p>
-<p>最优二叉搜索树</p>
-<p>3.贪心算法</p>
-<p>哈夫曼编码</p>
-<p>单源最短路径算法（迪杰斯特拉）</p>
-<p>最小生成树</p>
-<p>4.回溯法</p>
-<p>n后问题</p>
-<p>最大团问题</p>
-<p>0-1背包</p>
-<p>着色问题</p>
-<p>旅行售货员问题</p>
-<p>5.分支限界法</p>
-<p>最大团问题</p>
-<p>0-1背包</p>
-<p>6.随机化算法</p>
-<h1 id="其他应用算法"><a href="#其他应用算法" class="headerlink" title="其他应用算法"></a>其他应用算法</h1><p>1.LRU（最简单的实现方式是使用LinkedHashMap）</p>
-<p>2.<a href="https://blog.csdn.net/xiaojimanman/article/details/50358506" target="_blank" rel="noopener">一致性哈希算法</a></p>
-<p>3.<a href="https://www.jianshu.com/p/36bca4ed6d17" target="_blank" rel="noopener">流量控制算法</a></p>
-<p>4.布隆过滤器</p>
-<p>5.HyperLogLog</p>
-<p>6.<a href="https://github.com/GongDexing/Geohash" target="_blank" rel="noopener">GeoHash</a></p>
+        <p><em>本文主要参考 <a href="https://www.linuxjournal.com/article/6345?page=0,0" target="_blank" rel="noopener">Zero Copy I: User-Mode Perspective</a>，作为一个笔记。</em></p>
+<h1 id="什么是零拷贝"><a href="#什么是零拷贝" class="headerlink" title="什么是零拷贝"></a>什么是零拷贝</h1><p>为了更好的理解问题的解决方案，我们首先需要理解问题的本身。我们先看一段代码，它是读取一个文件，然后将文件内容通过网络的方式发送出去。</p>
+<p><em>代码块-1</em><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">read(file, tmp_buf, len);</span><br><span class="line">write(socket, tmp_buf, len);</span><br></pre></td></tr></table></figure></p>
+<p>站在我们的角度看，read 函数将文件内容读取出来放在了 <code>tmp_buf</code> 中，然后又将 <code>tmp_buf</code> 的内容通过 write 将其以网络形式发送出去。这两个系统调用至少涉及 4 次数据复制、多次用户/内核上下文切换。请看图-1。</p>
+<p><img src="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f1.jpg" alt="代码块-1 涉及的系统调用"><br><em>图-1 代码块-1 涉及的系统调用</em></p>
+<p>图-1的底部显示的是复制操作，顶部显示的是上下文切换。</p>
+<p>对图-1每个步骤的解释如下。</p>
+<ul>
+<li>第一步，调用 <code>read</code> 函数时，由于它是系统接口调用，导致一次上下文切换，代码逻辑从用户模式切换到内核模式。在内核模式下，操作系统通过 DMA 的方式，将文件内容复制到内核的缓冲区中，该缓冲区位于内核地址空间中。注意：1）DMA 复制是不需要 CPU 参与，直接由磁盘硬件来完成；2）内核缓冲区不是 <code>tmp_buf</code> 所在的位置，<code>tmp_buf</code> 是用户程序声明的缓冲区，位置在用户地址区间中。</li>
+<li>第二步，内核将数据从内核缓冲区复制到用户空间的缓冲区中（即 <code>tmp_buf</code> 中），然后 <code>read</code> 系统调用函数返回。此时触发一次上下文切换，从内核模式返回到用户模式。继续执行用户代码。该过程的复制是需要 CPU 参与的。</li>
+<li>第三步，应用程序继续调用 <code>write</code> 函数，它也是系统接口调用，导致一次上下文切换，代码逻辑从用户模式切换到内核模式。由于涉及到网络发送，内核会将用户模式下的数据（即 <code>tmp_buf</code> 中的数据）复制到 socket 缓冲区（即 <a href="https://docs.kernel.org/networking/skbuff.html" target="_blank" rel="noopener">sk_buff</a>），socket 缓冲区的数据最后会被发送出去。</li>
+<li>第四步，函数返回时，从内核模式返回到用户模式。注意，此时数据可能还没有发送出去，系统仅仅是将数据放在一个发送队列。具体可以参考 <a href="https://mp.weixin.qq.com/s/wThfD9th9e_-YGHJJ3HXNQ" target="_blank" rel="noopener">25 张图，一万字，拆解 Linux 网络包发送过程</a> 的说明。发送时的数据复制是由 DMA 完成的，不需要 CPU 参与。</li>
+</ul>
+<h1 id="第一步改进：mmap"><a href="#第一步改进：mmap" class="headerlink" title="第一步改进：mmap"></a>第一步改进：mmap</h1><p>图-1中，<code>tmp_buf</code> 能否减少一次拷贝呢？也就是不要复制到用户态，直接在内核里面完成复制。答案是 <code>mmap</code>。</p>
+<p>改进后的代码如下。</p>
+<p><em>代码块-2</em><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tmp_buf = mmap(file, len);</span><br><span class="line">write(socket, tmp_buf, len);</span><br></pre></td></tr></table></figure></p>
+<p>代码块-2 对应的内存复制流程如图-2所示。</p>
+<p><img src="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f2.jpg" alt="调用 mmap"><br><em>图-2 调用 mmap</em></p>
+<p>图-2所示，2 次系统调用和 4 次上下文切换一次都没有少，还是一样，但是内存复制有点不一样。按步骤分解如下。</p>
+<ul>
+<li>第一步，调用 <code>mmap</code> 后，内核会将文件数据复制到缓冲区，这个缓冲区是共享的，用户空间和内核空间都可以访问。这一步已经不像之前那样，需要将数据复制到用户空间的缓冲区中，而是直接返回共享缓冲区的地址。</li>
+<li>第二步，调用 <code>write</code> 函数后，内核直接从共享缓冲区中将数据复制到 sk buff 中。</li>
+<li>第三步，最后一步之前一样，数据通过 DMA 的方式将数据从 sk buff 从复制到网卡并发送出去。</li>
+</ul>
+<p>使用 <code>mmap</code> 可以减少一次数据拷贝，也就是将内核缓冲区的数据拷贝到用户空间的缓冲区中，可以提高效率。但是使用 mmap 也是有代价的。代价是并发访问问题导致进程崩溃，当 <code>write</code> 访问文件的内存映射地址区间时，文件内容可能被其他任务修改过了，这会导致地址区间也发生变化，导致内存越界，发出 SIGBUS 错误，然后结束进程。不过这也有解决办法，使用 file leasing，这不是本文的重点，就不说了。</p>
+<h1 id="再次改进：sendfile"><a href="#再次改进：sendfile" class="headerlink" title="再次改进：sendfile"></a>再次改进：sendfile</h1><p>为了提高文件和网络之间的传输效率，内核从 2.1 开始引入了 <code>sendfile</code> 系统调用。此时直接一行代码就可以搞定。</p>
+<p><em>代码块-3</em><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sendfile(socket, file, len);</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f3.jpg" alt="使用 sendfile"><br><em>图-3 使用 sendfile</em></p>
+<p><code>sendfile</code> 相比 <code>mmap</code> 来说，并没有减少内存复制的操作，但是减少了系统调用，进而减少了上下文切换。</p>
+<p>步骤分解如下：</p>
+<ul>
+<li>第一步，<code>sendfile</code> 系统调用之后后，内核将文件内容通过 DMA 的方式复制到内核缓冲区中。然后文件的内容再通过 CPU 被复制到 sk buff 中。</li>
+<li>第二步，最后一步跟之前一样，数据通过 DMA 的方式将数据从 sk buff 从复制到网卡并发送出去。</li>
+</ul>
+<h1 id="终极大招：DMA-Gather"><a href="#终极大招：DMA-Gather" class="headerlink" title="终极大招：DMA Gather"></a>终极大招：DMA Gather</h1><p>通过 <code>mmap</code> 和 <code>sendfile</code>，我们发现与 sk buff 有关的内存复制还存在，并没有消除。</p>
+<p>从 Linux 内核 2.4 开始，通过 DMA Gather 技术，可以做到真正的零拷贝。</p>
+<p>使用的代码还是一行 <code>sendfile</code> 调用，不过内核做了很多事情。</p>
+<p><em>代码块-4</em><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sendfile(socket, file, len);</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/063/6345/6345f4.jpg" alt="由硬件支持的 gather 操作可以将聚合多个内存地址的数据，减少其他复制"><br><em>图-4 由硬件支持的 gather 操作可以将聚合多个内存地址的数据，减少其他复制</em></p>
+<p>图-4中，sk buff 不在复制数据，而是仅仅记录了数据的地址和长度，然后交给 DMA。</p>
 
       
     </div>
@@ -414,7 +380,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-algorithm/" title="Java后端开发 - 算法和数据结构" target="_blank" rel="external">https://stltqhs.github.io/2018/10/13/java-programmer-knowledge-algorithm/</a>
+      <a href="https://stltqhs.github.io/2023/09/10/zero-copy/" title="彻底搞懂零拷贝" target="_blank" rel="external">https://stltqhs.github.io/2023/09/10/zero-copy/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -458,13 +424,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/2019/05/16/java-programmer-knowledge-paper/" title="Java后端开发 - 优秀论文"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/2018/10/13/java-programmer-knowledge-network/" title="Java后端开发 - 网络"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2023/09/09/Linux-kernel-about-network-second/" title="Linux 网络简说（下）"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
