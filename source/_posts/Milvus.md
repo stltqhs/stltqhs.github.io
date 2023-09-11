@@ -205,7 +205,7 @@ Milvus 使用 LSM 算法，数据先写入内存中（MemTable），发生溢写
 
 图-8所示是 Milvus 的三层架构，存储层是基于 S3 的存储，因为它是高可用的，计算层处理用户请求，包括数据写入和查询请求。当然它也有本地内存和 SSD 来缓存数据，避免频繁的访问 S3。此外，Milvus 还有一个协调器来维护系统分片和负载均衡等元数据，协调器层使用 3 节点的 zookeeper 来保持高可用。
 
-计算层是无状态的节点，具有弹性。它包括一个 writer 节点实例和多个 reader 节点的实例，writer 节点负责数据更新请求（包括 insertion，deletion 和 update）。多个 reader 节点处理用户的查询请求。reader 中的数据分片基于一致性 hash 算法，分片信息存储在协调器节点。所有的计算层实例都是由 kubernates 来维护的，当一个节点 crash 时 k8s 会很快重启服务以替换旧节点。如果 writer 崩溃，Milvus 依赖 WAL（write-ahead log）来保证原子性。因为计算层节点是无状态的，所以他们崩溃并不会造成数据的不一致。
+计算层是无状态的节点，具有弹性。它包括一个 writer 节点实例和多个 reader 节点的实例，writer 节点负责数据更新请求（包括 insertion，deletion 和 update）。多个 reader 节点处理用户的查询请求。reader 中的数据分片基于一致性 hash 算法，分片信息存储在协调器节点。所有的计算层实例都是由 Kubernetes 来维护的，当一个节点 crash 时 k8s 会很快重启服务以替换旧节点。如果 writer 崩溃，Milvus 依赖 WAL（write-ahead log）来保证原子性。因为计算层节点是无状态的，所以他们崩溃并不会造成数据的不一致。
 
 为了减少存储和计算之间的网络负载，Milvus 做了两个优化：
 * 计算层仅仅将日志发送到存储层，类似 [Aurora](https://pages.cs.wisc.edu/~yxy/cs764-f20/papers/aurora-sigmod-17.pdf)；
