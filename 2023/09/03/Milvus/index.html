@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://stltqhs.github.io/images/milvus/milvus_search_strategy.jpg">
 <meta property="og:image" content="https://stltqhs.github.io/images/milvus/milvus_iterative_merging.png">
 <meta property="og:image" content="https://stltqhs.github.io/images/milvus/milvus_distributed_system.png">
-<meta property="og:updated_time" content="2023-09-04T00:20:24.354Z">
+<meta property="og:updated_time" content="2023-09-11T09:40:26.169Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Milvus">
 <meta name="twitter:description" content="本文是阅读 Milvus: A Purpose-Built Vector Data Management System 论文的总结。 介绍随着数据科学和 AI 的快速发展，深度学习模型需要将大量的非结构化数据转换为向量，用来做数据分析，比如产品推荐。现存的向量数据库在性能和功能性方面都已经不太符合当前深度学习大规模应用场景的需求。 为了解决向量检索的问题，出现了很多解决方案，比如用关系数据库来存储">
@@ -255,7 +255,7 @@
                 
               </p>
               <p class="item-title">
-                <a href="/2023/09/08/Borg-Omega-and-Kubernates/" class="title">Borg, Omega, and Kubernates</a>
+                <a href="/2023/09/08/Borg-Omega-and-Kubernates/" class="title">Borg, Omega, and Kubernetes</a>
               </p>
               <p class="item-date">
                 <time datetime="2023-09-08T06:40:38.000Z" itemprop="datePublished">2023-09-08</time>
@@ -445,7 +445,7 @@
 <h2 id="分布式计算"><a href="#分布式计算" class="headerlink" title="分布式计算"></a>分布式计算</h2><p>为了可用性和可扩展性，Milvus 是一个支持多节点的数据管理的分布式系统。Milvus 通过共享存储（shared-storage）的方式将存储和计算分离以达到最好的弹性。存储计算分离广泛应用在现代云平台系统中，比如 <a href="https://event.cwi.nl/lsde/papers/p215-dageville-snowflake.pdf" target="_blank" rel="noopener">Snowflake</a> 和 <a href="https://pages.cs.wisc.edu/~yxy/cs764-f20/papers/aurora-sigmod-17.pdf" target="_blank" rel="noopener">Aurora</a>。</p>
 <p><img src="/images/milvus/milvus_distributed_system.png" alt="Milvus 分布式计算"><br><em>图-8 Milvus 分布式计算</em></p>
 <p>图-8所示是 Milvus 的三层架构，存储层是基于 S3 的存储，因为它是高可用的，计算层处理用户请求，包括数据写入和查询请求。当然它也有本地内存和 SSD 来缓存数据，避免频繁的访问 S3。此外，Milvus 还有一个协调器来维护系统分片和负载均衡等元数据，协调器层使用 3 节点的 zookeeper 来保持高可用。</p>
-<p>计算层是无状态的节点，具有弹性。它包括一个 writer 节点实例和多个 reader 节点的实例，writer 节点负责数据更新请求（包括 insertion，deletion 和 update）。多个 reader 节点处理用户的查询请求。reader 中的数据分片基于一致性 hash 算法，分片信息存储在协调器节点。所有的计算层实例都是由 kubernates 来维护的，当一个节点 crash 时 k8s 会很快重启服务以替换旧节点。如果 writer 崩溃，Milvus 依赖 WAL（write-ahead log）来保证原子性。因为计算层节点是无状态的，所以他们崩溃并不会造成数据的不一致。</p>
+<p>计算层是无状态的节点，具有弹性。它包括一个 writer 节点实例和多个 reader 节点的实例，writer 节点负责数据更新请求（包括 insertion，deletion 和 update）。多个 reader 节点处理用户的查询请求。reader 中的数据分片基于一致性 hash 算法，分片信息存储在协调器节点。所有的计算层实例都是由 Kubernetes 来维护的，当一个节点 crash 时 k8s 会很快重启服务以替换旧节点。如果 writer 崩溃，Milvus 依赖 WAL（write-ahead log）来保证原子性。因为计算层节点是无状态的，所以他们崩溃并不会造成数据的不一致。</p>
 <p>为了减少存储和计算之间的网络负载，Milvus 做了两个优化：</p>
 <ul>
 <li>计算层仅仅将日志发送到存储层，类似 <a href="https://pages.cs.wisc.edu/~yxy/cs764-f20/papers/aurora-sigmod-17.pdf" target="_blank" rel="noopener">Aurora</a>；</li>

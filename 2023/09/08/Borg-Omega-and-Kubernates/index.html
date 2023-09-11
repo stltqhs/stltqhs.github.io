@@ -17,18 +17,18 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>Borg, Omega, and Kubernates | 海东青</title>
+  <title>Borg, Omega, and Kubernetes | 海东青</title>
   <meta name="description" content="这篇文章是阅读了 Borg, Omega, and Kubernetes 这篇论文写下来的。 简介Borg 是 Google 开发的一个大规模集群管理系统，用来调度 Google 内部批任务和长时间运行的服务，还包括服务发现、负载均衡、任务调度，以提高资源利用率和减低成本。 Omega 是 Borg 的继承者，继承了 Borg 的很多优点，并且提供更多的一致性。Omega 使用了面向事务的基于 P">
 <meta name="keywords" content="云原生">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Borg, Omega, and Kubernates">
+<meta property="og:title" content="Borg, Omega, and Kubernetes">
 <meta property="og:url" content="https://stltqhs.github.io/2023/09/08/Borg-Omega-and-Kubernates/index.html">
 <meta property="og:site_name" content="海东青">
 <meta property="og:description" content="这篇文章是阅读了 Borg, Omega, and Kubernetes 这篇论文写下来的。 简介Borg 是 Google 开发的一个大规模集群管理系统，用来调度 Google 内部批任务和长时间运行的服务，还包括服务发现、负载均衡、任务调度，以提高资源利用率和减低成本。 Omega 是 Borg 的继承者，继承了 Borg 的很多优点，并且提供更多的一致性。Omega 使用了面向事务的基于 P">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2023-09-08T06:45:58.916Z">
+<meta property="og:updated_time" content="2023-09-11T09:39:39.590Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Borg, Omega, and Kubernates">
+<meta name="twitter:title" content="Borg, Omega, and Kubernetes">
 <meta name="twitter:description" content="这篇文章是阅读了 Borg, Omega, and Kubernetes 这篇论文写下来的。 简介Borg 是 Google 开发的一个大规模集群管理系统，用来调度 Google 内部批任务和长时间运行的服务，还包括服务发现、负载均衡、任务调度，以提高资源利用率和减低成本。 Omega 是 Borg 的继承者，继承了 Borg 的很多优点，并且提供更多的一致性。Omega 使用了面向事务的基于 P">
   <!-- Canonical links -->
   <link rel="canonical" href="https://stltqhs.github.io/2023/09/08/Borg-Omega-and-Kubernates/index.html">
@@ -246,7 +246,7 @@
                 
               </p>
               <p class="item-title">
-                <a href="/2023/09/08/Borg-Omega-and-Kubernates/" class="title">Borg, Omega, and Kubernates</a>
+                <a href="/2023/09/08/Borg-Omega-and-Kubernates/" class="title">Borg, Omega, and Kubernetes</a>
               </p>
               <p class="item-date">
                 <time datetime="2023-09-08T06:40:38.000Z" itemprop="datePublished">2023-09-08</time>
@@ -298,7 +298,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Borg, Omega, and Kubernates
+      Borg, Omega, and Kubernetes
     </h1>
   
 
@@ -329,8 +329,8 @@
         <p>这篇文章是阅读了 <a href="https://dl.acm.org/doi/pdf/10.1145/2890784" target="_blank" rel="noopener">Borg, Omega, and Kubernetes</a> 这篇论文写下来的。</p>
 <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><a href="https://research.google/pubs/pub43438/" target="_blank" rel="noopener">Borg</a> 是 Google 开发的一个大规模集群管理系统，用来调度 Google 内部批任务和长时间运行的服务，还包括服务发现、负载均衡、任务调度，以提高资源利用率和减低成本。</p>
 <p>Omega 是 Borg 的继承者，继承了 Borg 的很多优点，并且提供更多的一致性。Omega 使用了面向事务的基于 Paxos 的中心化存储来保存状态数据，它可以被集群内控制平面的多个组件访问，提供了乐观一致性控制解决少有的并非冲突问题。这种解耦方式使得 Borgmaster 的功能可以被划分成多个对等的组件，而不是让每个修改操作都通过单一、中心化的 master 来管理。 Omega 的多创新技术反哺给 Borg，包括多调度器。</p>
-<p>由于容器技术的发展（Google 也因为 Borg 项目向 Linux 贡献了容器相关的代码，比如 cgroup 资源控制），出现了 Docker 技术，而业界 Paas 平台也逐渐转移并倾向使用容器部署。由于 Google 多年集群系统管理经验，Google 与开源社区开发者一起开发了 Kubernates 项目，实现容器编排。</p>
-<p>Kubernates 解决了很多 Borg 和 Omega 的优点，同时也进行了改进。相同点是都使用一个共享存储服务来保存集群状态，不同的是 Omega 直接将状态数据暴露给受信的控制平面组件访问，而 Kubernates 则是通过特定领域的 REST API 访问，支持更多不同类型的客户端访问。Kubernates 的主要设计目标是使其易于部署和管理复杂的分布式系统，同时仍然受益于容器使能的利用率的提高。</p>
+<p>由于容器技术的发展（Google 也因为 Borg 项目向 Linux 贡献了容器相关的代码，比如 cgroup 资源控制），出现了 Docker 技术，而业界 Paas 平台也逐渐转移并倾向使用容器部署。由于 Google 多年集群系统管理经验，Google 与开源社区开发者一起开发了 Kubernetes 项目，实现容器编排。</p>
+<p>Kubernetes 解决了很多 Borg 和 Omega 的优点，同时也进行了改进。相同点是都使用一个共享存储服务来保存集群状态，不同的是 Omega 直接将状态数据暴露给受信的控制平面组件访问，而 Kubernetes 则是通过特定领域的 REST API 访问，支持更多不同类型的客户端访问。Kubernetes 的主要设计目标是使其易于部署和管理复杂的分布式系统，同时仍然受益于容器使能的利用率的提高。</p>
 <h1 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h1><p>最高提供容器隔离的是 chroot 方法，后来经过多年发展逐渐形成今天的 cgroup（linux control group）。容器提供的资源隔离使得 Google 能够充分控制资源利用率。容器不仅仅是自愿隔离，还有镜像隔离。所谓镜像就是在容器里运行的应用程序是由哪些文件组成的。</p>
 <h1 id="面向应用的架构"><a href="#面向应用的架构" class="headerlink" title="面向应用的架构"></a>面向应用的架构</h1><p>容器化不仅仅是更高的资源利用率，而且将数据中心从面向机器转移到面向应用。主要是两点：</p>
 <ul>
@@ -350,9 +350,9 @@
 <p>额外的信息可以由容器提供，也可以为容器提供，并显示在各种用户界面中。例如，Borg应用程序可以提供简单的文本状态消息，可以动态更新，Kubernetes提供存储在每个对象的元数据中的键值注释（key-value annotation），可以用于通信应用程序结构。这样的注释可以由容器本身或者管理系统中的其他参与者来设置。</p>
 <p>在另一个方向上，容器管理系统可以将资源限制、容器元数据传播到日志和监控，并在节点维护之前提供优雅终止警告的通知。</p>
 <p>监控只是一个例子，面向应用的转变已经蔓延到整个管理基础设置。我们的复杂均衡器不再按照机器均衡流量，而是应用实例。日志是应用程序的关键，而不是机器关键，因此它们可以很容易地从多个实例中收集和汇总，而不会受到来自多个应用程序或系统操作的污染。从根本上说，由于容器管理器所管理的实例的特征与应用程序开发人员所期望的实例的特征完全一致，因此更容易构建、管理和调试应用程序。</p>
-<p>在 Borg 中，最外层的容器被称为资源分配，或者 alloc；在 Kubernates 中，它被称为 pod。Borg 还允许顶级应用容器在 alloc 之外运行；这给使用带来了诸多不便，因此 Kubernetes 将事情规范化，并且总是在一个顶级的 pod 中运行一个应用程序容器，即使这个pod包含一个容器。</p>
+<p>在 Borg 中，最外层的容器被称为资源分配，或者 alloc；在 Kubernetes 中，它被称为 pod。Borg 还允许顶级应用容器在 alloc 之外运行；这给使用带来了诸多不便，因此 Kubernetes 将事情规范化，并且总是在一个顶级的 pod 中运行一个应用程序容器，即使这个pod包含一个容器。</p>
 <p>一个常用的使用模式是一个 pod 容纳一个复杂应用的实例。应用程序的主要部分位于其中一个子容器中，其他子容器运行支持的功能，如日志旋转或点击日志卸载到分布式文件系统。这种被称为边车模式（sidecar）。</p>
-<h2 id="编排只是开始"><a href="#编排只是开始" class="headerlink" title="编排只是开始"></a>编排只是开始</h2><p>Borg 系统使用比较复杂，Kubernates 进行了改进，比如将 Kubernates 的基本对象划分 3 个字段：ObjectMetadata, Specification (Spec) 和 Status。对象元数据（ObjectMetadata）对于系统中的所有对象都是一样的；它包含对象名称、UID ( unique identifier )、对象版本号(为了实现乐观的并发控制)和标签(键值对)等信息。Spec 和 Status 的内容因对象类型而异，但它们的概念并不相同：Spec 用于描述对象的期望状态，而 Status 只提供关于对象当前状态的可读信息。</p>
+<h2 id="编排只是开始"><a href="#编排只是开始" class="headerlink" title="编排只是开始"></a>编排只是开始</h2><p>Borg 系统使用比较复杂，Kubernetes 进行了改进，比如将 Kubernetes 的基本对象划分 3 个字段：ObjectMetadata, Specification (Spec) 和 Status。对象元数据（ObjectMetadata）对于系统中的所有对象都是一样的；它包含对象名称、UID ( unique identifier )、对象版本号(为了实现乐观的并发控制)和标签(键值对)等信息。Spec 和 Status 的内容因对象类型而异，但它们的概念并不相同：Spec 用于描述对象的期望状态，而 Status 只提供关于对象当前状态的可读信息。</p>
 <p>这种统一的 API 提供了许多好处。学习该系统更加简单：相似的信息适用于所有对象，编写跨对象工作的通用工具更加简单，进而能够开发出一致的用户体验。借鉴 Borg 和 Omega 的做法，Kubernetes 是由一组易于用户扩展的可组合构建块构建而成的。一个通用的 API 和对象元数据结构使这一点变得容易得多。例如，pod API可以被人、内部 Kubernetes 组件和外部自动化工具使用。为了进一步增强这种一致性，Kubernetes 正在进行扩展，使用户能够在 Kubernetes 核心功能的基础上动态添加自己的API。</p>
 <p>一致性也是通过 Kubernetes API 中的解耦实现的。API 组件之间的关注点分离意味着更高级别的服务都共享相同的公共基础构建块。比较好的一个例子是 replication 控制器和 autoscaler ，replication 控制器保证了给定角色所需 pod 的数量。反过来，autoscaler 依靠这种能力，简单地调整所需的 pod 数量，而不用担心这些 pod 是如何创建或删除的。autoscaler 的实现可以专注于需求和使用预测，而忽略了如何实现其决策的细节。</p>
 <p>一致性也是通过不同 Kubernetes 组件的通用设计模式来实现的。控制器循环的思想在 Borg、Omega 和 Kubernetes 中得到了体现，以提高系统的弹性：它将期望状态(例如,一个标签选择器查询需要匹配多少个 pod)与观测状态(它所能找到的这种 pod 的数量)进行比较，并采取行动使观测状态和期望状态收敛。</p>
@@ -365,7 +365,7 @@
 <h2 id="小心所有权"><a href="#小心所有权" class="headerlink" title="小心所有权"></a>小心所有权</h2><p>在 Borg，任务不会脱离 job 独立存在。创建一个 job 就会创建一个任务，这些任务永远都与特定的 job 关联起来，删除 job 同时也会删除任务。这很方便，同时也有缺点：因为只有一个组合机制，它需要处理所有场景。比如，一个 job 必须存储只对服务或批处理作业有意义而对两者都没有意义的参数，并且当 job 抽象不处理用例时，用户必须开发变通方法。</p>
 <p>在 Kubernetes 中，replication 控制器等 pod 生命周期管理组件决定了它们使用标签选择器负责哪些 pod，因此多个控制器可能会认为它们对单个 pod 具有管辖权。重要的是通过适当的配置选择来防止这种冲突。但是灵活的标签具有补偿优势，比如，控制器和 pod 的分离意味着可以”孤儿”和”采用”容器。考虑一种负载均衡的服务，该服务使用标签选择器来识别发送流量到的 pod 集合。如果其中一个 pod 开始出错，则可以通过移除那些被 Kubernetes 服务负载均衡器使用的一个或多个标签来隔离该 pod 对服务请求的影响。pod 不再有流量进来，但它会保持继续运行，并且可以被用来调试。同时，管理这个 pod 的 replication 控制器自动创建一个 pod 替代它。</p>
 <h2 id="不要暴露原始状态"><a href="#不要暴露原始状态" class="headerlink" title="不要暴露原始状态"></a>不要暴露原始状态</h2><p>Borg、Omega 和 Kubernetes 的一个关键区别在于它们的 API 架构。Borgmaster 是一个单体组件，它知道每个 API 操作的语义。它包含了集群管理逻辑，如 job 、任务和机器的状态机，并且它运行基于 Paxos 的复制存储系统，用于记录 master 的状态。相比之下，Omega 除了存储外没有中心化的组件，只保存被动的状态信息，并执行乐观的并发控制：所有的逻辑和语义都被推送到客户端的存储，由客户端直接读写存储内容。在实际应用中，每个 Omega 组件都使用相同的客户端库来进行存储，对数据结构进行序列化/方序列化，检索，并实现语义一致性。</p>
-<p>Kubernates 使用一个中立方案，提供了 Omega 那种弹性和可扩展性组件化架构，同时还实现系统层面的不变性、策略、数据转换。它强制对存储的访问都通过一个中心化的 API 服务来完成，该服务隐藏了存储实现的细节，并提供对象验证、默认值和版本控制服务。正如在 Omega 中一样，客户端组件是相互解耦的，可以独立演化或替换，但是，中心化使得强制执行通用语义、不变性和策略变得容易。</p>
+<p>Kubernetes 使用一个中立方案，提供了 Omega 那种弹性和可扩展性组件化架构，同时还实现系统层面的不变性、策略、数据转换。它强制对存储的访问都通过一个中心化的 API 服务来完成，该服务隐藏了存储实现的细节，并提供对象验证、默认值和版本控制服务。正如在 Omega 中一样，客户端组件是相互解耦的，可以独立演化或替换，但是，中心化使得强制执行通用语义、不变性和策略变得容易。</p>
 <h1 id="一些开放且困难的问题"><a href="#一些开放且困难的问题" class="headerlink" title="一些开放且困难的问题"></a>一些开放且困难的问题</h1><p>尽管我们有多年的容器系统管理经验，但是我们也感觉到有一些问题依然没有很好的答案。</p>
 <h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>在我们所面临的所有问题中，最耗费脑力、墨水和代码的问题是与管理配置有关的：提供给应用程序的一组值，而不是硬编码到应用程序中。以下是几个亮点。</p>
 <p>首先，应用配置成为实现所有事情的首要位置，而这些事情容器管理系统并没有做。纵观 Borg 的历史，这些包括：</p>
@@ -390,7 +390,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://stltqhs.github.io/2023/09/08/Borg-Omega-and-Kubernates/" title="Borg, Omega, and Kubernates" target="_blank" rel="external">https://stltqhs.github.io/2023/09/08/Borg-Omega-and-Kubernates/</a>
+      <a href="https://stltqhs.github.io/2023/09/08/Borg-Omega-and-Kubernates/" title="Borg, Omega, and Kubernetes" target="_blank" rel="external">https://stltqhs.github.io/2023/09/08/Borg-Omega-and-Kubernates/</a>
     </li>
     
     <li class="post-copyright-license">
